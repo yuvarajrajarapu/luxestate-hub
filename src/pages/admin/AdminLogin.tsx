@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { db } from '@/lib/firebase';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -14,7 +15,7 @@ const AdminLogin: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signIn, user, isAdmin, loading, checkingAdmin, logout, checkAdminClaim } = useAuth();
+  const { signIn, user, isAdmin, loading, checkingAdmin, logout, refreshUserData } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already logged in as admin
@@ -30,13 +31,13 @@ const AdminLogin: React.FC = () => {
     setError('');
 
     try {
-      await signIn(email, password);
+      const userCredential = await signIn(email, password);
       
-      // SECURE: Verify admin via Firebase Custom Claims (ID Token)
-      // This cannot be spoofed - claims are set server-side only
-      const adminStatus = await checkAdminClaim();
+      // Fetch fresh user data to check role
+      const userDocRef = await import('firebase/firestore').then(m => m.getDoc(m.doc(db, 'users', userCredential.user.uid)));
+      const userData = userDocRef.data();
       
-      if (adminStatus) {
+      if (userData?.role === 'admin') {
         toast.success('Welcome back, Admin!');
         navigate('/admin/dashboard');
       } else {
