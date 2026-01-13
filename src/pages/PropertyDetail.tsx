@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -14,36 +14,43 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Calendar,
   Building,
-  Compass,
-  Maximize,
+  Loader2,
 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { sampleProperties } from '@/data/sampleProperties';
-import type { Property } from '@/types/property';
+import { useProperty } from '@/hooks/useProperties';
 
 const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [property, setProperty] = useState<Property | null>(null);
+  const { property, loading, error } = useProperty(id);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  useEffect(() => {
-    const found = sampleProperties.find((p) => p.id === id);
-    if (found) {
-      setProperty(found);
-    }
-  }, [id]);
-
-  if (!property) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Property not found</p>
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error || !property) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-20 flex flex-col items-center justify-center min-h-[60vh]">
+          <p className="text-lg text-muted-foreground mb-4">
+            {error || 'Property not found'}
+          </p>
+          <Button onClick={() => navigate('/properties')}>
+            Browse Properties
+          </Button>
+        </div>
+        <Footer />
       </div>
     );
   }
