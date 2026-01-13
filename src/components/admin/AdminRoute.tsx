@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ShieldX, ArrowLeft, Home } from 'lucide-react';
@@ -10,16 +10,35 @@ interface AdminRouteProps {
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { user, loading, isAdmin, checkingAdmin } = useAuth();
+  const { user, loading, isAdmin, checkingAdmin, checkAdminClaim, logout } = useAuth();
   const location = useLocation();
+  const [verifying, setVerifying] = useState(false);
+  const [verified, setVerified] = useState(false);
+
+  // Double-check admin claim on route access for security
+  useEffect(() => {
+    const verifyAdmin = async () => {
+      if (user && !loading && !checkingAdmin) {
+        setVerifying(true);
+        const adminStatus = await checkAdminClaim();
+        if (!adminStatus && isAdmin) {
+          // Token claims changed - force logout
+          await logout();
+        }
+        setVerified(true);
+        setVerifying(false);
+      }
+    };
+    verifyAdmin();
+  }, [user, loading, checkingAdmin]);
 
   // Show loading while checking auth
-  if (loading || checkingAdmin) {
+  if (loading || checkingAdmin || verifying) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div className="text-center">
           <div className="w-12 h-12 border-3 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="mt-4 text-slate-400">Verifying access...</p>
+          <p className="mt-4 text-slate-400">Verifying admin access...</p>
         </div>
       </div>
     );
