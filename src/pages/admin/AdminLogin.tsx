@@ -1,35 +1,85 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Building2, Eye, EyeOff, Lock, Mail, Shield } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Shield, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const [error, setError] = useState('');
+  const { signIn, user, isAdmin, loading, checkingAdmin } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already logged in as admin
+  useEffect(() => {
+    if (!loading && !checkingAdmin && user && isAdmin) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [user, isAdmin, loading, checkingAdmin, navigate]);
+
+  // Check if user has admin role
+  const verifyAdminRole = async (userId: string): Promise<boolean> => {
+    try {
+      const rolesRef = collection(db, 'user_roles');
+      const q = query(rolesRef, where('user_id', '==', userId), where('role', '==', 'admin'));
+      const snapshot = await getDocs(q);
+      return !snapshot.empty;
+    } catch (error) {
+      console.error('Error verifying admin role:', error);
+      return false;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
 
     try {
-      await signIn(email, password);
-      toast.success('Welcome back, Admin!');
-      navigate('/admin/dashboard');
+      const userCredential = await signIn(email, password);
+      const userId = userCredential.user.uid;
+      
+      // Check admin role directly
+      const adminStatus = await verifyAdminRole(userId);
+      
+      if (adminStatus) {
+        toast.success('Welcome back, Admin!');
+        navigate('/admin/dashboard');
+      } else {
+        setError('Access denied. This account does not have admin privileges.');
+        toast.error('You are not authorized to access the admin panel');
+      }
     } catch (error: any) {
-      toast.error(error.message || 'Invalid admin credentials');
+      const errorMessage = error.code === 'auth/invalid-credential' 
+        ? 'Invalid email or password'
+        : error.message || 'Authentication failed';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Show loading if checking auth
+  if (loading || checkingAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-3 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="mt-4 text-slate-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
@@ -71,6 +121,17 @@ const AdminLogin: React.FC = () => {
           transition={{ delay: 0.3 }}
           className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8 shadow-2xl"
         >
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 rounded-lg bg-red-500/20 border border-red-500/30 flex items-start gap-3"
+            >
+              <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+              <p className="text-red-300 text-sm">{error}</p>
+            </motion.div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-white/90">
