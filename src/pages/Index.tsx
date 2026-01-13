@@ -1,12 +1,145 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import HeroSection from '@/components/home/HeroSection';
+import PropertyCard from '@/components/property/PropertyCard';
+import { motion } from 'framer-motion';
+import { sampleProperties } from '@/data/sampleProperties';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 
 const Index = () => {
+  const featuredProperties = sampleProperties.filter((p) => p.isFeatured || !p.isSoldOut).slice(0, 6);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header />
+
+      <main>
+        {/* Hero Section */}
+        <HeroSection />
+
+        {/* Featured Properties */}
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
+                Property Listings
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Explore our handpicked selection of premium properties across India's most 
+                sought-after locations
+              </p>
+            </motion.div>
+
+            {/* Property Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+              {featuredProperties.map((property, index) => (
+                <PropertyCard key={property.id} property={property} index={index} />
+              ))}
+            </div>
+
+            {/* View All Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <Link to="/properties">
+                <Button className="btn-luxury h-12 px-8 flex items-center gap-2 mx-auto">
+                  View All Properties
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Stats Section */}
+        <section className="py-16 bg-primary text-primary-foreground">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              {[
+                { value: '500+', label: 'Properties Listed' },
+                { value: '1000+', label: 'Happy Customers' },
+                { value: '50+', label: 'Cities Covered' },
+                { value: '₹500 Cr+', label: 'Worth Properties Sold' },
+              ].map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <p className="text-3xl md:text-4xl font-display font-bold mb-2">
+                    {stat.value}
+                  </p>
+                  <p className="text-primary-foreground/70 text-sm">{stat.label}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Property Categories */}
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
+                Browse by Category
+              </h2>
+              <p className="text-muted-foreground">
+                Find exactly what you're looking for
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {[
+                { label: 'Flats for Sale', href: '/properties?category=flat-for-sale', icon: '🏢' },
+                { label: 'Houses for Sale', href: '/properties?category=house-for-sale', icon: '🏠' },
+                { label: 'Land for Sale', href: '/properties?category=land-for-sale', icon: '🌳' },
+                { label: 'Flats for Rent', href: '/properties?category=flat-for-rent', icon: '🏨' },
+                { label: 'Houses for Rent', href: '/properties?category=house-for-rent', icon: '🏡' },
+                { label: 'Office Spaces', href: '/properties?category=office-for-rent-lease', icon: '🏬' },
+                { label: 'Commercial', href: '/properties?category=commercial-space-for-rent-lease', icon: '🏪' },
+                { label: 'PG & Hostels', href: '/properties?category=pg-boys', icon: '🛏️' },
+              ].map((category, index) => (
+                <motion.div
+                  key={category.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Link
+                    to={category.href}
+                    className="block p-6 rounded-xl bg-card border border-border hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover group"
+                  >
+                    <span className="text-3xl mb-3 block">{category.icon}</span>
+                    <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                      {category.label}
+                    </p>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
     </div>
   );
 };
