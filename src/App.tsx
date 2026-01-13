@@ -15,6 +15,9 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPropertyNew from "./pages/admin/AdminPropertyNew";
 import AdminPropertyEdit from "./pages/admin/AdminPropertyEdit";
 import AdminRoute from "./components/admin/AdminRoute";
+import LandPlot from "./pages/land/LandPlot";
+import LandAgricultural from "./pages/land/LandAgricultural";
+import LandFarmHouses from "./pages/land/LandFarmHouses";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +34,10 @@ const App = () => (
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            {/* Land Routes */}
+            <Route path="/land/plot" element={<LandPlot />} />
+            <Route path="/land/agricultural" element={<LandAgricultural />} />
+            <Route path="/land/farm-houses" element={<LandFarmHouses />} />
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />

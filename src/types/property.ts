@@ -11,6 +11,8 @@ export type PropertyCategory =
   | 'pg-boys'
   | 'pg-girls';
 
+export type LandType = 'plot' | 'agricultural' | 'farm-houses';
+
 export type ListingType = 'sale' | 'rent' | 'lease';
 
 export type FurnishingStatus = 'fully-furnished' | 'semi-furnished' | 'unfurnished';
@@ -32,6 +34,7 @@ export interface Property {
   title: string;
   description: string;
   category: PropertyCategory;
+  landType?: LandType;
   listingType: ListingType;
   price: number;
   priceUnit: 'total' | 'per-month' | 'per-year' | 'per-sqft';

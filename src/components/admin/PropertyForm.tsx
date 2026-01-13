@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   Property,
   PropertyCategory,
+  LandType,
   ListingType,
   FurnishingStatus,
   PossessionStatus,
@@ -50,6 +51,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
     title: '',
     description: '',
     category: '' as PropertyCategory,
+    landType: undefined as LandType | undefined,
     listingType: 'sale' as ListingType,
     price: '',
     priceUnit: 'total' as Property['priceUnit'],
@@ -107,6 +109,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
           title: data.title,
           description: data.description,
           category: data.category,
+          landType: data.landType || undefined,
           listingType: data.listingType,
           price: data.price.toString(),
           priceUnit: data.priceUnit,
@@ -246,6 +249,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
       if (formData.occupancy) propertyDataRaw.occupancy = formData.occupancy;
       if (formData.furnishingStatus) propertyDataRaw.furnishingStatus = formData.furnishingStatus;
       if (formData.contactWhatsapp) propertyDataRaw.contactWhatsapp = formData.contactWhatsapp;
+      if (formData.landType) propertyDataRaw.landType = formData.landType;
 
       if (mode === 'create') {
         propertyDataRaw.createdAt = Timestamp.now();
@@ -356,7 +360,24 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
                 </Select>
               </div>
 
-              <div>
+              {formData.category === 'land-for-sale' && (
+                <div>
+                  <Label htmlFor="landType">Land Type *</Label>
+                  <Select
+                    value={formData.landType || ''}
+                    onValueChange={(value) => handleSelectChange('landType', value)}
+                  >
+                    <SelectTrigger className="mt-1.5">
+                      <SelectValue placeholder="Select land type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="plot">Plot</SelectItem>
+                      <SelectItem value="agricultural">Agricultural</SelectItem>
+                      <SelectItem value="farm-houses">Farm Houses</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
                 <Label htmlFor="postedBy">Posted By *</Label>
                 <Select
                   value={formData.postedBy}
