@@ -11,24 +11,35 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from '@/components/ui/navigation-menu';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [landDropdownOpen, setLandDropdownOpen] = useState(false);
   const { user, userData, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const navLinks = [
-    { label: 'Home', href: '/' },
-    { label: 'Properties', href: '/properties' },
-    { label: 'For Sale', href: '/properties?type=sale' },
-    { label: 'For Rent', href: '/properties?type=rent' },
-    { label: 'For Lease', href: '/properties?type=lease' },
+  const landSubItems = [
+    { label: 'Plot', href: '/land/plot' },
+    { label: 'Agricultural', href: '/land/agricultural' },
+    { label: 'Farm Houses', href: '/land/farm-houses' },
   ];
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
     return location.pathname.startsWith(href.split('?')[0]);
+  };
+
+  const isLandActive = () => {
+    return location.pathname.startsWith('/land');
   };
 
   const handleLogout = async () => {
@@ -62,25 +73,98 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link, index) => (
-              <motion.div
-                key={link.href}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0 }}
+            >
+              <Link
+                to="/properties?type=sale"
+                className={`nav-link text-sm ${
+                  location.search.includes('type=sale')
+                    ? 'text-primary font-semibold'
+                    : 'text-muted-foreground'
+                }`}
               >
-                <Link
-                  to={link.href}
-                  className={`nav-link text-sm ${
-                    isActive(link.href)
-                      ? 'text-primary font-semibold'
-                      : 'text-muted-foreground'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              </motion.div>
-            ))}
+                Buy
+              </Link>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Link
+                to="/properties?type=rent"
+                className={`nav-link text-sm ${
+                  location.search.includes('type=rent')
+                    ? 'text-primary font-semibold'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                Rent
+              </Link>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <NavigationMenu>
+                <NavigationMenuList>
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger 
+                      className={`nav-link text-sm bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent px-0 ${
+                        isLandActive()
+                          ? 'text-primary font-semibold'
+                          : 'text-muted-foreground'
+                      }`}
+                    >
+                      Land
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="w-40 p-2 bg-card border border-border rounded-lg shadow-lg z-50">
+                        {landSubItems.map((item) => (
+                          <li key={item.href}>
+                            <NavigationMenuLink asChild>
+                              <Link
+                                to={item.href}
+                                className={`block px-4 py-2 text-sm rounded-md transition-colors hover:bg-muted ${
+                                  isActive(item.href)
+                                    ? 'text-primary font-medium bg-muted'
+                                    : 'text-foreground'
+                                }`}
+                              >
+                                {item.label}
+                              </Link>
+                            </NavigationMenuLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Link
+                to="/properties?type=lease"
+                className={`nav-link text-sm ${
+                  location.search.includes('type=lease')
+                    ? 'text-primary font-semibold'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                Commercial
+              </Link>
+            </motion.div>
           </nav>
 
           {/* Auth Buttons */}
@@ -98,7 +182,7 @@ const Header = () => {
                     <ChevronDown className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent align="end" className="w-48 bg-card border border-border">
                   <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                     <User className="w-4 h-4 mr-2" />
                     Dashboard
@@ -146,20 +230,81 @@ const Header = () => {
             className="lg:hidden bg-card border-t border-border"
           >
             <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`px-4 py-3 rounded-lg transition-colors ${
-                    isActive(link.href)
+              <Link
+                to="/properties?type=sale"
+                onClick={() => setIsMenuOpen(false)}
+                className={`px-4 py-3 rounded-lg transition-colors ${
+                  location.search.includes('type=sale')
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+              >
+                Buy
+              </Link>
+              <Link
+                to="/properties?type=rent"
+                onClick={() => setIsMenuOpen(false)}
+                className={`px-4 py-3 rounded-lg transition-colors ${
+                  location.search.includes('type=rent')
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+              >
+                Rent
+              </Link>
+              
+              {/* Land with sub-items */}
+              <div className="flex flex-col">
+                <button
+                  onClick={() => setLandDropdownOpen(!landDropdownOpen)}
+                  className={`px-4 py-3 rounded-lg transition-colors flex items-center justify-between ${
+                    isLandActive()
                       ? 'bg-primary text-primary-foreground'
                       : 'hover:bg-muted'
                   }`}
                 >
-                  {link.label}
-                </Link>
-              ))}
+                  <span>Land</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${landDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                <AnimatePresence>
+                  {landDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="ml-4 mt-1 flex flex-col gap-1"
+                    >
+                      {landSubItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          to={item.href}
+                          onClick={() => setIsMenuOpen(false)}
+                          className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                            isActive(item.href)
+                              ? 'bg-primary/10 text-primary font-medium'
+                              : 'hover:bg-muted text-muted-foreground'
+                          }`}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              
+              <Link
+                to="/properties?type=lease"
+                onClick={() => setIsMenuOpen(false)}
+                className={`px-4 py-3 rounded-lg transition-colors ${
+                  location.search.includes('type=lease')
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+              >
+                Commercial
+              </Link>
+
               <div className="border-t border-border my-2" />
               {user ? (
                 <>
