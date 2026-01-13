@@ -7,8 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -16,7 +14,7 @@ const AdminLogin: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signIn, user, isAdmin, loading, checkingAdmin } = useAuth();
+  const { signIn, user, isAdmin, loading, checkingAdmin, logout, checkAdminClaim } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already logged in as admin
@@ -26,35 +24,24 @@ const AdminLogin: React.FC = () => {
     }
   }, [user, isAdmin, loading, checkingAdmin, navigate]);
 
-  // Check if user has admin role
-  const verifyAdminRole = async (userId: string): Promise<boolean> => {
-    try {
-      const rolesRef = collection(db, 'user_roles');
-      const q = query(rolesRef, where('user_id', '==', userId), where('role', '==', 'admin'));
-      const snapshot = await getDocs(q);
-      return !snapshot.empty;
-    } catch (error) {
-      console.error('Error verifying admin role:', error);
-      return false;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
-      const userCredential = await signIn(email, password);
-      const userId = userCredential.user.uid;
+      await signIn(email, password);
       
-      // Check admin role directly
-      const adminStatus = await verifyAdminRole(userId);
+      // SECURE: Verify admin via Firebase Custom Claims (ID Token)
+      // This cannot be spoofed - claims are set server-side only
+      const adminStatus = await checkAdminClaim();
       
       if (adminStatus) {
         toast.success('Welcome back, Admin!');
         navigate('/admin/dashboard');
       } else {
+        // User is authenticated but not admin - log them out immediately
+        await logout();
         setError('Access denied. This account does not have admin privileges.');
         toast.error('You are not authorized to access the admin panel');
       }
