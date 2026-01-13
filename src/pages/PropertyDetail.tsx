@@ -70,9 +70,9 @@ const PropertyDetail = () => {
   };
 
   const handleWhatsApp = () => {
-    const phone = property.contactWhatsapp || property.contactPhone;
-    const message = `Hi, I'm interested in the property: ${property.title}`;
-    window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+    const phone = '9059611547';
+    const message = `Hello, I am interested in this property: ${property.title}. Please share more details.`;
+    window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleCall = () => {
