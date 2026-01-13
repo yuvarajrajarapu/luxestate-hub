@@ -15,7 +15,7 @@ interface UserData {
   uid: string;
   email: string;
   username: string;
-  role: 'user';
+  role: 'user' | 'admin';
   createdAt: Date;
 }
 
@@ -28,7 +28,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   isAdmin: boolean;
   checkingAdmin: boolean;
-  checkAdminClaim: () => Promise<boolean>;
+  refreshUserData: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,19 +41,6 @@ export const useAuth = () => {
   return context;
 };
 
-// SECURE: Check admin status via Firebase Custom Claims (ID Token)
-// Admin claims can ONLY be set via Firebase Admin SDK (server-side)
-const checkAdminCustomClaim = async (user: User): Promise<boolean> => {
-  try {
-    // Force refresh to get latest claims
-    const idTokenResult = await user.getIdTokenResult(true);
-    return idTokenResult.claims.admin === true;
-  } catch (error) {
-    console.error('Error checking admin claim:', error);
-    return false;
-  }
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -61,10 +48,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAdmin, setCheckingAdmin] = useState(false);
 
-  // Function to check admin claim - exposed for manual verification
-  const checkAdminClaim = async (): Promise<boolean> => {
-    if (!auth.currentUser) return false;
-    return await checkAdminCustomClaim(auth.currentUser);
+  // Function to fetch user data and check admin status
+  const fetchUserData = async (currentUser: User) => {
+    try {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        const fetchedUserData: UserData = {
+          uid: data.uid,
+          email: data.email,
+          username: data.username,
+          role: data.role || 'user',
+          createdAt: data.createdAt?.toDate() || new Date(),
+        };
+        setUserData(fetchedUserData);
+        
+        // Check if role is admin
+        setIsAdmin(data.role === 'admin');
+        return fetchedUserData;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      return null;
+    }
+  };
+
+  // Refresh user data (useful after role change)
+  const refreshUserData = async () => {
+    if (auth.currentUser) {
+      setCheckingAdmin(true);
+      await fetchUserData(auth.currentUser);
+      setCheckingAdmin(false);
+    }
   };
 
   useEffect(() => {
@@ -73,29 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCheckingAdmin(true);
       
       if (currentUser) {
-        try {
-          // Fetch user profile data
-          const userDocRef = doc(db, 'users', currentUser.uid);
-          const userDoc = await getDoc(userDocRef);
-          
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            setUserData({
-              uid: data.uid,
-              email: data.email,
-              username: data.username,
-              role: 'user', // Users always have 'user' role
-              createdAt: data.createdAt?.toDate() || new Date(),
-            });
-          }
-
-          // SECURE: Check admin via Firebase Custom Claims (not Firestore)
-          const adminStatus = await checkAdminCustomClaim(currentUser);
-          setIsAdmin(adminStatus);
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-          setIsAdmin(false);
-        }
+        await fetchUserData(currentUser);
       } else {
         setUserData(null);
         setIsAdmin(false);
@@ -112,8 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return await signInWithEmailAndPassword(auth, email, password);
   };
 
-  // SECURE: User signup ALWAYS assigns role: "user"
-  // Users CANNOT choose or modify their role
+  // User signup - automatically assigns role: "user"
   const signUp = async (email: string, password: string, username: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const newUser = userCredential.user;
@@ -121,13 +116,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Update display name
     await updateProfile(newUser, { displayName: username });
     
-    // Create user document in Firestore with FIXED role: "user"
-    // Role is hardcoded server-side and cannot be modified by client
+    // Create user document with role: "user" (you can change to "admin" in Firebase Console)
     await setDoc(doc(db, 'users', newUser.uid), {
       uid: newUser.uid,
       email: newUser.email,
       username,
-      role: 'user', // ALWAYS user - admins are created via Firebase Admin SDK
+      role: 'user', // ← Automatically set to "user", edit in Firebase Console to make admin
       createdAt: serverTimestamp(),
     });
 
@@ -155,7 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     isAdmin,
     checkingAdmin,
-    checkAdminClaim,
+    refreshUserData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
