@@ -205,34 +205,20 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
     setLoading(true);
 
     try {
-      const propertyData: Omit<Property, 'id'> = {
+      // Build property data, filtering out undefined values
+      const propertyDataRaw: Record<string, any> = {
         title: formData.title,
         description: formData.description,
         category: formData.category,
         listingType: formData.listingType,
         price: parseFloat(formData.price),
         priceUnit: formData.priceUnit,
-        pricePerSqft: formData.pricePerSqft
-          ? parseFloat(formData.pricePerSqft)
-          : undefined,
         location: formData.location,
         city: formData.city,
         state: formData.state,
-        pincode: formData.pincode || undefined,
         area: parseFloat(formData.area),
         areaUnit: formData.areaUnit,
-        bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : undefined,
-        bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : undefined,
-        balconies: formData.balconies ? parseInt(formData.balconies) : undefined,
-        floor: formData.floor ? parseInt(formData.floor) : undefined,
-        totalFloors: formData.totalFloors
-          ? parseInt(formData.totalFloors)
-          : undefined,
-        propertyAge: formData.propertyAge || undefined,
-        facing: formData.facing || undefined,
-        occupancy: formData.occupancy || undefined,
         foodIncluded: formData.foodIncluded,
-        furnishingStatus: formData.furnishingStatus || undefined,
         possessionStatus: formData.possessionStatus,
         postedBy: formData.postedBy,
         amenities: selectedAmenities,
@@ -240,27 +226,33 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
         videos,
         contactName: formData.contactName,
         contactPhone: formData.contactPhone,
-        contactWhatsapp: formData.contactWhatsapp || undefined,
         isVerified: formData.isVerified,
         isFeatured: formData.isFeatured,
         isSoldOut: formData.isSoldOut,
-        createdAt: mode === 'create' ? new Date() : undefined as any,
-        updatedAt: new Date(),
-        userId: user?.uid,
+        updatedAt: Timestamp.now(),
+        userId: user?.uid || null,
       };
 
+      // Add optional fields only if they have values
+      if (formData.pricePerSqft) propertyDataRaw.pricePerSqft = parseFloat(formData.pricePerSqft);
+      if (formData.pincode) propertyDataRaw.pincode = formData.pincode;
+      if (formData.bedrooms) propertyDataRaw.bedrooms = parseInt(formData.bedrooms);
+      if (formData.bathrooms) propertyDataRaw.bathrooms = parseInt(formData.bathrooms);
+      if (formData.balconies) propertyDataRaw.balconies = parseInt(formData.balconies);
+      if (formData.floor) propertyDataRaw.floor = parseInt(formData.floor);
+      if (formData.totalFloors) propertyDataRaw.totalFloors = parseInt(formData.totalFloors);
+      if (formData.propertyAge) propertyDataRaw.propertyAge = formData.propertyAge;
+      if (formData.facing) propertyDataRaw.facing = formData.facing;
+      if (formData.occupancy) propertyDataRaw.occupancy = formData.occupancy;
+      if (formData.furnishingStatus) propertyDataRaw.furnishingStatus = formData.furnishingStatus;
+      if (formData.contactWhatsapp) propertyDataRaw.contactWhatsapp = formData.contactWhatsapp;
+
       if (mode === 'create') {
-        await addDoc(collection(db, 'properties'), {
-          ...propertyData,
-          createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now(),
-        });
+        propertyDataRaw.createdAt = Timestamp.now();
+        await addDoc(collection(db, 'properties'), propertyDataRaw);
         toast.success('Property created successfully!');
       } else {
-        await updateDoc(doc(db, 'properties', propertyId!), {
-          ...propertyData,
-          updatedAt: Timestamp.now(),
-        });
+        await updateDoc(doc(db, 'properties', propertyId!), propertyDataRaw);
         toast.success('Property updated successfully!');
       }
 
