@@ -378,6 +378,8 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
                   </Select>
                 </div>
               )}
+
+              <div>
                 <Label htmlFor="postedBy">Posted By *</Label>
                 <Select
                   value={formData.postedBy}
