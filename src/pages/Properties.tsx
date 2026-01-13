@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { SlidersHorizontal, Grid, List, X } from 'lucide-react';
+import { SlidersHorizontal, Grid, List, Loader2 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PropertyCard from '@/components/property/PropertyCard';
@@ -21,7 +21,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { sampleProperties } from '@/data/sampleProperties';
+import { useProperties } from '@/hooks/useProperties';
 
 const Properties = () => {
   const [searchParams] = useSearchParams();
@@ -40,6 +40,9 @@ const Properties = () => {
     furnishing: [] as string[],
   });
 
+  // Fetch properties from Firestore
+  const { properties, loading, error } = useProperties();
+
   const handleClearFilters = () => {
     setFilters({
       priceRange: [0, 200000000],
@@ -53,7 +56,7 @@ const Properties = () => {
   };
 
   const filteredProperties = useMemo(() => {
-    let result = [...sampleProperties];
+    let result = [...properties];
 
     // Filter by tab
     if (activeTab !== 'all') {
@@ -85,7 +88,7 @@ const Properties = () => {
     }
 
     return result;
-  }, [filters, sortBy, activeTab, searchParams]);
+  }, [properties, filters, sortBy, activeTab, searchParams]);
 
   const tabs = [
     { id: 'all', label: 'All Properties' },
@@ -211,7 +214,16 @@ const Properties = () => {
 
             {/* Property Grid */}
             <div className="flex-1">
-              {filteredProperties.length === 0 ? (
+              {loading ? (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : error ? (
+                <div className="text-center py-16">
+                  <p className="text-lg text-destructive mb-4">{error}</p>
+                  <Button onClick={() => window.location.reload()}>Try Again</Button>
+                </div>
+              ) : filteredProperties.length === 0 ? (
                 <div className="text-center py-16">
                   <p className="text-lg text-muted-foreground mb-4">
                     No properties found matching your criteria

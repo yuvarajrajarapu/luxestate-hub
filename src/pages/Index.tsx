@@ -3,13 +3,14 @@ import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/home/HeroSection';
 import PropertyCard from '@/components/property/PropertyCard';
 import { motion } from 'framer-motion';
-import { sampleProperties } from '@/data/sampleProperties';
+import { useProperties } from '@/hooks/useProperties';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 
 const Index = () => {
-  const featuredProperties = sampleProperties.filter((p) => p.isFeatured || !p.isSoldOut).slice(0, 6);
+  // Fetch properties from Firestore, limited to 6 for homepage
+  const { properties, loading } = useProperties({ limit: 6 });
 
   return (
     <div className="min-h-screen bg-background">
@@ -38,11 +39,26 @@ const Index = () => {
             </motion.div>
 
             {/* Property Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {featuredProperties.map((property, index) => (
-                <PropertyCard key={property.id} property={property} index={index} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : properties.length === 0 ? (
+              <div className="text-center py-16">
+                <p className="text-lg text-muted-foreground mb-4">
+                  No properties available yet
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Check back soon for new listings!
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                {properties.map((property, index) => (
+                  <PropertyCard key={property.id} property={property} index={index} />
+                ))}
+              </div>
+            )}
 
             {/* View All Button */}
             <motion.div
