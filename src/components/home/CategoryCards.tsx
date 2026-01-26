@@ -6,9 +6,9 @@ import { usePropertyCounts } from '@/hooks/usePropertyCounts';
 import property1 from '@/assets/properties/property-1.jpg';
 import property2 from '@/assets/properties/property-2.jpg';
 import property3 from '@/assets/properties/property-3.jpg';
-import property4 from '@/assets/properties/property-4.jpg';
 import property5 from '@/assets/properties/property-5.jpg';
-import property6 from '@/assets/properties/property-6.jpg';
+import flatRent from '@/assets/properties/flat-rent.jpg';
+import houseRent from '@/assets/properties/house-rent.jpg';
 
 const categories = [
   {
@@ -43,7 +43,7 @@ const categories = [
     title: 'Flats for Rent',
     subtitle: 'Rental Apartments',
     href: '/properties?category=flat-for-rent',
-    image: property6,
+    image: flatRent,
     bgColor: 'bg-cyan-50 dark:bg-cyan-950/30',
     icon: Key,
   },
@@ -52,7 +52,7 @@ const categories = [
     title: 'Houses for Rent',
     subtitle: 'Rental Villas & Houses',
     href: '/properties?category=house-for-rent',
-    image: property4,
+    image: houseRent,
     bgColor: 'bg-violet-50 dark:bg-violet-950/30',
     icon: Home,
   },
@@ -76,7 +76,7 @@ const categories = [
   },
   {
     id: 'pg-hostel-boys',
-    title: 'PG for Boys',
+    title: 'PG for Men',
     subtitle: 'Hostels & PG',
     href: '/properties?category=pg-hostel-boys',
     image: property2,
@@ -85,29 +85,11 @@ const categories = [
   },
   {
     id: 'pg-hostel-girls',
-    title: 'PG for Girls',
+    title: 'PG for Women',
     subtitle: 'Hostels & PG',
     href: '/properties?category=pg-hostel-girls',
     image: property3,
     bgColor: 'bg-pink-50 dark:bg-pink-950/30',
-    icon: Users,
-  },
-  {
-    id: 'pg-boys',
-    title: 'Paying Guest (Boys)',
-    subtitle: 'Shared Accommodation',
-    href: '/properties?category=pg-boys',
-    image: property4,
-    bgColor: 'bg-indigo-50 dark:bg-indigo-950/30',
-    icon: Users,
-  },
-  {
-    id: 'pg-girls',
-    title: 'Paying Guest (Girls)',
-    subtitle: 'Shared Accommodation',
-    href: '/properties?category=pg-girls',
-    image: property5,
-    bgColor: 'bg-fuchsia-50 dark:bg-fuchsia-950/30',
     icon: Users,
   },
 ];
