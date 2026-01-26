@@ -46,6 +46,10 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
   const [loading, setLoading] = useState(false);
   const [loadingProperty, setLoadingProperty] = useState(mode === 'edit');
 
+  // Default dealer info
+  const DEFAULT_DEALER_NAME = 'Rajarapu Uma Mahesh';
+  const DEFAULT_DEALER_PHONE = '9059611547';
+
   // Form State
   const [formData, setFormData] = useState({
     title: '',
@@ -73,10 +77,12 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
     foodIncluded: false,
     furnishingStatus: undefined as FurnishingStatus | undefined,
     possessionStatus: 'ready-to-move' as PossessionStatus,
-    postedBy: 'owner' as PostedBy,
-    contactName: '',
-    contactPhone: '',
-    contactWhatsapp: '',
+    postedBy: 'dealer' as PostedBy,
+    dealerName: DEFAULT_DEALER_NAME,
+    dealerPhone: DEFAULT_DEALER_PHONE,
+    contactName: DEFAULT_DEALER_NAME,
+    contactPhone: DEFAULT_DEALER_PHONE,
+    contactWhatsapp: DEFAULT_DEALER_PHONE,
     isVerified: false,
     isFeatured: false,
     isSoldOut: false,
@@ -131,10 +137,12 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
           foodIncluded: data.foodIncluded || false,
           furnishingStatus: data.furnishingStatus || undefined,
           possessionStatus: data.possessionStatus || 'ready-to-move',
-          postedBy: data.postedBy,
-          contactName: data.contactName,
-          contactPhone: data.contactPhone,
-          contactWhatsapp: data.contactWhatsapp || '',
+          postedBy: data.postedBy || 'dealer',
+          dealerName: (data as any).dealerName || DEFAULT_DEALER_NAME,
+          dealerPhone: (data as any).dealerPhone || DEFAULT_DEALER_PHONE,
+          contactName: data.contactName || DEFAULT_DEALER_NAME,
+          contactPhone: data.contactPhone || DEFAULT_DEALER_PHONE,
+          contactWhatsapp: data.contactWhatsapp || DEFAULT_DEALER_PHONE,
           isVerified: data.isVerified,
           isFeatured: data.isFeatured,
           isSoldOut: data.isSoldOut,
@@ -224,6 +232,8 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
         foodIncluded: formData.foodIncluded,
         possessionStatus: formData.possessionStatus,
         postedBy: formData.postedBy,
+        dealerName: formData.dealerName,
+        dealerPhone: formData.dealerPhone,
         amenities: selectedAmenities,
         images,
         videos,
@@ -852,7 +862,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
             />
           </motion.div>
 
-          {/* Contact Information */}
+          {/* Dealer Information */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -860,8 +870,40 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
             className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100"
           >
             <h2 className="text-lg font-semibold text-slate-900 mb-6">
-              Contact Information
+              Dealer Information
             </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <Label htmlFor="dealerName">Dealer Name *</Label>
+                <Input
+                  id="dealerName"
+                  name="dealerName"
+                  value={formData.dealerName}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Rajarapu Uma Mahesh"
+                  required
+                  className="mt-1.5"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="dealerPhone">Dealer Phone *</Label>
+                <Input
+                  id="dealerPhone"
+                  name="dealerPhone"
+                  value={formData.dealerPhone}
+                  onChange={handleInputChange}
+                  placeholder="e.g., 9059611547"
+                  required
+                  className="mt-1.5"
+                />
+              </div>
+            </div>
+
+            <h3 className="text-md font-medium text-slate-700 mb-4 pt-4 border-t border-slate-200">
+              Property Contact (displayed on listing)
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
@@ -871,7 +913,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
                   name="contactName"
                   value={formData.contactName}
                   onChange={handleInputChange}
-                  placeholder="e.g., John Doe"
+                  placeholder="e.g., Rajarapu Uma Mahesh"
                   required
                   className="mt-1.5"
                 />
@@ -884,7 +926,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
                   name="contactPhone"
                   value={formData.contactPhone}
                   onChange={handleInputChange}
-                  placeholder="e.g., 9876543210"
+                  placeholder="e.g., 9059611547"
                   required
                   className="mt-1.5"
                 />

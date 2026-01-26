@@ -66,6 +66,10 @@ export interface Property {
   possessionStatus?: PossessionStatus;
   postedBy: PostedBy;
   
+  // Dealer Info
+  dealerName?: string;
+  dealerPhone?: string;
+  
   // Amenities
   amenities: string[];
   
