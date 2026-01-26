@@ -19,7 +19,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const { shortlistedIds, loading: shortlistLoading } = useShortlist();
   const [shortlistedProperties, setShortlistedProperties] = useState<Property[]>([]);
-  const [loadingProperties, setLoadingProperties] = useState(false);
+  const [loadingProperties, setLoadingProperties] = useState(true);
 
   useEffect(() => {
     if (!user) {
@@ -30,11 +30,29 @@ const Profile = () => {
   // Fetch shortlisted properties
   useEffect(() => {
     const fetchShortlistedProperties = async () => {
-      if (!user || shortlistLoading) return;
+      if (!user) {
+        setLoadingProperties(false);
+        return;
+      }
+      
+      // Wait for shortlist IDs to load first
+      if (shortlistLoading) {
+        return;
+      }
+
+      // If no shortlisted items, stop loading
+      if (shortlistedIds.length === 0) {
+        setShortlistedProperties([]);
+        setLoadingProperties(false);
+        return;
+      }
 
       setLoadingProperties(true);
       try {
+        console.log('Fetching shortlisted properties for user:', user.uid);
+        console.log('Shortlisted IDs:', shortlistedIds);
         const properties = await getUserShortlistedProperties(user.uid);
+        console.log('Fetched properties:', properties);
         setShortlistedProperties(properties);
       } catch (error) {
         console.error('Error fetching shortlisted properties:', error);
@@ -44,7 +62,7 @@ const Profile = () => {
     };
 
     fetchShortlistedProperties();
-  }, [user, shortlistedIds, shortlistLoading]);
+  }, [user, shortlistedIds.length, shortlistLoading]);
 
   const handleLogout = async () => {
     try {

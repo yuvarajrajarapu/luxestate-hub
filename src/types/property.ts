@@ -60,6 +60,15 @@ export interface Property {
   // For PG/Hostel
   occupancy?: 'single' | 'double' | 'triple' | 'any';
   foodIncluded?: boolean;
+  areaAcres?: number; // For PG/Hostels
+  propertyAgeYears?: number; // For PG/Hostels - numeric age in years
+  constructionStatus?: 'ready-to-move' | 'under-construction' | 'new-launch' | 'resale'; // For PG/Hostels
+  
+  // For Land
+  plotSize?: number; // For Land - plot size
+  landFacing?: string; // For Land - facing direction
+  roadAccess?: string; // For Land - road access details
+  legalClearances?: string; // For Land - legal clearance info
   
   // Status
   furnishingStatus?: FurnishingStatus;
@@ -175,14 +184,8 @@ export const getCategoryAmenities = (category: PropertyCategory): string[] => {
       ];
     case 'land-for-sale':
       return [
-        'Gated Community',
-        'Corner Plot',
-        'Park Facing',
-        'Main Road Facing',
-        'Water Connection',
-        'Electricity',
-        'Sewage',
-        'Compound Wall',
+        'Road Access',
+        'Legal Clearances',
       ];
     default:
       return [];

@@ -75,6 +75,13 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
     facing: '',
     occupancy: undefined as Property['occupancy'],
     foodIncluded: false,
+    areaAcres: '',
+    propertyAgeYears: '',
+    constructionStatus: undefined as Property['constructionStatus'],
+    plotSize: '',
+    landFacing: '',
+    roadAccess: '',
+    legalClearances: '',
     furnishingStatus: undefined as FurnishingStatus | undefined,
     possessionStatus: 'ready-to-move' as PossessionStatus,
     postedBy: 'dealer' as PostedBy,
@@ -135,6 +142,13 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
           facing: data.facing || '',
           occupancy: data.occupancy || undefined,
           foodIncluded: data.foodIncluded || false,
+          areaAcres: (data as any).areaAcres?.toString() || '',
+          propertyAgeYears: (data as any).propertyAgeYears?.toString() || '',
+          constructionStatus: (data as any).constructionStatus || undefined,
+          plotSize: (data as any).plotSize?.toString() || '',
+          landFacing: (data as any).landFacing || '',
+          roadAccess: (data as any).roadAccess || '',
+          legalClearances: (data as any).legalClearances || '',
           furnishingStatus: data.furnishingStatus || undefined,
           possessionStatus: data.possessionStatus || 'ready-to-move',
           postedBy: data.postedBy || 'dealer',
@@ -260,6 +274,13 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
       if (formData.furnishingStatus) propertyDataRaw.furnishingStatus = formData.furnishingStatus;
       if (formData.contactWhatsapp) propertyDataRaw.contactWhatsapp = formData.contactWhatsapp;
       if (formData.landType) propertyDataRaw.landType = formData.landType;
+      if (formData.areaAcres) propertyDataRaw.areaAcres = parseFloat(formData.areaAcres);
+      if (formData.propertyAgeYears) propertyDataRaw.propertyAgeYears = parseInt(formData.propertyAgeYears);
+      if (formData.constructionStatus) propertyDataRaw.constructionStatus = formData.constructionStatus;
+      if (formData.plotSize) propertyDataRaw.plotSize = parseFloat(formData.plotSize);
+      if (formData.landFacing) propertyDataRaw.landFacing = formData.landFacing;
+      if (formData.roadAccess) propertyDataRaw.roadAccess = formData.roadAccess;
+      if (formData.legalClearances) propertyDataRaw.legalClearances = formData.legalClearances;
 
       if (mode === 'create') {
         propertyDataRaw.createdAt = Timestamp.now();
@@ -553,37 +574,240 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <Label htmlFor="area">Area *</Label>
-                <Input
-                  id="area"
-                  name="area"
-                  type="number"
-                  value={formData.area}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 1500"
-                  required
-                  className="mt-1.5"
-                />
-              </div>
+              {/* Land-Specific Details */}
+              {formData.category === 'land-for-sale' && (
+                <>
+                  <div className="md:col-span-3">
+                    <h3 className="text-md font-medium text-slate-800 mb-4">Land-Specific Details</h3>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="plotSize">Plot Size</Label>
+                    <Input
+                      id="plotSize"
+                      name="plotSize"
+                      type="number"
+                      value={formData.plotSize}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 2400 sq ft"
+                      className="mt-1.5"
+                    />
+                  </div>
 
-              <div>
-                <Label htmlFor="areaUnit">Area Unit *</Label>
-                <Select
-                  value={formData.areaUnit}
-                  onValueChange={(value) => handleSelectChange('areaUnit', value)}
-                >
-                  <SelectTrigger className="mt-1.5">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sqft">Sq.ft</SelectItem>
-                    <SelectItem value="sqyd">Sq.yd</SelectItem>
-                    <SelectItem value="acres">Acres</SelectItem>
-                    <SelectItem value="cents">Cents</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  <div>
+                    <Label htmlFor="landType">Land Type</Label>
+                    <Select
+                      value={formData.landType}
+                      onValueChange={(value) => handleSelectChange('landType', value)}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Select Land Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="plot">Plot</SelectItem>
+                        <SelectItem value="agricultural">Agricultural</SelectItem>
+                        <SelectItem value="farm-houses">Farm Houses</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="landFacing">Land Facing</Label>
+                    <Select
+                      value={formData.landFacing}
+                      onValueChange={(value) => handleSelectChange('landFacing', value)}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Select Facing" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="east">East</SelectItem>
+                        <SelectItem value="west">West</SelectItem>
+                        <SelectItem value="north">North</SelectItem>
+                        <SelectItem value="south">South</SelectItem>
+                        <SelectItem value="north-east">North-East</SelectItem>
+                        <SelectItem value="north-west">North-West</SelectItem>
+                        <SelectItem value="south-east">South-East</SelectItem>
+                        <SelectItem value="south-west">South-West</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {/* PG/Hostel-Specific Details */}
+              {(formData.category === 'pg-hostel-boys' || 
+                formData.category === 'pg-hostel-girls' || 
+                formData.category === 'pg-boys' || 
+                formData.category === 'pg-girls') && (
+                <>
+                  <div className="md:col-span-3">
+                    <h3 className="text-md font-medium text-slate-800 mb-4">PG/Hostel Details</h3>
+                  </div>
+                </>
+              )}
+
+              {/* Common Area Fields - Show for all except Land */}
+              {formData.category !== 'land-for-sale' && (
+                <>
+                  <div>
+                    <Label htmlFor="area">Area (sq.ft) *</Label>
+                    <Input
+                      id="area"
+                      name="area"
+                      type="number"
+                      value={formData.area}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 2500 sq ft"
+                      required
+                      className="mt-1.5"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="areaUnit">Area Unit *</Label>
+                    <Select
+                      value={formData.areaUnit}
+                      onValueChange={(value) => handleSelectChange('areaUnit', value)}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sqft">Sq.ft</SelectItem>
+                        <SelectItem value="sqyd">Sq.yd</SelectItem>
+                        <SelectItem value="acres">Acres</SelectItem>
+                        <SelectItem value="cents">Cents</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {/* Area in Acres - For PG/Hostels */}
+              {(formData.category === 'pg-hostel-boys' || 
+                formData.category === 'pg-hostel-girls' || 
+                formData.category === 'pg-boys' || 
+                formData.category === 'pg-girls') && (
+                <>
+                  <div>
+                    <Label htmlFor="areaAcres">Area (acres)</Label>
+                    <Input
+                      id="areaAcres"
+                      name="areaAcres"
+                      type="number"
+                      step="0.01"
+                      value={formData.areaAcres}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 1.5 acres"
+                      className="mt-1.5"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Optional: Enter area in acres (decimal values allowed)
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="propertyAgeYears">Property Age (in years)</Label>
+                    <Input
+                      id="propertyAgeYears"
+                      name="propertyAgeYears"
+                      type="number"
+                      value={formData.propertyAgeYears}
+                      onChange={handleInputChange}
+                      placeholder="Enter age in years (0 for new construction)"
+                      className="mt-1.5"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Leave empty if age is not specified. Enter 0 for new construction.
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="constructionStatus">Status *</Label>
+                    <Select
+                      value={formData.constructionStatus}
+                      onValueChange={(value) => handleSelectChange('constructionStatus', value)}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ready-to-move">Ready to Move</SelectItem>
+                        <SelectItem value="under-construction">Under Construction</SelectItem>
+                        <SelectItem value="new-launch">New Launch</SelectItem>
+                        <SelectItem value="resale">Resale</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Select the current construction status of the property
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="bedrooms">Bedrooms</Label>
+                    <Input
+                      id="bedrooms"
+                      name="bedrooms"
+                      type="number"
+                      value={formData.bedrooms}
+                      onChange={handleInputChange}
+                      placeholder="Number of bedrooms"
+                      className="mt-1.5"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="bathrooms">Bathrooms</Label>
+                    <Input
+                      id="bathrooms"
+                      name="bathrooms"
+                      type="number"
+                      value={formData.bathrooms}
+                      onChange={handleInputChange}
+                      placeholder="Number of bathrooms"
+                      className="mt-1.5"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Land Area Fields */}
+              {formData.category === 'land-for-sale' && (
+                <>
+                  <div>
+                    <Label htmlFor="area">Area *</Label>
+                    <Input
+                      id="area"
+                      name="area"
+                      type="number"
+                      value={formData.area}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 1500"
+                      required
+                      className="mt-1.5"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="areaUnit">Area Unit *</Label>
+                    <Select
+                      value={formData.areaUnit}
+                      onValueChange={(value) => handleSelectChange('areaUnit', value)}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sqft">Sq.ft</SelectItem>
+                        <SelectItem value="sqyd">Sq.yd</SelectItem>
+                        <SelectItem value="acres">Acres</SelectItem>
+                        <SelectItem value="cents">Cents</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
 
               {/* BHK Fields - Show only for residential */}
               {shouldShowBHK(formData.category) && (
@@ -691,31 +915,36 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
                 </>
               )}
 
-              <div>
-                <Label htmlFor="floor">Floor</Label>
-                <Input
-                  id="floor"
-                  name="floor"
-                  type="number"
-                  value={formData.floor}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 5"
-                  className="mt-1.5"
-                />
-              </div>
+              {/* Floor and Total Floors - Hide for Land */}
+              {formData.category !== 'land-for-sale' && (
+                <>
+                  <div>
+                    <Label htmlFor="floor">Floor</Label>
+                    <Input
+                      id="floor"
+                      name="floor"
+                      type="number"
+                      value={formData.floor}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 5"
+                      className="mt-1.5"
+                    />
+                  </div>
 
-              <div>
-                <Label htmlFor="totalFloors">Total Floors</Label>
-                <Input
-                  id="totalFloors"
-                  name="totalFloors"
-                  type="number"
-                  value={formData.totalFloors}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 10"
-                  className="mt-1.5"
-                />
-              </div>
+                  <div>
+                    <Label htmlFor="totalFloors">Total Floors</Label>
+                    <Input
+                      id="totalFloors"
+                      name="totalFloors"
+                      type="number"
+                      value={formData.totalFloors}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 10"
+                      className="mt-1.5"
+                    />
+                  </div>
+                </>
+              )}
 
               <div>
                 <Label htmlFor="propertyAge">Property Age</Label>
@@ -787,27 +1016,30 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
                 </div>
               )}
 
-              <div>
-                <Label htmlFor="possessionStatus">Possession Status</Label>
-                <Select
-                  value={formData.possessionStatus}
-                  onValueChange={(value) =>
-                    handleSelectChange('possessionStatus', value)
-                  }
-                >
-                  <SelectTrigger className="mt-1.5">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ready-to-move">Ready to Move</SelectItem>
-                    <SelectItem value="under-construction">
-                      Under Construction
-                    </SelectItem>
-                    <SelectItem value="new-launch">New Launch</SelectItem>
-                    <SelectItem value="resale">Resale</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Possession Status - Hide for Land */}
+              {formData.category !== 'land-for-sale' && (
+                <div>
+                  <Label htmlFor="possessionStatus">Possession Status</Label>
+                  <Select
+                    value={formData.possessionStatus}
+                    onValueChange={(value) =>
+                      handleSelectChange('possessionStatus', value)
+                    }
+                  >
+                    <SelectTrigger className="mt-1.5">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ready-to-move">Ready to Move</SelectItem>
+                      <SelectItem value="under-construction">
+                        Under Construction
+                      </SelectItem>
+                      <SelectItem value="new-launch">New Launch</SelectItem>
+                      <SelectItem value="resale">Resale</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           </motion.div>
 
