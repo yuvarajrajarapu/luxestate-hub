@@ -1,6 +1,7 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/home/HeroSection';
+import CategoryCards from '@/components/home/CategoryCards';
 import PropertyCard from '@/components/property/PropertyCard';
 import { motion } from 'framer-motion';
 import { useProperties } from '@/hooks/useProperties';
@@ -19,6 +20,9 @@ const Index = () => {
       <main>
         {/* Hero Section */}
         <HeroSection />
+
+        {/* Category Cards - 99acres Style */}
+        <CategoryCards />
 
         {/* Featured Properties */}
         <section className="py-16 md:py-24">
