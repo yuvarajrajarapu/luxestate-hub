@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, LogOut, ChevronDown, Search } from 'lucide-react';
+import { Menu, X, User, LogOut, ChevronDown, Search, Home, Building2, Key, Briefcase, Store, Users, Fence, Trees } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -23,14 +23,36 @@ import {
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [landDropdownOpen, setLandDropdownOpen] = useState(false);
+  const [pgDropdownOpen, setPgDropdownOpen] = useState(false);
   const { user, userData, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
   const landSubItems = [
-    { label: 'Plot', href: '/land/plot' },
-    { label: 'Agricultural', href: '/land/agricultural' },
-    { label: 'Farm Houses', href: '/land/farm-houses' },
+    { label: 'Plot for Sale', href: '/land/plot', icon: Fence },
+    { label: 'Agriculture Land', href: '/land/agricultural', icon: Trees },
+    { label: 'Farmhouse for Sale', href: '/land/farm-houses?type=sale', icon: Home },
+    { label: 'Farmhouse for Rent', href: '/land/farm-houses?type=rent', icon: Key },
+  ];
+
+  const buyItems = [
+    { label: 'Flats for Sale', href: '/properties?category=flat-for-sale', icon: Building2 },
+    { label: 'Houses for Sale', href: '/properties?category=house-for-sale', icon: Home },
+  ];
+
+  const rentItems = [
+    { label: 'Flats for Rent', href: '/properties?category=flat-for-rent', icon: Building2 },
+    { label: 'Houses for Rent', href: '/properties?category=house-for-rent', icon: Home },
+  ];
+
+  const commercialItems = [
+    { label: 'Office Spaces', href: '/properties?category=office-for-rent-lease', icon: Briefcase },
+    { label: 'Commercial Spaces', href: '/properties?category=commercial-space-for-rent-lease', icon: Store },
+  ];
+
+  const pgItems = [
+    { label: 'PG for Men', href: '/properties?category=pg-hostel-boys', icon: Users },
+    { label: 'PG for Women', href: '/properties?category=pg-hostel-girls', icon: Users },
   ];
 
   const isActive = (href: string) => {
@@ -239,33 +261,47 @@ const Header = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-card border-t border-border"
+            className="lg:hidden bg-card border-t border-border max-h-[80vh] overflow-y-auto"
           >
             <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
-              <Link
-                to="/properties?type=sale"
-                onClick={() => setIsMenuOpen(false)}
-                className={`px-4 py-3 rounded-lg transition-colors ${
-                  location.search.includes('type=sale')
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-muted'
-                }`}
-              >
-                Buy
-              </Link>
-              <Link
-                to="/properties?type=rent"
-                onClick={() => setIsMenuOpen(false)}
-                className={`px-4 py-3 rounded-lg transition-colors ${
-                  location.search.includes('type=rent')
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-muted'
-                }`}
-              >
-                Rent
-              </Link>
+              {/* Buy Section */}
+              <p className="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Buy</p>
+              {buyItems.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`px-4 py-3 rounded-lg transition-colors flex items-center gap-3 ${
+                    isActive(item.href)
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-muted'
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {item.label}
+                </Link>
+              ))}
+
+              {/* Rent Section */}
+              <p className="px-4 py-1 mt-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rent</p>
+              {rentItems.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`px-4 py-3 rounded-lg transition-colors flex items-center gap-3 ${
+                    isActive(item.href)
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-muted'
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {item.label}
+                </Link>
+              ))}
               
               {/* Land with sub-items */}
+              <p className="px-4 py-1 mt-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Land & Farmhouse</p>
               <div className="flex flex-col">
                 <button
                   onClick={() => setLandDropdownOpen(!landDropdownOpen)}
@@ -275,7 +311,10 @@ const Header = () => {
                       : 'hover:bg-muted'
                   }`}
                 >
-                  <span>Land</span>
+                  <span className="flex items-center gap-3">
+                    <Fence className="w-4 h-4" />
+                    Land & Farmhouse
+                  </span>
                   <ChevronDown className={`w-4 h-4 transition-transform ${landDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
                 <AnimatePresence>
@@ -291,12 +330,13 @@ const Header = () => {
                           key={item.href}
                           to={item.href}
                           onClick={() => setIsMenuOpen(false)}
-                          className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                          className={`px-4 py-2 rounded-lg transition-colors text-sm flex items-center gap-3 ${
                             isActive(item.href)
                               ? 'bg-primary/10 text-primary font-medium'
                               : 'hover:bg-muted text-muted-foreground'
                           }`}
                         >
+                          <item.icon className="w-4 h-4" />
                           {item.label}
                         </Link>
                       ))}
@@ -304,18 +344,65 @@ const Header = () => {
                   )}
                 </AnimatePresence>
               </div>
-              
-              <Link
-                to="/properties?type=lease"
-                onClick={() => setIsMenuOpen(false)}
-                className={`px-4 py-3 rounded-lg transition-colors ${
-                  location.search.includes('type=lease')
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-muted'
-                }`}
-              >
-                Commercial
-              </Link>
+
+              {/* Commercial Section */}
+              <p className="px-4 py-1 mt-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Commercial</p>
+              {commercialItems.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`px-4 py-3 rounded-lg transition-colors flex items-center gap-3 ${
+                    isActive(item.href)
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-muted'
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {item.label}
+                </Link>
+              ))}
+
+              {/* PG Section */}
+              <p className="px-4 py-1 mt-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">PG & Hostel</p>
+              <div className="flex flex-col">
+                <button
+                  onClick={() => setPgDropdownOpen(!pgDropdownOpen)}
+                  className={`px-4 py-3 rounded-lg transition-colors flex items-center justify-between hover:bg-muted`}
+                >
+                  <span className="flex items-center gap-3">
+                    <Users className="w-4 h-4" />
+                    PG Accommodation
+                  </span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${pgDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                <AnimatePresence>
+                  {pgDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="ml-4 mt-1 flex flex-col gap-1"
+                    >
+                      {pgItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          to={item.href}
+                          onClick={() => setIsMenuOpen(false)}
+                          className={`px-4 py-2 rounded-lg transition-colors text-sm flex items-center gap-3 ${
+                            isActive(item.href)
+                              ? 'bg-primary/10 text-primary font-medium'
+                              : 'hover:bg-muted text-muted-foreground'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          {item.label}
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               <div className="border-t border-border my-2" />
               {user ? (
