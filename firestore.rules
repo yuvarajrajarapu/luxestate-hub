@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is the document owner
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Helper function to check if user has admin role
+    // This reads the user's role from the users collection
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Properties collection: read by all, write by admins only
+    match /properties/{propertyId} {
+      // Anyone can read properties (public listings)
+      allow read: if true;
+      
+      // Only admins can create, update, or delete properties
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Users collection: users can only read/write their own data
+    // Role field is protected from user modification
+    match /users/{userId} {
+      // Users can only read their own document
+      allow read: if isOwner(userId);
+      
+      // Users can create their own document on signup, but role must be 'user'
+      allow create: if isOwner(userId) && 
+        request.resource.data.role == 'user';
+      
+      // Users can update their own document, but cannot change their role
+      allow update: if isOwner(userId) && 
+        request.resource.data.role == resource.data.role;
+      
+      // Users cannot delete their own document (admin only via console)
+      allow delete: if false;
+    }
+  }
+}
