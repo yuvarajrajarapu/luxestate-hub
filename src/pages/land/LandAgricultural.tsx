@@ -7,11 +7,15 @@ import { useProperties } from '@/hooks/useProperties';
 import { Loader2 } from 'lucide-react';
 
 const LandAgricultural = () => {
-  const { properties, loading, error } = useProperties({ listingType: 'sale' });
+  // Filter by mainCategory='land' first, then filter by landType client-side
+  const { properties, loading, error } = useProperties({ 
+    mainCategory: 'land',
+    categorySlug: 'land-for-sale'
+  });
 
   const filteredProperties = useMemo(() => {
     return properties.filter(
-      (property) => property.category === 'land-for-sale' && property.landType === 'agricultural'
+      (property) => property.landType === 'agricultural'
     );
   }, [properties]);
 

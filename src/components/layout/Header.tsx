@@ -46,9 +46,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <span className="font-serif text-2xl font-normal text-gray-900">
-              UMY Infra
-            </span>
+            <img src="/logo.png" alt="Logo" className="h-12" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -131,9 +129,9 @@ const Header = () => {
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  className="h-9 w-9 rounded-full bg-gray-900 hover:bg-gray-800 text-white"
+                  className="h-9 w-9 rounded-full hover:bg-gray-100"
                 >
-                  <User className="w-5 h-5" />
+                  <User className="w-7 h-7 text-gray-900" />
                 </Button>
               </Link>
             ) : (

@@ -96,9 +96,9 @@ const Profile = () => {
       <Header />
       <main className="container mx-auto px-6 pt-24 pb-12">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             {/* Main Content */}
-            <div className="lg:col-span-3">
+            <div>
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
                   <TabsTrigger 
@@ -175,6 +175,18 @@ const Profile = () => {
                       </div>
                     </CardContent>
                   </Card>
+
+                  {/* Logout Button */}
+                  <div className="mt-6 flex justify-center">
+                    <Button
+                      onClick={handleLogout}
+                      variant="ghost"
+                      className="text-red-600 hover:text-red-700 hover:bg-transparent"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="shortlisted" className="mt-0">
@@ -189,7 +201,7 @@ const Profile = () => {
                       description="Save your favorite properties here by clicking the heart icon"
                     />
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
                       {shortlistedProperties.map((property, index) => (
                         <PropertyCard key={property.id} property={property} index={index} />
                       ))}
@@ -198,54 +210,9 @@ const Profile = () => {
                 </TabsContent>
               </Tabs>
             </div>
-
-            {/* Sidebar */}
-            <div className="lg:col-span-1">
-              <Card className="border-gray-200">
-                <CardContent className="p-6">
-                  <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-blue-600 mb-4">My Activity</h2>
-                    <nav className="space-y-2">
-                      <button
-                        onClick={() => setActiveTab('profile')}
-                        className={`block w-full text-left px-4 py-2 rounded transition-colors ${
-                          activeTab === 'profile' 
-                            ? 'bg-blue-50 text-blue-600' 
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        Profile
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('shortlisted')}
-                        className={`block w-full text-left px-4 py-2 rounded transition-colors ${
-                          activeTab === 'shortlisted' 
-                            ? 'bg-blue-50 text-blue-600' 
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        Shortlisted
-                      </button>
-                    </nav>
-                  </div>
-
-                  <div className="border-t border-gray-200 pt-6">
-                    <Button
-                      onClick={handleLogout}
-                      className="w-full justify-start bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
-                      variant="outline"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

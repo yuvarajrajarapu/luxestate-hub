@@ -63,7 +63,19 @@ const Properties = () => {
       result = result.filter((p) => p.listingType === activeTab);
     }
 
-    // Filter by URL params
+    // Filter by URL params - categorySlug filtering (most specific)
+    const categorySlugParam = searchParams.get('categorySlug');
+    if (categorySlugParam) {
+      result = result.filter((p) => p.categorySlug === categorySlugParam);
+    }
+    
+    // Filter by URL params - legacy category filtering (for backward compatibility)
+    const categoryParam = searchParams.get('category');
+    if (categoryParam && !categorySlugParam) {
+      result = result.filter((p) => p.categorySlug === categoryParam);
+    }
+    
+    // Filter by URL params - type filtering
     const typeParam = searchParams.get('type');
     if (typeParam) {
       result = result.filter((p) => p.listingType === typeParam);

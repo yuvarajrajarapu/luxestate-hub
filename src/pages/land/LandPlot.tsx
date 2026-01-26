@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -7,13 +6,11 @@ import { useProperties } from '@/hooks/useProperties';
 import { Loader2 } from 'lucide-react';
 
 const LandPlot = () => {
-  const { properties, loading, error } = useProperties({ listingType: 'sale' });
-
-  const filteredProperties = useMemo(() => {
-    return properties.filter(
-      (property) => property.category === 'land-for-sale' && property.landType === 'plot'
-    );
-  }, [properties]);
+  // Filter by mainCategory='land' and categorySlug='land-for-sale'
+  const { properties, loading, error } = useProperties({ 
+    mainCategory: 'land',
+    categorySlug: 'land-for-sale'
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,13 +39,13 @@ const LandPlot = () => {
             <div className="text-center py-20">
               <p className="text-destructive">{error}</p>
             </div>
-          ) : filteredProperties.length === 0 ? (
+          ) : properties.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-muted-foreground">No plots available at the moment</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProperties.map((property) => (
+              {properties.map((property) => (
                 <motion.div
                   key={property.id}
                   initial={{ opacity: 0, y: 20 }}

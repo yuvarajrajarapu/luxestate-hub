@@ -1,3 +1,5 @@
+export type MainCategory = 'buy' | 'rent' | 'land' | 'commercial' | 'pg';
+
 export type PropertyCategory = 
   | 'land-for-sale'
   | 'flat-for-sale'
@@ -34,6 +36,8 @@ export interface Property {
   title: string;
   description: string;
   category: PropertyCategory;
+  categorySlug: string;
+  mainCategory: MainCategory;
   landType?: LandType;
   listingType: ListingType;
   price: number;
@@ -102,18 +106,24 @@ export interface Property {
   userId?: string;
 }
 
-export const PROPERTY_CATEGORIES: { value: PropertyCategory; label: string; listingType: ListingType }[] = [
-  { value: 'land-for-sale', label: 'Land for Sale', listingType: 'sale' },
-  { value: 'flat-for-sale', label: 'Flat for Sale', listingType: 'sale' },
-  { value: 'house-for-sale', label: 'House for Sale', listingType: 'sale' },
-  { value: 'house-for-rent', label: 'House for Rent', listingType: 'rent' },
-  { value: 'flat-for-rent', label: 'Flat for Rent', listingType: 'rent' },
-  { value: 'office-for-rent-lease', label: 'Office for Rent & Lease', listingType: 'lease' },
-  { value: 'commercial-space-for-rent-lease', label: 'Commercial Space for Rent & Lease', listingType: 'lease' },
-  { value: 'pg-hostel-boys', label: 'PG Hostel for Boys', listingType: 'rent' },
-  { value: 'pg-hostel-girls', label: 'PG Hostel for Girls', listingType: 'rent' },
-  { value: 'pg-boys', label: 'PG for Boys', listingType: 'rent' },
-  { value: 'pg-girls', label: 'PG for Girls', listingType: 'rent' },
+export const PROPERTY_CATEGORIES: { 
+  value: PropertyCategory; 
+  label: string; 
+  listingType: ListingType;
+  mainCategory: MainCategory;
+  categorySlug: string;
+}[] = [
+  { value: 'land-for-sale', label: 'Land for Sale', listingType: 'sale', mainCategory: 'land', categorySlug: 'land-for-sale' },
+  { value: 'flat-for-sale', label: 'Flat for Sale', listingType: 'sale', mainCategory: 'buy', categorySlug: 'flat-for-sale' },
+  { value: 'house-for-sale', label: 'House for Sale', listingType: 'sale', mainCategory: 'buy', categorySlug: 'house-for-sale' },
+  { value: 'house-for-rent', label: 'House for Rent', listingType: 'rent', mainCategory: 'rent', categorySlug: 'house-for-rent' },
+  { value: 'flat-for-rent', label: 'Flat for Rent', listingType: 'rent', mainCategory: 'rent', categorySlug: 'flat-for-rent' },
+  { value: 'office-for-rent-lease', label: 'Office for Rent & Lease', listingType: 'lease', mainCategory: 'commercial', categorySlug: 'office-for-rent-lease' },
+  { value: 'commercial-space-for-rent-lease', label: 'Commercial Space for Rent & Lease', listingType: 'lease', mainCategory: 'commercial', categorySlug: 'commercial-space-for-rent-lease' },
+  { value: 'pg-hostel-boys', label: 'PG Hostel for Boys', listingType: 'rent', mainCategory: 'pg', categorySlug: 'pg-hostel-boys' },
+  { value: 'pg-hostel-girls', label: 'PG Hostel for Girls', listingType: 'rent', mainCategory: 'pg', categorySlug: 'pg-hostel-girls' },
+  { value: 'pg-boys', label: 'PG for Boys', listingType: 'rent', mainCategory: 'pg', categorySlug: 'pg-boys' },
+  { value: 'pg-girls', label: 'PG for Girls', listingType: 'rent', mainCategory: 'pg', categorySlug: 'pg-girls' },
 ];
 
 export const getCategoryAmenities = (category: PropertyCategory): string[] => {
@@ -218,4 +228,20 @@ export const shouldShowOccupancy = (category: PropertyCategory): boolean => {
     'pg-boys',
     'pg-girls',
   ].includes(category);
+};
+
+export const getCategoryMapping = (category: PropertyCategory): {
+  mainCategory: MainCategory;
+  categorySlug: string;
+  listingType: ListingType;
+} => {
+  const categoryConfig = PROPERTY_CATEGORIES.find((c) => c.value === category);
+  if (!categoryConfig) {
+    throw new Error(`Invalid category: ${category}`);
+  }
+  return {
+    mainCategory: categoryConfig.mainCategory,
+    categorySlug: categoryConfig.categorySlug,
+    listingType: categoryConfig.listingType,
+  };
 };

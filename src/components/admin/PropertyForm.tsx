@@ -19,6 +19,7 @@ import {
   shouldShowFurnishing,
   shouldShowBHK,
   shouldShowOccupancy,
+  getCategoryMapping,
 } from '@/types/property';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -230,12 +231,17 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
     setLoading(true);
 
     try {
+      // Get category mapping
+      const categoryMapping = getCategoryMapping(formData.category);
+      
       // Build property data, filtering out undefined values
       const propertyDataRaw: Record<string, any> = {
         title: formData.title,
         description: formData.description,
         category: formData.category,
-        listingType: formData.listingType,
+        categorySlug: categoryMapping.categorySlug,
+        mainCategory: categoryMapping.mainCategory,
+        listingType: categoryMapping.listingType,
         price: parseFloat(formData.price),
         priceUnit: formData.priceUnit,
         location: formData.location,

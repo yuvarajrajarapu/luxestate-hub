@@ -29,15 +29,17 @@ export const usePropertyCounts = (): UsePropertyCountsReturn => {
         
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
-          const category = data.category as PropertyCategory;
+          const categorySlug = data.categorySlug as string;
           const landType = data.landType as LandType | undefined;
           const listingType = data.listingType as string | undefined;
           
-          // Count by category
-          countMap[category] = (countMap[category] || 0) + 1;
+          // Count by categorySlug (this is the main category identifier)
+          if (categorySlug) {
+            countMap[categorySlug] = (countMap[categorySlug] || 0) + 1;
+          }
           
           // Count land types separately (plot, agricultural, farm-houses)
-          if (category === 'land-for-sale' && landType) {
+          if (categorySlug === 'land-for-sale' && landType) {
             // Count the landType directly (e.g., 'plot', 'agricultural', 'farm-houses')
             countMap[landType] = (countMap[landType] || 0) + 1;
             

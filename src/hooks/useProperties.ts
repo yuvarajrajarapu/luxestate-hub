@@ -11,10 +11,12 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Property, ListingType } from '@/types/property';
+import type { Property, ListingType, MainCategory } from '@/types/property';
 
 interface UsePropertiesOptions {
   listingType?: ListingType | 'all';
+  mainCategory?: MainCategory;
+  categorySlug?: string;
   featured?: boolean;
   limit?: number;
 }
@@ -48,6 +50,16 @@ export const useProperties = (options: UsePropertiesOptions = {}): UseProperties
 
   useEffect(() => {
     const constraints: QueryConstraint[] = [orderBy('createdAt', 'desc')];
+    
+    // Filter by mainCategory if specified
+    if (options.mainCategory) {
+      constraints.unshift(where('mainCategory', '==', options.mainCategory));
+    }
+    
+    // Filter by categorySlug if specified (most specific filter)
+    if (options.categorySlug) {
+      constraints.unshift(where('categorySlug', '==', options.categorySlug));
+    }
     
     // Filter by listing type if specified
     if (options.listingType && options.listingType !== 'all') {
@@ -83,7 +95,7 @@ export const useProperties = (options: UsePropertiesOptions = {}): UseProperties
     );
 
     return () => unsubscribe();
-  }, [options.listingType, options.featured, options.limit]);
+  }, [options.listingType, options.mainCategory, options.categorySlug, options.featured, options.limit]);
 
   return { properties, loading, error };
 };
