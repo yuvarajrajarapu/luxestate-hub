@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -130,11 +130,11 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Poppins', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Poppins', system-ui, sans-serif;
   }
 }
 
@@ -269,22 +269,22 @@
 
   /* Luxury Typography */
   .text-display {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Poppins', system-ui, sans-serif;
     @apply text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight;
   }
 
   .text-headline {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Poppins', system-ui, sans-serif;
     @apply text-2xl md:text-3xl font-semibold;
   }
 
   .text-body {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Poppins', system-ui, sans-serif;
     @apply text-base leading-relaxed;
   }
 
   .text-caption {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Poppins', system-ui, sans-serif;
     @apply text-sm text-muted-foreground;
   }
 
@@ -300,6 +300,16 @@
 
   .nav-link:hover::after {
     @apply w-full;
+  }
+
+  /* Hide scrollbar for horizontal scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 
   /* Search Bar */
