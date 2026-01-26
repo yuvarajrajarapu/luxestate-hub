@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, Building2, Home, LandPlot, Key, Briefcase, Store, Users } from 'lucide-react';
 import { usePropertyCounts } from '@/hooks/usePropertyCounts';
 import property1 from '@/assets/properties/property-1.jpg';
 import property2 from '@/assets/properties/property-2.jpg';
@@ -13,45 +13,102 @@ import property6 from '@/assets/properties/property-6.jpg';
 const categories = [
   {
     id: 'flat-for-sale',
-    title: 'Residential Apartment',
+    title: 'Flats for Sale',
+    subtitle: 'Apartments & Flats',
     href: '/properties?category=flat-for-sale',
     image: property1,
     bgColor: 'bg-amber-50 dark:bg-amber-950/30',
-  },
-  {
-    id: 'land-for-sale',
-    title: 'Residential Land',
-    href: '/land/plot',
-    image: property2,
-    bgColor: 'bg-blue-50 dark:bg-blue-950/30',
+    icon: Building2,
   },
   {
     id: 'house-for-sale',
-    title: 'Independent House/ Villa',
+    title: 'Houses for Sale',
+    subtitle: 'Villas & Independent Houses',
     href: '/properties?category=house-for-sale',
     image: property3,
     bgColor: 'bg-emerald-50 dark:bg-emerald-950/30',
+    icon: Home,
   },
   {
-    id: 'office-for-rent-lease',
-    title: 'Office Space',
-    href: '/properties?category=office-for-rent-lease',
-    image: property4,
-    bgColor: 'bg-purple-50 dark:bg-purple-950/30',
-  },
-  {
-    id: 'commercial-space-for-rent-lease',
-    title: 'Commercial Space',
-    href: '/properties?category=commercial-space-for-rent-lease',
-    image: property5,
-    bgColor: 'bg-rose-50 dark:bg-rose-950/30',
+    id: 'land-for-sale',
+    title: 'Land for Sale',
+    subtitle: 'Plots & Agricultural',
+    href: '/land/plot',
+    image: property2,
+    bgColor: 'bg-blue-50 dark:bg-blue-950/30',
+    icon: LandPlot,
   },
   {
     id: 'flat-for-rent',
     title: 'Flats for Rent',
+    subtitle: 'Rental Apartments',
     href: '/properties?category=flat-for-rent',
     image: property6,
     bgColor: 'bg-cyan-50 dark:bg-cyan-950/30',
+    icon: Key,
+  },
+  {
+    id: 'house-for-rent',
+    title: 'Houses for Rent',
+    subtitle: 'Rental Villas & Houses',
+    href: '/properties?category=house-for-rent',
+    image: property4,
+    bgColor: 'bg-violet-50 dark:bg-violet-950/30',
+    icon: Home,
+  },
+  {
+    id: 'office-for-rent-lease',
+    title: 'Office Spaces',
+    subtitle: 'For Rent & Lease',
+    href: '/properties?category=office-for-rent-lease',
+    image: property5,
+    bgColor: 'bg-purple-50 dark:bg-purple-950/30',
+    icon: Briefcase,
+  },
+  {
+    id: 'commercial-space-for-rent-lease',
+    title: 'Commercial Spaces',
+    subtitle: 'Shops & Showrooms',
+    href: '/properties?category=commercial-space-for-rent-lease',
+    image: property1,
+    bgColor: 'bg-rose-50 dark:bg-rose-950/30',
+    icon: Store,
+  },
+  {
+    id: 'pg-hostel-boys',
+    title: 'PG for Boys',
+    subtitle: 'Hostels & PG',
+    href: '/properties?category=pg-hostel-boys',
+    image: property2,
+    bgColor: 'bg-sky-50 dark:bg-sky-950/30',
+    icon: Users,
+  },
+  {
+    id: 'pg-hostel-girls',
+    title: 'PG for Girls',
+    subtitle: 'Hostels & PG',
+    href: '/properties?category=pg-hostel-girls',
+    image: property3,
+    bgColor: 'bg-pink-50 dark:bg-pink-950/30',
+    icon: Users,
+  },
+  {
+    id: 'pg-boys',
+    title: 'Paying Guest (Boys)',
+    subtitle: 'Shared Accommodation',
+    href: '/properties?category=pg-boys',
+    image: property4,
+    bgColor: 'bg-indigo-50 dark:bg-indigo-950/30',
+    icon: Users,
+  },
+  {
+    id: 'pg-girls',
+    title: 'Paying Guest (Girls)',
+    subtitle: 'Shared Accommodation',
+    href: '/properties?category=pg-girls',
+    image: property5,
+    bgColor: 'bg-fuchsia-50 dark:bg-fuchsia-950/30',
+    icon: Users,
   },
 ];
 
@@ -86,9 +143,11 @@ const CategoryCards = () => {
         >
           <div>
             <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-              Apartments, Villas and more
+              Explore Properties
             </h2>
-            <p className="text-muted-foreground text-sm mt-1">in India</p>
+            <p className="text-muted-foreground text-sm mt-1">
+              Find your perfect property across all categories
+            </p>
           </div>
 
           {/* Scroll Buttons */}
@@ -114,12 +173,13 @@ const CategoryCards = () => {
         <div className="relative">
           <div
             ref={scrollRef}
-            className="flex gap-5 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 snap-x snap-mandatory"
+            className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 snap-x snap-mandatory"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {categories.map((category, index) => {
               const countDisplay = getCountDisplay(category.id);
               const hasProperties = countDisplay !== null;
+              const IconComponent = category.icon;
 
               return (
                 <motion.div
@@ -127,30 +187,38 @@ const CategoryCards = () => {
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className="flex-shrink-0 w-[280px] md:w-[320px] snap-start"
+                  transition={{ delay: index * 0.05, duration: 0.4 }}
+                  className="flex-shrink-0 w-[260px] md:w-[300px] snap-start"
                 >
                   <Link
                     to={category.href}
-                    className={`block rounded-xl overflow-hidden ${category.bgColor} hover:shadow-xl transition-all duration-300 group relative h-[300px] md:h-[360px]`}
+                    className={`block rounded-xl overflow-hidden ${category.bgColor} hover:shadow-xl transition-all duration-300 group relative h-[280px] md:h-[340px]`}
                   >
+                    {/* Icon Badge */}
+                    <div className="absolute top-4 left-4 z-20 w-10 h-10 rounded-lg bg-background/90 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                      <IconComponent className="w-5 h-5 text-primary" />
+                    </div>
+
                     {/* Content */}
-                    <div className="p-5 relative z-10">
-                      <h3 className="text-lg md:text-xl font-bold text-foreground mb-1">
+                    <div className="p-5 pt-16 relative z-10">
+                      <h3 className="text-lg md:text-xl font-bold text-foreground mb-0.5">
                         {category.title}
                       </h3>
-                      
+                      <p className="text-muted-foreground text-xs mb-2">
+                        {category.subtitle}
+                      </p>
+
                       {hasProperties ? (
-                        <p className="text-muted-foreground text-sm">
+                        <p className="text-sm">
                           <span className="font-semibold text-foreground/80">
                             {countDisplay}
                           </span>{' '}
-                          Properties
+                          <span className="text-muted-foreground">Properties</span>
                         </p>
                       ) : (
-                        <div className="flex items-center gap-1.5 mt-2">
-                          <Search className="w-3.5 h-3.5 text-primary" />
-                          <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <Search className="w-3 h-3 text-primary" />
+                          <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                             We are searching more for you
                           </span>
                         </div>
@@ -158,7 +226,7 @@ const CategoryCards = () => {
                     </div>
 
                     {/* Image */}
-                    <div className="absolute bottom-0 right-0 w-[85%] h-[60%]">
+                    <div className="absolute bottom-0 right-0 w-[80%] h-[55%]">
                       <img
                         src={category.image}
                         alt={category.title}
@@ -167,7 +235,7 @@ const CategoryCards = () => {
                     </div>
 
                     {/* Hover Arrow */}
-                    <div className="absolute top-5 right-5 w-9 h-9 rounded-full bg-background/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                    <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-background/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
                       <svg
                         className="w-4 h-4 text-primary"
                         fill="none"
@@ -195,7 +263,7 @@ const CategoryCards = () => {
 
         {/* Mobile Scroll Hint */}
         <p className="text-center text-xs text-muted-foreground mt-2 md:hidden">
-          ← Swipe to see more →
+          ← Swipe to explore all categories →
         </p>
       </div>
     </section>
