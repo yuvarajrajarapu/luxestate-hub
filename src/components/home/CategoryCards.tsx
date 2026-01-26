@@ -181,26 +181,24 @@ const CategoryCards = () => {
                       <IconComponent className="w-5 h-5 text-primary" />
                     </div>
 
-                    {/* Content */}
-                    <div className="p-5 pt-16 relative z-10">
-                      <h3 className="text-lg md:text-xl font-bold text-foreground mb-0.5">
+                    {/* Content with background for readability */}
+                    <div className="p-5 pt-16 pb-6 relative z-10 bg-gradient-to-b from-transparent via-transparent to-background/60">
+                      <h3 className="text-lg md:text-xl font-bold text-foreground mb-1">
                         {category.title}
                       </h3>
-                      <p className="text-muted-foreground text-xs mb-2">
+                      <p className="text-muted-foreground text-xs mb-3">
                         {category.subtitle}
                       </p>
 
                       {hasProperties ? (
-                        <p className="text-sm">
-                          <span className="font-semibold text-foreground/80">
-                            {countDisplay}
-                          </span>{' '}
+                        <span className="inline-flex items-center gap-1.5 text-sm font-semibold bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
+                          <span className="text-foreground">{countDisplay}</span>
                           <span className="text-muted-foreground">Properties</span>
-                        </p>
+                        </span>
                       ) : (
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <Search className="w-3 h-3 text-primary" />
-                          <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                        <div className="inline-flex items-center gap-1.5 bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
+                          <Search className="w-3.5 h-3.5 text-primary" />
+                          <span className="text-xs font-medium text-primary">
                             We are searching more for you
                           </span>
                         </div>
