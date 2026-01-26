@@ -20,7 +20,7 @@ const Footer = () => {
               <div className="w-10 h-10 rounded-lg bg-primary-foreground/10 flex items-center justify-center">
                 <span className="text-primary-foreground font-display font-bold text-xl">Y</span>
               </div>
-              <span className="font-display text-xl font-bold">Yuva InfraEdge</span>
+              <span className="font-display text-xl font-bold">UMY Infra</span>
             </div>
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
               Your trusted partner in finding the perfect property. Explore homes, 
@@ -119,7 +119,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-primary-foreground/10 mt-12 pt-8 text-center text-sm text-primary-foreground/50">
-          <p>© {currentYear} Yuva InfraEdge. All rights reserved.</p>
+          <p>© {currentYear} UMY Infra. All rights reserved.</p>
         </div>
       </div>
     </footer>
