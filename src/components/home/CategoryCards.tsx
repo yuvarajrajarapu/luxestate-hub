@@ -9,6 +9,10 @@ import property3 from '@/assets/properties/property-3.jpg';
 import property5 from '@/assets/properties/property-5.jpg';
 import flatRent from '@/assets/properties/flat-rent.jpg';
 import houseRent from '@/assets/properties/house-rent.jpg';
+import plotSale from '@/assets/properties/plot-sale.jpg';
+import agricultureLand from '@/assets/properties/agriculture-land.jpg';
+import farmhouseSale from '@/assets/properties/farmhouse-sale.jpg';
+import farmhouseRent from '@/assets/properties/farmhouse-rent.jpg';
 
 const categories = [
   {
@@ -34,7 +38,7 @@ const categories = [
     title: 'Plot for Sale',
     subtitle: 'Residential & Commercial Plots',
     href: '/land/plot',
-    image: property2,
+    image: plotSale,
     bgColor: 'bg-blue-50 dark:bg-blue-950/30',
     icon: Fence,
   },
@@ -43,7 +47,7 @@ const categories = [
     title: 'Agriculture Land',
     subtitle: 'Farm & Agricultural Land',
     href: '/land/agricultural',
-    image: property2,
+    image: agricultureLand,
     bgColor: 'bg-lime-50 dark:bg-lime-950/30',
     icon: Trees,
   },
@@ -52,7 +56,7 @@ const categories = [
     title: 'Farmhouse for Sale',
     subtitle: 'Luxury Farmhouses',
     href: '/land/farm-houses?type=sale',
-    image: property3,
+    image: farmhouseSale,
     bgColor: 'bg-teal-50 dark:bg-teal-950/30',
     icon: Home,
   },
@@ -61,7 +65,7 @@ const categories = [
     title: 'Farmhouse for Rent',
     subtitle: 'Rental Farmhouses',
     href: '/land/farm-houses?type=rent',
-    image: houseRent,
+    image: farmhouseRent,
     bgColor: 'bg-green-50 dark:bg-green-950/30',
     icon: Key,
   },
