@@ -31,14 +31,21 @@ export const usePropertyCounts = (): UsePropertyCountsReturn => {
           const data = doc.data();
           const category = data.category as PropertyCategory;
           const landType = data.landType as LandType | undefined;
+          const listingType = data.listingType as string | undefined;
           
           // Count by category
           countMap[category] = (countMap[category] || 0) + 1;
           
-          // Also count land types separately
+          // Count land types separately (plot, agricultural, farm-houses)
           if (category === 'land-for-sale' && landType) {
-            const landKey = `land-${landType}`;
-            countMap[landKey] = (countMap[landKey] || 0) + 1;
+            // Count the landType directly (e.g., 'plot', 'agricultural', 'farm-houses')
+            countMap[landType] = (countMap[landType] || 0) + 1;
+            
+            // For farm-houses, also count by sale/rent
+            if (landType === 'farm-houses' && listingType) {
+              const farmKey = `farm-houses-${listingType}`;
+              countMap[farmKey] = (countMap[farmKey] || 0) + 1;
+            }
           }
         });
         

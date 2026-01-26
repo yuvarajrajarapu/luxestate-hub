@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Search, Building2, Home, LandPlot, Key, Briefcase, Store, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, Building2, Home, LandPlot, Key, Briefcase, Store, Users, Trees, Fence } from 'lucide-react';
 import { usePropertyCounts } from '@/hooks/usePropertyCounts';
 import property1 from '@/assets/properties/property-1.jpg';
 import property2 from '@/assets/properties/property-2.jpg';
@@ -30,13 +30,40 @@ const categories = [
     icon: Home,
   },
   {
-    id: 'land-for-sale',
-    title: 'Land for Sale',
-    subtitle: 'Plots & Agricultural',
+    id: 'plot',
+    title: 'Plot for Sale',
+    subtitle: 'Residential & Commercial Plots',
     href: '/land/plot',
     image: property2,
     bgColor: 'bg-blue-50 dark:bg-blue-950/30',
-    icon: LandPlot,
+    icon: Fence,
+  },
+  {
+    id: 'agricultural',
+    title: 'Agriculture Land',
+    subtitle: 'Farm & Agricultural Land',
+    href: '/land/agricultural',
+    image: property2,
+    bgColor: 'bg-lime-50 dark:bg-lime-950/30',
+    icon: Trees,
+  },
+  {
+    id: 'farm-houses-sale',
+    title: 'Farmhouse for Sale',
+    subtitle: 'Luxury Farmhouses',
+    href: '/land/farm-houses?type=sale',
+    image: property3,
+    bgColor: 'bg-teal-50 dark:bg-teal-950/30',
+    icon: Home,
+  },
+  {
+    id: 'farm-houses-rent',
+    title: 'Farmhouse for Rent',
+    subtitle: 'Rental Farmhouses',
+    href: '/land/farm-houses?type=rent',
+    image: houseRent,
+    bgColor: 'bg-green-50 dark:bg-green-950/30',
+    icon: Key,
   },
   {
     id: 'flat-for-rent',
