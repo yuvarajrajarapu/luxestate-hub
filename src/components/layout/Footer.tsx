@@ -103,15 +103,15 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-primary-foreground/70">
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4" />
-                <span>+91 98765 43210</span>
+                <span>+91 90596 11547</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
-                <span>contact@yuvainfraedge.com</span>
+                <span>umyinfra@gmail.com</span>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-0.5" />
-                <span>Bangalore, Karnataka, India</span>
+                <span>Kakinada, Andhra Pradesh,India</span>
               </li>
             </ul>
           </motion.div>

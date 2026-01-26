@@ -8,17 +8,43 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Heart, LogOut, Mail, Calendar, User as UserIcon } from 'lucide-react';
+import { useShortlist } from '@/hooks/useShortlist';
+import { getUserShortlistedProperties } from '@/lib/shortlist';
+import PropertyCard from '@/components/property/PropertyCard';
+import type { Property } from '@/types/property';
 
 const Profile = () => {
   const { user, userData, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
+  const { shortlistedIds, loading: shortlistLoading } = useShortlist();
+  const [shortlistedProperties, setShortlistedProperties] = useState<Property[]>([]);
+  const [loadingProperties, setLoadingProperties] = useState(false);
 
   useEffect(() => {
     if (!user) {
       navigate('/login');
     }
   }, [user, navigate]);
+
+  // Fetch shortlisted properties
+  useEffect(() => {
+    const fetchShortlistedProperties = async () => {
+      if (!user || shortlistLoading) return;
+
+      setLoadingProperties(true);
+      try {
+        const properties = await getUserShortlistedProperties(user.uid);
+        setShortlistedProperties(properties);
+      } catch (error) {
+        console.error('Error fetching shortlisted properties:', error);
+      } finally {
+        setLoadingProperties(false);
+      }
+    };
+
+    fetchShortlistedProperties();
+  }, [user, shortlistedIds, shortlistLoading]);
 
   const handleLogout = async () => {
     try {
@@ -67,7 +93,7 @@ const Profile = () => {
                     value="shortlisted" 
                     className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent px-6 py-3"
                   >
-                    0 Shortlisted
+                    {shortlistedIds.length} Shortlisted
                   </TabsTrigger>
                 </TabsList>
 
@@ -124,7 +150,7 @@ const Profile = () => {
                             <Heart className="w-6 h-6 text-blue-600" />
                             <div>
                               <p className="text-sm text-gray-600 mb-1">Saved Properties</p>
-                              <p className="text-gray-900 font-medium">0 Properties</p>
+                              <p className="text-gray-900 font-medium">{shortlistedIds.length} Properties</p>
                             </div>
                           </div>
                         </div>
@@ -134,11 +160,23 @@ const Profile = () => {
                 </TabsContent>
 
                 <TabsContent value="shortlisted" className="mt-0">
-                  <EmptyState 
-                    icon={Heart}
-                    title="No shortlisted properties!"
-                    description="Save your favorite properties here by clicking the heart icon"
-                  />
+                  {loadingProperties ? (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500">Loading your shortlisted properties...</p>
+                    </div>
+                  ) : shortlistedProperties.length === 0 ? (
+                    <EmptyState 
+                      icon={Heart}
+                      title="No shortlisted properties!"
+                      description="Save your favorite properties here by clicking the heart icon"
+                    />
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+                      {shortlistedProperties.map((property, index) => (
+                        <PropertyCard key={property.id} property={property} index={index} />
+                      ))}
+                    </div>
+                  )}
                 </TabsContent>
               </Tabs>
             </div>
