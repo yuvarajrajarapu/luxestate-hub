@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -199,7 +199,7 @@ const AdminDashboard: React.FC = () => {
               </div>
               <div>
                 <h1 className="font-semibold text-slate-900">Admin Dashboard</h1>
-                <p className="text-xs text-slate-500">Yuva InfraEdge</p>
+                <p className="text-xs text-slate-500">UMY Infra</p>
               </div>
             </div>
 

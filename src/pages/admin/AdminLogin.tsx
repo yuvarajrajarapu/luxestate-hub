@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Lock, Mail, Shield, AlertCircle } from 'lucide-react';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -34,7 +35,7 @@ const AdminLogin: React.FC = () => {
       const userCredential = await signIn(email, password);
       
       // Fetch fresh user data to check role
-      const userDocRef = await import('firebase/firestore').then(m => m.getDoc(m.doc(db, 'users', userCredential.user.uid)));
+      const userDocRef = await getDoc(doc(db, 'users', userCredential.user.uid));
       const userData = userDocRef.data();
       
       if (userData?.role === 'admin') {
@@ -98,7 +99,7 @@ const AdminLogin: React.FC = () => {
             Admin Portal
           </h1>
           <p className="text-slate-400">
-            Yuva InfraEdge Property Management
+            UMY Infra Property Management
           </p>
         </div>
 
