@@ -46,7 +46,7 @@ const Signup = () => {
       await signUp(email, password, username);
       toast({
         title: 'Account created!',
-        description: 'Welcome to Yuva InfraEdge.',
+        description: 'Welcome to UMY Infra.',
       });
       navigate('/');
     } catch (error: any) {
@@ -80,7 +80,7 @@ const Signup = () => {
               Create Account
             </h1>
             <p className="text-muted-foreground">
-              Join Yuva InfraEdge and find your dream property
+              Join UMY Infra and find your dream property
             </p>
           </div>
 
