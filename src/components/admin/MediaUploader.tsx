@@ -53,10 +53,11 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
   const extractYoutubeId = (url: string): string | null => {
     // Handle various YouTube URL formats (including Shorts)
     const regexes = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/, // youtube.com and youtu.be
-      /(?:youtube\.com\/shorts\/)([^&\n?#]+)/, // YouTube Shorts
-      /youtube\.com\/embed\/([^&\n?#]+)/, // youtube.com/embed
-      /youtube\.com\/v\/([^&\n?#]+)/, // youtube.com/v
+      /(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/, // YouTube Shorts - 11 char ID
+      /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/, // youtu.be format
+      /(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/, // youtube.com watch format
+      /(?:youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/, // youtube.com/embed format
+      /(?:youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/, // youtube.com/v format
     ];
 
     for (const regex of regexes) {
