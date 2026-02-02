@@ -9,6 +9,8 @@ import {
   UserCredential,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithCredential,
+  GoogleAuthProvider as GoogleAuthProviderClass,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
@@ -28,6 +30,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<UserCredential>;
   signUp: (email: string, password: string, username: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithGoogleCredential: (credential: string) => Promise<void>;
   logout: () => Promise<void>;
   isAdmin: boolean;
   checkingAdmin: boolean;
@@ -173,6 +176,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithGoogleCredential = async (credential: string): Promise<void> => {
+    try {
+      // Decode and authenticate with Google credential token
+      const googleProvider = new GoogleAuthProviderClass();
+      const googleCredential = GoogleAuthProviderClass.credential(null, credential);
+      
+      const result = await signInWithCredential(auth, googleCredential);
+      const currentUser = result.user;
+      
+      // Create user document if it doesn't exist
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (!userDoc.exists()) {
+        const username = currentUser.displayName || currentUser.email?.split('@')[0] || 'User';
+        await setDoc(userDocRef, {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          username,
+          role: 'user',
+          createdAt: serverTimestamp(),
+          authProvider: 'google',
+        });
+      }
+      
+      // Fetch user data to update context
+      await fetchUserData(currentUser);
+    } catch (error) {
+      console.error('Google credential sign-in error:', error);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     await signOut(auth);
     setUserData(null);
@@ -186,6 +222,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signUp,
     signInWithGoogle,
+    signInWithGoogleCredential,
     logout,
     isAdmin,
     checkingAdmin,

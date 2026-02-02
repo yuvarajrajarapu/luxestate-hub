@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from "@/contexts/AuthContext";
+import GoogleOneTap from "@/components/auth/GoogleOneTap";
 import Index from "./pages/Index";
 import Properties from "./pages/Properties";
 import PropertyDetail from "./pages/PropertyDetail";
@@ -30,6 +31,7 @@ const App = () => {
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <GoogleOneTap />
         <TooltipProvider>
           <Toaster />
           <Sonner />
