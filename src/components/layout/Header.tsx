@@ -52,6 +52,8 @@ const Header = () => {
     { label: 'Farmhouse for Rent', href: '/land/farm-houses?type=rent' },
   ];
 
+  // Menu categories used in both desktop and mobile navigation
+
   const menuCategories = [
     {
       title: 'Buy',
@@ -115,7 +117,7 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-8">
             <Link
-              to="/properties?type=sale"
+              to={menuCategories[0].mainLink}
               className={`text-sm transition-colors ${
                 location.search.includes('type=sale')
                   ? 'text-gray-900 font-medium'
@@ -126,7 +128,7 @@ const Header = () => {
             </Link>
 
             <Link
-              to="/properties?type=rent"
+              to={menuCategories[1].mainLink}
               className={`text-sm transition-colors ${
                 location.search.includes('type=rent')
                   ? 'text-gray-900 font-medium'
@@ -150,7 +152,7 @@ const Header = () => {
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
-                      {landSubItems.map((item) => (
+                      {menuCategories[2].items.map((item) => (
                         <li key={item.href}>
                           <NavigationMenuLink asChild>
                             <Link
@@ -173,7 +175,7 @@ const Header = () => {
             </NavigationMenu>
 
             <Link
-              to="/properties?category=commercial"
+              to={menuCategories[3].mainLink}
               className={`text-sm transition-colors ${
                 location.search.includes('category=commercial')
                   ? 'text-gray-900 font-medium'
@@ -182,6 +184,38 @@ const Header = () => {
             >
               Commercial
             </Link>
+
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger 
+                    className={`text-sm bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent px-0 h-auto text-gray-600 hover:text-gray-900`}
+                  >
+                    PG
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+                      {menuCategories[4].items.map((item) => (
+                        <li key={item.href}>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to={item.href}
+                              className={`block px-4 py-3 text-sm rounded-md transition-colors hover:bg-gray-100 ${
+                                  isActive(item.href)
+                                    ? 'text-gray-900 font-medium'
+                                    : 'text-gray-700'
+                                }`}
+                            >
+                              {item.label}
+                            </Link>
+                          </NavigationMenuLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
           </nav>
 
           {/* Right side - Auth */}
