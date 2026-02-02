@@ -137,6 +137,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  const signInWithGoogle = async (): Promise<void> => {
+    try {
+      const googleProvider = new GoogleAuthProvider();
+      googleProvider.addScope('profile');
+      googleProvider.addScope('email');
+      googleProvider.setCustomParameters({
+        prompt: 'consent',
+      });
+      
+      const result = await signInWithPopup(auth, googleProvider);
+      const currentUser = result.user;
+      
+      // Create user document if it doesn't exist
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (!userDoc.exists()) {
+        const username = currentUser.displayName || currentUser.email?.split('@')[0] || 'User';
+        await setDoc(userDocRef, {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          username,
+          role: 'user',
+          createdAt: serverTimestamp(),
+          authProvider: 'google',
+        });
+      }
+      
+      // Fetch user data to update context
+      await fetchUserData(currentUser);
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     await signOut(auth);
     setUserData(null);
