@@ -138,7 +138,7 @@ const PropertyDetail = () => {
             Back to listings
           </motion.button>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-2 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
               {/* Image Gallery */}
@@ -326,6 +326,71 @@ const PropertyDetail = () => {
                   )}
                 </div>
 
+                {/* Contact Agent - Moved above description */}
+                {!property.isSoldOut && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="bg-card rounded-2xl border border-border p-6 space-y-6"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold mb-1">Contact Agent</h3>
+                        <p className="text-muted-foreground text-sm">{property.contactName}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleCall}
+                          className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
+                        >
+                          <Phone className="w-5 h-5 text-primary" />
+                        </button>
+                        <button
+                          onClick={handleWhatsApp}
+                          className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center hover:bg-green-500/20 transition-colors"
+                        >
+                          <MessageCircle className="w-5 h-5 text-green-500" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Button
+                        onClick={handleCall}
+                        variant="outline"
+                        className="w-full h-12 flex items-center justify-center gap-2"
+                      >
+                        <Phone className="w-5 h-5" />
+                        {property.contactPhone}
+                      </Button>
+                      <Button
+                        onClick={handleWhatsApp}
+                        className="w-full h-12 bg-green-500 hover:bg-green-600 text-white flex items-center justify-center gap-2"
+                      >
+                        <MessageCircle className="w-5 h-5" />
+                        Chat on WhatsApp
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {property.isSoldOut && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="bg-card rounded-2xl border border-border p-6 text-center py-4"
+                  >
+                    <p className="text-muted-foreground mb-4">
+                      This property is no longer available
+                    </p>
+                    <Button variant="outline" className="w-full" onClick={() => navigate('/properties')}>
+                      View Similar Listings
+                    </Button>
+                  </motion.div>
+                )}
+
                 {/* Description */}
                 <div>
                   <h2 className="text-xl font-semibold mb-3">Description</h2>
@@ -392,68 +457,6 @@ const PropertyDetail = () => {
                 )}
               </motion.div>
             </div>
-
-            {/* Sticky Sidebar - Contact */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="lg:col-span-1"
-            >
-              <div className="bg-card rounded-2xl border border-border p-6 sticky top-24 space-y-6">
-                {!property.isSoldOut ? (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-lg font-semibold mb-1">Contact Agent</h3>
-                        <p className="text-muted-foreground text-sm">{property.contactName}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleCall}
-                          className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
-                        >
-                          <Phone className="w-5 h-5 text-primary" />
-                        </button>
-                        <button
-                          onClick={handleWhatsApp}
-                          className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center hover:bg-green-500/20 transition-colors"
-                        >
-                          <MessageCircle className="w-5 h-5 text-green-500" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <Button
-                        onClick={handleCall}
-                        variant="outline"
-                        className="w-full h-12 flex items-center justify-center gap-2"
-                      >
-                        <Phone className="w-5 h-5" />
-                        {property.contactPhone}
-                      </Button>
-                      <Button
-                        onClick={handleWhatsApp}
-                        className="w-full h-12 bg-green-500 hover:bg-green-600 text-white flex items-center justify-center gap-2"
-                      >
-                        <MessageCircle className="w-5 h-5" />
-                        Chat on WhatsApp
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-4">
-                    <p className="text-muted-foreground mb-4">
-                      This property is no longer available
-                    </p>
-                    <Button variant="outline" className="w-full" onClick={() => navigate('/properties')}>
-                      View Similar Listings
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </motion.div>
           </div>
         </div>
       </main>
