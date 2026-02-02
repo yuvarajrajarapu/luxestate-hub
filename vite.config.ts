@@ -54,20 +54,18 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Core React - minimal
-          'react': ['react', 'react-dom', 'react-router-dom'],
-          // Firebase - separate chunk, lazy loaded
+          // Core React
+          'react-vendor': ['react', 'react-dom', 'react-router-dom', 'react-helmet-async'],
+          // Firebase - separate to lazy load
           'firebase-vendor': ['firebase/app', 'firebase/firestore', 'firebase/auth'],
-          // Forms - heavy utility  
-          'forms': ['react-hook-form', '@hookform/resolvers'],
-          // Framer - animations
-          'framer': ['framer-motion'],
-          // Radix UI - critical
-          'radix-critical': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-navigation-menu', '@radix-ui/react-select'],
-          // Rest of Radix
-          'radix-rest': ['@radix-ui/react-label', '@radix-ui/react-checkbox', '@radix-ui/react-slider', '@radix-ui/react-progress', '@radix-ui/react-sheet'],
-          // Utils
-          'utils': ['clsx', 'class-variance-authority', 'tailwind-merge'],
+          // Forms
+          'forms-vendor': ['react-hook-form', '@hookform/resolvers'],
+          // Animations
+          'animation': ['framer-motion'],
+          // Radix UI components
+          'radix-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-navigation-menu', '@radix-ui/react-select', '@radix-ui/react-label', '@radix-ui/react-checkbox', '@radix-ui/react-slider', '@radix-ui/react-progress', '@radix-ui/react-tabs'],
+          // Query
+          'query': ['@tanstack/react-query'],
         },
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
