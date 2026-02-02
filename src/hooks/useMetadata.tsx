@@ -28,7 +28,7 @@ export const MetadataHead = ({ metadata }: { metadata: MetadataConfig }) => {
   const twitterMetadata = generateTwitterMetadata(metadata);
 
   return (
-    <Helmet prioritizeSeoTags>
+    <Helmet>
       <title>{metadata.title}</title>
       <meta name="description" content={metadata.description} />
       <meta name="author" content={metadata.author} />
