@@ -17,6 +17,7 @@ import {
   Building,
   Loader2,
   Play,
+  AlertCircle,
 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -153,7 +154,7 @@ const PropertyDetail = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="relative aspect-video rounded-2xl overflow-hidden bg-muted"
               >
-                {allMedia.length > 0 && (
+                {allMedia.length > 0 ? (
                   <>
                     {allMedia[currentMediaIndex]?.type === 'video' && allMedia[currentMediaIndex]?.url.includes('youtube') ? (
                       <iframe
@@ -167,9 +168,21 @@ const PropertyDetail = () => {
                         src={allMedia[currentMediaIndex]?.url || '/placeholder.svg'}
                         alt={property.title}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.warn(`Failed to load image: ${allMedia[currentMediaIndex]?.url}`);
+                          e.currentTarget.src = '/placeholder.svg';
+                        }}
+                        loading="eager"
                       />
                     )}
                   </>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <div className="text-center">
+                      <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500">No images available</p>
+                    </div>
+                  </div>
                 )}
 
                 {/* Navigation */}
@@ -245,6 +258,9 @@ const PropertyDetail = () => {
                               src={`https://img.youtube.com/vi/${media.url.split('/embed/')[1]}/default.jpg`}
                               alt={`Video thumbnail ${index + 1}`}
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = '/placeholder.svg';
+                              }}
                             />
                             <div className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/50 transition-colors">
                               <Play className="w-6 h-6 text-white" />
@@ -252,9 +268,13 @@ const PropertyDetail = () => {
                           </>
                         ) : (
                           <img
-                            src={media.url}
+                            src={media.url || '/placeholder.svg'}
                             alt={`Thumbnail ${index + 1}`}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                            loading="lazy"
                           />
                         )}
                       </button>

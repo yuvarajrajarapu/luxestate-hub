@@ -5,6 +5,7 @@ import { MapPin, Square, Heart, Share2 } from 'lucide-react';
 import type { Property } from '@/types/property';
 import { useShortlist } from '@/hooks/useShortlist';
 import { useToast } from '@/hooks/use-toast';
+import PropertyImage from './PropertyImage';
 
 interface PropertyCardProps {
   property: Property;
@@ -104,11 +105,11 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
     >
       <Link to={`/property/${property.id}`}>
         {/* Image Section */}
-        <div className="relative aspect-[4/3] overflow-hidden">
-          <img
-            src={property.images[0]?.url || '/placeholder.svg'}
-            alt={property.title}
-            className="w-full h-full object-cover"
+        <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
+          <PropertyImage 
+            images={property.images} 
+            title={property.title}
+            className="w-full h-full"
           />
           
           {/* Top Right Icons */}

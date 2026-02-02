@@ -213,6 +213,75 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAdmin(false);
   };
 
+  // Helper function to create or fetch user document
+  const createOrFetchUserDoc = async (currentUser: User): Promise<UserData | null> => {
+    try {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (userDoc.exists()) {
+        // User document already exists
+        const data = userDoc.data();
+        const fetchedUserData: UserData = {
+          uid: data.uid,
+          email: data.email,
+          username: data.username,
+          role: data.role || 'user',
+          createdAt: data.createdAt?.toDate() || new Date(),
+        };
+        setUserData(fetchedUserData);
+        setIsAdmin(data.role === 'admin');
+        return fetchedUserData;
+      } else {
+        // Create new user document
+        const username = currentUser.displayName || currentUser.email?.split('@')[0] || 'User';
+        await setDoc(userDocRef, {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          username,
+          role: 'user',
+          createdAt: serverTimestamp(),
+          authProvider: 'google', // Track authentication method
+        });
+        
+        const newUserData: UserData = {
+          uid: currentUser.uid,
+          email: currentUser.email || '',
+          username,
+          role: 'user',
+          createdAt: new Date(),
+        };
+        setUserData(newUserData);
+        setIsAdmin(false);
+        return newUserData;
+      }
+    } catch (error) {
+      console.error('Error creating/fetching user document:', error);
+      return null;
+    }
+  };
+
+  const signInWithGoogle = async (): Promise<void> => {
+    try {
+      const googleProvider = new GoogleAuthProvider();
+      // Add custom parameters for better UX
+      googleProvider.addScope('profile');
+      googleProvider.addScope('email');
+      googleProvider.setCustomParameters({
+        prompt: 'consent',
+      });
+      
+      const result = await signInWithPopup(auth, googleProvider);
+      const currentUser = result.user;
+      
+      // Create or fetch user document
+      await createOrFetchUserDoc(currentUser);
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      throw error;
+    }
+  };
+
   const value = {
     user,
     userData,
