@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, User, ChevronDown } from 'lucide-react';
+import { Menu, X, User, ChevronDown, Home, Building2, MapPin, Store, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -14,7 +14,6 @@ import {
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [landDropdownOpen, setLandDropdownOpen] = useState(false);
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -38,6 +37,55 @@ const Header = () => {
     { label: 'Agriculture Land', href: '/land/agricultural' },
     { label: 'Farmhouse for Sale', href: '/land/farm-houses?type=sale' },
     { label: 'Farmhouse for Rent', href: '/land/farm-houses?type=rent' },
+  ];
+
+  const menuCategories = [
+    {
+      title: 'Buy',
+      icon: Home,
+      items: [
+        { label: 'Flats & Apartments', href: '/properties?category=flat-for-sale' },
+        { label: 'Houses & Villas', href: '/properties?category=house-for-sale' },
+        { label: 'Land & Plots', href: '/properties?category=land-for-sale' },
+      ]
+    },
+    {
+      title: 'Rent',
+      icon: Building2,
+      items: [
+        { label: 'Flats & Apartments', href: '/properties?category=flat-for-rent' },
+        { label: 'Houses', href: '/properties?category=house-for-rent' },
+        { label: 'PG/Hostels', href: '/properties?type=rent&category=pg-hostel-boys' },
+      ]
+    },
+    {
+      title: 'Land',
+      icon: MapPin,
+      items: [
+        { label: 'Plot for Sale', href: '/land/plot' },
+        { label: 'Agriculture Land', href: '/land/agricultural' },
+        { label: 'Farmhouse for Sale', href: '/land/farm-houses?type=sale' },
+        { label: 'Farmhouse for Rent', href: '/land/farm-houses?type=rent' },
+      ]
+    },
+    {
+      title: 'Commercial',
+      icon: Store,
+      items: [
+        { label: 'Office Space', href: '/properties?category=office-for-rent-lease' },
+        { label: 'Commercial Space', href: '/properties?category=commercial-space-for-rent-lease' },
+      ]
+    },
+    {
+      title: 'PG & Hostels',
+      icon: Users,
+      items: [
+        { label: 'Boys Hostels', href: '/properties?category=pg-hostel-boys' },
+        { label: 'Girls Hostels', href: '/properties?category=pg-hostel-girls' },
+        { label: 'Boys PG', href: '/properties?category=pg-boys' },
+        { label: 'Girls PG', href: '/properties?category=pg-girls' },
+      ]
+    }
   ];
 
   return (
@@ -159,84 +207,57 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-gray-200">
-            <nav className="flex flex-col gap-4">
-              <Link
-                to="/properties?type=sale"
-                onClick={() => setIsMenuOpen(false)}
-                className={`text-sm transition-colors ${
-                  location.search.includes('type=sale')
-                    ? 'text-gray-900 font-medium'
-                    : 'text-gray-600'
-                }`}
-              >
-                Buy
-              </Link>
-
-              <Link
-                to="/properties?type=rent"
-                onClick={() => setIsMenuOpen(false)}
-                className={`text-sm transition-colors ${
-                  location.search.includes('type=rent')
-                    ? 'text-gray-900 font-medium'
-                    : 'text-gray-600'
-                }`}
-              >
-                Rent
-              </Link>
-
-              <div className="flex flex-col">
-                <button
-                  onClick={() => setLandDropdownOpen(!landDropdownOpen)}
-                  className="flex items-center justify-between text-sm text-gray-600 hover:text-gray-900"
-                >
-                  Land
-                  <ChevronDown className={`w-4 h-4 transition-transform ${landDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {landDropdownOpen && (
-                  <div className="ml-4 mt-2 flex flex-col gap-2">
-                    {landSubItems.map((item) => (
-                      <Link
-                        key={item.href}
-                        to={item.href}
-                        onClick={() => setIsMenuOpen(false)}
-                        className={`text-sm transition-colors ${
-                          isActive(item.href)
-                            ? 'text-gray-900 font-medium'
-                            : 'text-gray-600'
-                        }`}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
+          <div className="lg:hidden py-4 border-t border-gray-200 max-h-[calc(100vh-64px)] overflow-y-auto">
+            <nav className="flex flex-col gap-1">
+              {menuCategories.map((category) => {
+                const Icon = category.icon;
+                const [isOpen, setIsOpen] = useState(false);
+                
+                return (
+                  <div key={category.title} className="flex flex-col">
+                    <button
+                      onClick={() => setIsOpen(!isOpen)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                    >
+                      <Icon className="w-5 h-5 text-gray-600" />
+                      <span className="flex-1 text-left">{category.title}</span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {isOpen && (
+                      <div className="ml-8 mt-1 flex flex-col gap-1 border-l border-gray-200">
+                        {category.items.map((item) => (
+                          <Link
+                            key={item.href}
+                            to={item.href}
+                            onClick={() => setIsMenuOpen(false)}
+                            className={`px-4 py-2 text-sm transition-colors rounded-lg ${
+                              isActive(item.href)
+                                ? 'text-gray-900 font-medium bg-gray-100'
+                                : 'text-gray-600 hover:bg-gray-50'
+                            }`}
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-
-              <Link
-                to="/properties?category=commercial"
-                onClick={() => setIsMenuOpen(false)}
-                className={`text-sm transition-colors ${
-                  location.search.includes('category=commercial')
-                    ? 'text-gray-900 font-medium'
-                    : 'text-gray-600'
-                }`}
-              >
-                Commercial
-              </Link>
+                );
+              })}
               
-              <div className="border-t border-gray-200 my-2"></div>
+              <div className="border-t border-gray-200 my-3"></div>
               
               {user ? (
-                <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full h-9 bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 justify-center">
+                <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="w-full">
+                  <Button className="w-full h-10 bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 justify-center rounded-lg">
                     <User className="w-4 h-4" />
                     My Profile
                   </Button>
                 </Link>
               ) : (
-                <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full h-9 bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 justify-center">
+                <Link to="/login" onClick={() => setIsMenuOpen(false)} className="w-full">
+                  <Button className="w-full h-10 bg-gray-900 hover:bg-gray-800 text-white flex items-center gap-2 justify-center rounded-lg">
                     <User className="w-4 h-4" />
                     Log in
                   </Button>
