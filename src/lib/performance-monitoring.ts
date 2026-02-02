@@ -21,7 +21,7 @@ export function initPerformanceMonitoring() {
     // LCP (Largest Contentful Paint)
     const lcpObserver = new PerformanceObserver((entryList) => {
       const entries = entryList.getEntries();
-      const lastEntry = entries[entries.length - 1];
+      const lastEntry = entries[entries.length - 1] as any;
       console.log('LCP:', lastEntry.renderTime || lastEntry.loadTime);
     });
     lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
@@ -30,7 +30,7 @@ export function initPerformanceMonitoring() {
     const fidObserver = new PerformanceObserver((entryList) => {
       const entries = entryList.getEntries();
       entries.forEach((entry) => {
-        console.log('FID:', entry.processingDuration);
+        console.log('FID:', (entry as any).processingDuration);
       });
     });
     fidObserver.observe({ entryTypes: ['first-input'] });
@@ -70,8 +70,8 @@ export function getPerformanceMetrics() {
     metrics.resourcesLoaded = resources.length;
 
     // Separate by type
-    const images = resources.filter(r => r.initiatorType === 'img');
-    const scripts = resources.filter(r => r.initiatorType === 'script');
+    const images = resources.filter(r => (r as any).initiatorType === 'img');
+    const scripts = resources.filter(r => (r as any).initiatorType === 'script');
 
     if (images.length > 0) {
       metrics.imageLoadTime = images.reduce((sum, img) => sum + img.duration, 0) / images.length;
