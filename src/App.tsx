@@ -24,7 +24,9 @@ import LandFarmHouses from "./pages/land/LandFarmHouses";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  console.log("🚀 App component rendering...");
+  return (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -57,5 +59,7 @@ const App = () => (
   </QueryClientProvider>
   </HelmetProvider>
 );
+
+};
 
 export default App;
