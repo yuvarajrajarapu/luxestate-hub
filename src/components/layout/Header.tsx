@@ -14,9 +14,22 @@ import {
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set());
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const toggleDropdown = (categoryTitle: string) => {
+    setOpenDropdowns(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryTitle)) {
+        newSet.delete(categoryTitle);
+      } else {
+        newSet.add(categoryTitle);
+      }
+      return newSet;
+    });
+  };
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
@@ -43,6 +56,7 @@ const Header = () => {
     {
       title: 'Buy',
       icon: Home,
+      mainLink: '/properties?type=sale',
       items: [
         { label: 'Flats & Apartments', href: '/properties?category=flat-for-sale' },
         { label: 'Houses & Villas', href: '/properties?category=house-for-sale' },
@@ -52,6 +66,7 @@ const Header = () => {
     {
       title: 'Rent',
       icon: Building2,
+      mainLink: '/properties?type=rent',
       items: [
         { label: 'Flats & Apartments', href: '/properties?category=flat-for-rent' },
         { label: 'Houses', href: '/properties?category=house-for-rent' },
@@ -61,6 +76,7 @@ const Header = () => {
     {
       title: 'Land',
       icon: MapPin,
+      mainLink: '/properties?category=land-for-sale',
       items: [
         { label: 'Plot for Sale', href: '/land/plot' },
         { label: 'Agriculture Land', href: '/land/agricultural' },
@@ -71,6 +87,7 @@ const Header = () => {
     {
       title: 'Commercial',
       icon: Store,
+      mainLink: '/properties?category=commercial-space-for-rent-lease',
       items: [
         { label: 'Office Space', href: '/properties?category=office-for-rent-lease' },
         { label: 'Commercial Space', href: '/properties?category=commercial-space-for-rent-lease' },
@@ -79,6 +96,7 @@ const Header = () => {
     {
       title: 'PG & Hostels',
       icon: Users,
+      mainLink: '/properties?type=rent&category=pg-hostel-boys',
       items: [
         { label: 'Boys Hostels', href: '/properties?category=pg-hostel-boys' },
         { label: 'Girls Hostels', href: '/properties?category=pg-hostel-girls' },
@@ -211,20 +229,32 @@ const Header = () => {
             <nav className="flex flex-col gap-1">
               {menuCategories.map((category) => {
                 const Icon = category.icon;
-                const [isOpen, setIsOpen] = useState(false);
+                const isDropdownOpen = openDropdowns.has(category.title);
                 
                 return (
                   <div key={category.title} className="flex flex-col">
-                    <button
-                      onClick={() => setIsOpen(!isOpen)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                    >
-                      <Icon className="w-5 h-5 text-gray-600" />
-                      <span className="flex-1 text-left">{category.title}</span>
-                      <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                    </button>
+                    {/* Category Header - Clickable */}
+                    <div className="flex items-center gap-0">
+                      <Link
+                        to={category.mainLink}
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex-1 flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg rounded-r-none transition-colors"
+                      >
+                        <Icon className="w-5 h-5 text-gray-600" />
+                        <span>{category.title}</span>
+                      </Link>
+                      
+                      {/* Dropdown Toggle Button */}
+                      <button
+                        onClick={() => toggleDropdown(category.title)}
+                        className="px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg rounded-l-none border-l border-gray-200 transition-colors"
+                      >
+                        <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                    </div>
                     
-                    {isOpen && (
+                    {/* Dropdown Items */}
+                    {isDropdownOpen && (
                       <div className="ml-8 mt-1 flex flex-col gap-1 border-l border-gray-200">
                         {category.items.map((item) => (
                           <Link
