@@ -70,7 +70,6 @@ const Header = () => {
       items: [
         { label: 'Flats & Apartments', href: '/properties?category=flat-for-rent' },
         { label: 'Houses', href: '/properties?category=house-for-rent' },
-        { label: 'PG/Hostels', href: '/properties?type=rent&category=pg-hostel-boys' },
       ]
     },
     {
@@ -94,14 +93,12 @@ const Header = () => {
       ]
     },
     {
-      title: 'PG & Hostels',
+      title: 'PG',
       icon: Users,
-      mainLink: '/properties?type=rent&category=pg-hostel-boys',
+      mainLink: '/properties?type=rent&category=pg-boys',
       items: [
-        { label: 'Boys Hostels', href: '/properties?category=pg-hostel-boys' },
-        { label: 'Girls Hostels', href: '/properties?category=pg-hostel-girls' },
-        { label: 'Boys PG', href: '/properties?category=pg-boys' },
-        { label: 'Girls PG', href: '/properties?category=pg-girls' },
+        { label: 'Men\'s PG', href: '/properties?category=pg-boys' },
+        { label: 'Women\'s PG', href: '/properties?category=pg-girls' },
       ]
     }
   ];
