@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { isIntersectionObserverSupported } from '@/lib/mobile-optimization';
 
+// Type for PerformanceEntry with timing properties
+interface PerformanceEntryWithTiming extends PerformanceEntry {
+  renderTime?: number;
+  loadTime?: number;
+}
+
 /**
  * Hook for lazy loading images with IntersectionObserver
  * Improves mobile performance by deferring off-screen image loads
@@ -71,7 +77,7 @@ export const useCoreWebVitals = (onReport?: (metric: any) => void) => {
       // Largest Contentful Paint (LCP)
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1];
+        const lastEntry = entries[entries.length - 1] as PerformanceEntryWithTiming;
         if (onReport) {
           onReport({
             name: 'LCP',
