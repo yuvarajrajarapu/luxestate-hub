@@ -45,28 +45,10 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
       return;
     }
 
-    // Optimize Cloudinary images for better performance
-    let optimizedUrl = url;
-    if (typeof url === 'string' && url.includes('cloudinary.com')) {
-      // Add optimization parameters to Cloudinary URL
-      optimizedUrl = optimizeCloudinaryUrl(url);
-    }
-
-    setImageUrl(optimizedUrl);
+    // Use URL as-is from database - Cloudinary handles all transformations server-side
+    setImageUrl(url);
     setIsLoading(false);
   }, [images]);
-
-  const optimizeCloudinaryUrl = (url: string): string => {
-    // If the URL already has transformations, don't modify it
-    if (url.includes('/upload/')) {
-      // Insert quality and width optimization before the filename
-      return url.replace(
-        '/upload/',
-        '/upload/c_fill,w_800,q_auto:best,f_auto/'
-      );
-    }
-    return url;
-  };
 
   const handleImageError = () => {
     console.warn(`Failed to load image for property: ${title}`);
