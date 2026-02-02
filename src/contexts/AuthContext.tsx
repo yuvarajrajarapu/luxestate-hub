@@ -10,7 +10,6 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithCredential,
-  GoogleAuthProvider as GoogleAuthProviderClass,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
@@ -178,9 +177,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogleCredential = async (credential: string): Promise<void> => {
     try {
-      // Decode and authenticate with Google credential token
-      const googleProvider = new GoogleAuthProviderClass();
-      const googleCredential = GoogleAuthProviderClass.credential(null, credential);
+      // Authenticate with Google credential token from One Tap
+      const googleCredential = GoogleAuthProvider.credential(null, credential);
       
       const result = await signInWithCredential(auth, googleCredential);
       const currentUser = result.user;
