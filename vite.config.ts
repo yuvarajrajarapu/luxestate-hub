@@ -54,16 +54,19 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Core React
+          // Core React - minimal
           'react': ['react', 'react-dom', 'react-router-dom'],
-          // Firebase - lazy loaded
-          'firebase': ['firebase/app', 'firebase/firestore', 'firebase/auth'],
-          // Radix UI - only essential
-          'radix-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-navigation-menu'],
-          // Heavy dependencies
-          'framer': ['framer-motion'],
+          // Firebase - separate chunk, lazy loaded
+          'firebase-vendor': ['firebase/app', 'firebase/firestore', 'firebase/auth'],
+          // Forms - heavy utility  
           'forms': ['react-hook-form', '@hookform/resolvers'],
-          // Utilities
+          // Framer - animations
+          'framer': ['framer-motion'],
+          // Radix UI - critical
+          'radix-critical': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-navigation-menu', '@radix-ui/react-select'],
+          // Rest of Radix
+          'radix-rest': ['@radix-ui/react-label', '@radix-ui/react-checkbox', '@radix-ui/react-slider', '@radix-ui/react-progress', '@radix-ui/react-sheet'],
+          // Utils
           'utils': ['clsx', 'class-variance-authority', 'tailwind-merge'],
         },
         entryFileNames: 'assets/[name]-[hash].js',
@@ -74,7 +77,7 @@ export default defineConfig(({ mode }) => ({
     },
     
     // Aggressive chunk size limits
-    chunkSizeWarningLimit: 300,
+    chunkSizeWarningLimit: 200,
     assetsInlineLimit: 2048,
     
     // Remove unused code
@@ -97,14 +100,14 @@ export default defineConfig(({ mode }) => ({
       'react',
       'react-dom',
       'react-router-dom',
-      'firebase/app',
-      'firebase/firestore',
-      'firebase/auth',
+      'react-hook-form',
+      'framer-motion',
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
-      'framer-motion',
-      'react-hook-form',
+      '@radix-ui/react-select',
+      'clsx',
+      'tailwind-merge',
     ],
-    exclude: ['recharts', '@radix-ui/react-accordion', '@radix-ui/react-tabs'],
+    exclude: ['firebase', '@tanstack/react-query', 'recharts'],
   },
 }));
