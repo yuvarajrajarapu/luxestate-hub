@@ -13,9 +13,9 @@ export interface FieldConfig {
   [key: string]: FieldVisibility;
 }
 
-export interface CategoryFieldConfig {
+export type CategoryFieldConfig = {
   [key in PropertyCategory]?: FieldConfig;
-}
+};
 
 /**
  * Comprehensive field visibility matrix for all property categories
