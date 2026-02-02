@@ -62,7 +62,11 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
   }, [images, title]);
 
   const handleImageError = () => {
-    console.warn(`Failed to load image for property: ${title}`);
+    console.error(`Image failed to load for property: ${title}`, {
+      attemptedUrl: imageUrl,
+      images: images,
+      error: 'CORS or fetch error'
+    });
     setError(true);
     setImageUrl('/placeholder.svg');
   };
