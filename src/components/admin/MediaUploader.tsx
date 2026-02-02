@@ -51,9 +51,10 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
   const generateId = () => Math.random().toString(36).substring(2, 9);
 
   const extractYoutubeId = (url: string): string | null => {
-    // Handle various YouTube URL formats
+    // Handle various YouTube URL formats (including Shorts)
     const regexes = [
       /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/, // youtube.com and youtu.be
+      /(?:youtube\.com\/shorts\/)([^&\n?#]+)/, // YouTube Shorts
       /youtube\.com\/embed\/([^&\n?#]+)/, // youtube.com/embed
       /youtube\.com\/v\/([^&\n?#]+)/, // youtube.com/v
     ];
@@ -260,12 +261,12 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
             </Label>
           </div>
           <p className="text-sm text-slate-600">
-            Paste a YouTube link to add a video to the property gallery
+            Paste a YouTube link (regular video or Shorts) to add to the property gallery
           </p>
           <div className="flex gap-2">
             <Input
               type="url"
-              placeholder="https://www.youtube.com/watch?v=..."
+              placeholder="https://www.youtube.com/watch?v=... or shorts/..."
               value={youtubeUrl}
               onChange={(e) => setYoutubeUrl(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleAddYoutubeUrl()}
