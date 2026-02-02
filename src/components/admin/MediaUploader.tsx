@@ -9,11 +9,14 @@ import {
   GripVertical,
   Trash2,
   Plus,
+  Link as LinkIcon,
 } from 'lucide-react';
 import { uploadToCloudinary, CloudinaryUploadResult } from '@/lib/cloudinary';
 import { MediaItem } from '@/types/property';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
 interface MediaUploaderProps {
@@ -42,8 +45,62 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
 }) => {
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [dragActive, setDragActive] = useState(false);
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [addingYoutube, setAddingYoutube] = useState(false);
 
   const generateId = () => Math.random().toString(36).substring(2, 9);
+
+  const extractYoutubeId = (url: string): string | null => {
+    // Handle various YouTube URL formats
+    const regexes = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/, // youtube.com and youtu.be
+      /youtube\.com\/embed\/([^&\n?#]+)/, // youtube.com/embed
+      /youtube\.com\/v\/([^&\n?#]+)/, // youtube.com/v
+    ];
+
+    for (const regex of regexes) {
+      const match = url.match(regex);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+    return null;
+  };
+
+  const handleAddYoutubeUrl = async () => {
+    const youtubeId = extractYoutubeId(youtubeUrl);
+    
+    if (!youtubeId) {
+      toast.error('Invalid YouTube URL. Please use a valid YouTube link.');
+      return;
+    }
+
+    if (videos.length >= maxVideos) {
+      toast.error(`Maximum ${maxVideos} videos allowed`);
+      return;
+    }
+
+    try {
+      setAddingYoutube(true);
+      
+      const mediaItem: MediaItem = {
+        id: generateId(),
+        url: `https://www.youtube.com/embed/${youtubeId}`,
+        publicId: `youtube_${youtubeId}`,
+        type: 'video',
+        order: videos.length,
+      };
+
+      onVideosChange([...videos, mediaItem]);
+      setYoutubeUrl('');
+      toast.success('YouTube video added successfully');
+    } catch (error) {
+      console.error('Failed to add YouTube video:', error);
+      toast.error('Failed to add YouTube video');
+    } finally {
+      setAddingYoutube(false);
+    }
+  };
 
   const handleUpload = useCallback(
     async (files: FileList | null) => {
@@ -193,6 +250,46 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         </div>
       </div>
 
+      {/* YouTube URL Input */}
+      <div className="border border-slate-200 rounded-2xl p-6 bg-blue-50">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <LinkIcon className="w-5 h-5 text-blue-600" />
+            <Label className="text-base font-semibold text-slate-900">
+              Add YouTube Video
+            </Label>
+          </div>
+          <p className="text-sm text-slate-600">
+            Paste a YouTube link to add a video to the property gallery
+          </p>
+          <div className="flex gap-2">
+            <Input
+              type="url"
+              placeholder="https://www.youtube.com/watch?v=..."
+              value={youtubeUrl}
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAddYoutubeUrl()}
+              className="flex-1"
+              disabled={addingYoutube}
+            />
+            <Button
+              onClick={handleAddYoutubeUrl}
+              disabled={addingYoutube || !youtubeUrl.trim() || videos.length >= maxVideos}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {addingYoutube ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Uploading Progress */}
       <AnimatePresence>
         {uploadingFiles.length > 0 && (
@@ -293,34 +390,56 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         <div className="space-y-3">
           <h4 className="font-medium text-slate-700">Videos ({videos.length})</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {videos.map((video, index) => (
-              <motion.div
-                key={video.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="group relative aspect-video rounded-xl overflow-hidden bg-slate-900 border border-slate-200"
-              >
-                <video
-                  src={video.url}
-                  className="w-full h-full object-cover"
-                  controls
-                />
-                
-                {/* Delete Button */}
-                <div className="absolute top-2 right-2">
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="w-8 h-8"
-                    onClick={() => removeVideo(video.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
+            {videos.map((video, index) => {
+              const isYoutube = video.url.includes('youtube.com');
+              
+              return (
+                <motion.div
+                  key={video.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="group relative aspect-video rounded-xl overflow-hidden bg-slate-900 border border-slate-200"
+                >
+                  {isYoutube ? (
+                    <iframe
+                      src={video.url}
+                      className="w-full h-full"
+                      allowFullScreen
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                  ) : (
+                    <video
+                      src={video.url}
+                      className="w-full h-full object-cover"
+                      controls
+                    />
+                  )}
+                  
+                  {/* Delete Button */}
+                  <div className="absolute top-2 right-2">
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="w-8 h-8"
+                      onClick={() => removeVideo(video.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  
+                  {/* YouTube Badge */}
+                  {isYoutube && (
+                    <div className="absolute bottom-2 left-2">
+                      <span className="px-2 py-1 bg-red-600 text-white rounded text-xs font-medium">
+                        YouTube
+                      </span>
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       )}

@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Building,
   Loader2,
+  Play,
 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -27,8 +28,11 @@ const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { property, loading, error } = useProperty(id);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+
+  // Combine images and videos into a single media array
+  const allMedia = property ? [...(property.images || []), ...(property.videos || [])] : [];
 
   if (loading) {
     return (
@@ -90,15 +94,15 @@ const PropertyDetail = () => {
   };
 
   const nextImage = () => {
-    if (property.images.length > 1) {
-      setCurrentImageIndex((prev) => (prev + 1) % property.images.length);
+    if (allMedia.length > 1) {
+      setCurrentMediaIndex((prev) => (prev + 1) % allMedia.length);
     }
   };
 
   const prevImage = () => {
-    if (property.images.length > 1) {
-      setCurrentImageIndex((prev) =>
-        prev === 0 ? property.images.length - 1 : prev - 1
+    if (allMedia.length > 1) {
+      setCurrentMediaIndex((prev) =>
+        prev === 0 ? allMedia.length - 1 : prev - 1
       );
     }
   };
@@ -143,14 +147,27 @@ const PropertyDetail = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="relative aspect-video rounded-2xl overflow-hidden bg-muted"
               >
-                <img
-                  src={property.images[currentImageIndex]?.url || '/placeholder.svg'}
-                  alt={property.title}
-                  className="w-full h-full object-cover"
-                />
+                {allMedia.length > 0 && (
+                  <>
+                    {allMedia[currentMediaIndex]?.type === 'video' && allMedia[currentMediaIndex]?.url.includes('youtube') ? (
+                      <iframe
+                        src={allMedia[currentMediaIndex]?.url}
+                        className="w-full h-full"
+                        allowFullScreen
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      />
+                    ) : (
+                      <img
+                        src={allMedia[currentMediaIndex]?.url || '/placeholder.svg'}
+                        alt={property.title}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </>
+                )}
 
                 {/* Navigation */}
-                {property.images.length > 1 && (
+                {allMedia.length > 1 && (
                   <>
                     <button
                       onClick={prevImage}
@@ -196,30 +213,47 @@ const PropertyDetail = () => {
                   </button>
                 </div>
 
-                {/* Image Counter */}
+                {/* Media Counter */}
                 <div className="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-black/50 text-white text-sm">
-                  {currentImageIndex + 1} / {property.images.length}
+                  {currentMediaIndex + 1} / {allMedia.length}
                 </div>
               </motion.div>
 
               {/* Thumbnails */}
-              {property.images.length > 1 && (
+              {allMedia.length > 1 && (
                 <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                  {property.images.map((image, index) => (
-                    <button
-                      key={image.id}
-                      onClick={() => setCurrentImageIndex(index)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden ${
-                        index === currentImageIndex ? 'ring-2 ring-primary' : ''
-                      }`}
-                    >
-                      <img
-                        src={image.url}
-                        alt={`Thumbnail ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
+                  {allMedia.map((media, index) => {
+                    const isYoutube = media.type === 'video' && media.url.includes('youtube');
+                    
+                    return (
+                      <button
+                        key={media.id}
+                        onClick={() => setCurrentMediaIndex(index)}
+                        className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden relative ${
+                          index === currentMediaIndex ? 'ring-2 ring-primary' : ''
+                        }`}
+                      >
+                        {isYoutube ? (
+                          <>
+                            <img
+                              src={`https://img.youtube.com/vi/${media.url.split('/embed/')[1]}/default.jpg`}
+                              alt={`Video thumbnail ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/50 transition-colors">
+                              <Play className="w-6 h-6 text-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <img
+                            src={media.url}
+                            alt={`Thumbnail ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 
