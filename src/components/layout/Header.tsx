@@ -116,27 +116,83 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-8">
-            <Link
-              to={menuCategories[0].mainLink}
-              className={`text-sm transition-colors ${
-                location.search.includes('type=sale')
-                  ? 'text-gray-900 font-medium'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Buy
-            </Link>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger 
+                    className={`text-sm bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent px-0 h-auto ${
+                      location.search.includes('type=sale')
+                        ? 'text-gray-900 font-medium'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    asChild
+                  >
+                    <Link to={menuCategories[0].mainLink}>
+                      Buy
+                    </Link>
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+                      {menuCategories[0].items.map((item) => (
+                        <li key={item.href}>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to={item.href}
+                              className={`block px-4 py-3 text-sm rounded-md transition-colors hover:bg-gray-100 ${
+                                isActive(item.href)
+                                  ? 'text-gray-900 font-medium'
+                                  : 'text-gray-700'
+                              }`}
+                            >
+                              {item.label}
+                            </Link>
+                          </NavigationMenuLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
 
-            <Link
-              to={menuCategories[1].mainLink}
-              className={`text-sm transition-colors ${
-                location.search.includes('type=rent')
-                  ? 'text-gray-900 font-medium'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Rent
-            </Link>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger 
+                    className={`text-sm bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent px-0 h-auto ${
+                      location.search.includes('type=rent')
+                        ? 'text-gray-900 font-medium'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    asChild
+                  >
+                    <Link to={menuCategories[1].mainLink}>
+                      Rent
+                    </Link>
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+                      {menuCategories[1].items.map((item) => (
+                        <li key={item.href}>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to={item.href}
+                              className={`block px-4 py-3 text-sm rounded-md transition-colors hover:bg-gray-100 ${
+                                isActive(item.href)
+                                  ? 'text-gray-900 font-medium'
+                                  : 'text-gray-700'
+                              }`}
+                            >
+                              {item.label}
+                            </Link>
+                          </NavigationMenuLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
 
             <NavigationMenu>
               <NavigationMenuList>
@@ -147,8 +203,11 @@ const Header = () => {
                         ? 'text-gray-900 font-medium'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
+                    asChild
                   >
-                    Land
+                    <Link to={menuCategories[2].mainLink}>
+                      Land
+                    </Link>
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
@@ -174,24 +233,59 @@ const Header = () => {
               </NavigationMenuList>
             </NavigationMenu>
 
-            <Link
-              to={menuCategories[3].mainLink}
-              className={`text-sm transition-colors ${
-                location.search.includes('category=commercial')
-                  ? 'text-gray-900 font-medium'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Commercial
-            </Link>
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger 
+                    className={`text-sm bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent px-0 h-auto ${
+                      location.search.includes('category=commercial')
+                        ? 'text-gray-900 font-medium'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    asChild
+                  >
+                    <Link to={menuCategories[3].mainLink}>
+                      Commercial
+                    </Link>
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+                      {menuCategories[3].items.map((item) => (
+                        <li key={item.href}>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to={item.href}
+                              className={`block px-4 py-3 text-sm rounded-md transition-colors hover:bg-gray-100 ${
+                                isActive(item.href)
+                                  ? 'text-gray-900 font-medium'
+                                  : 'text-gray-700'
+                              }`}
+                            >
+                              {item.label}
+                            </Link>
+                          </NavigationMenuLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
 
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
                   <NavigationMenuTrigger 
-                    className={`text-sm bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent px-0 h-auto text-gray-600 hover:text-gray-900`}
+                    className={`text-sm bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent px-0 h-auto ${
+                      location.search.includes('category=pg')
+                        ? 'text-gray-900 font-medium'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    asChild
                   >
-                    PG
+                    <Link to={menuCategories[4].mainLink}>
+                      PG
+                    </Link>
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
