@@ -49,7 +49,7 @@ const GoogleSignIn: React.FC<GoogleSignInProps> = ({ isSignup = false }) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 mt-8">
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-border"></div>
