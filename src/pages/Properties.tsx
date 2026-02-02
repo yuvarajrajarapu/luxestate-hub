@@ -22,6 +22,8 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { useProperties } from '@/hooks/useProperties';
+import { MetadataHead } from '@/hooks/useMetadata';
+import { generateListingPageMetadata, generatePageMetadata } from '@/lib/metadata';
 
 const Properties = () => {
   const [searchParams] = useSearchParams();
@@ -109,8 +111,16 @@ const Properties = () => {
     { id: 'lease', label: 'For Lease' },
   ] as const;
 
+  // Generate metadata based on search params
+  const category = searchParams.get('category') || 'all';
+  const type = searchParams.get('type') || undefined;
+  const metadata = category !== 'all' 
+    ? generateListingPageMetadata(category, type)
+    : generatePageMetadata('Properties', 'Browse our extensive collection of premium properties', '/properties');
+
   return (
     <div className="min-h-screen bg-background">
+      <MetadataHead metadata={metadata} />
       <Header />
 
       {/* Main Content */}

@@ -8,13 +8,23 @@ import { useProperties } from '@/hooks/useProperties';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Loader2 } from 'lucide-react';
+import { MetadataHead } from '@/hooks/useMetadata';
+import { generatePageMetadata } from '@/lib/metadata';
 
 const Index = () => {
   // Fetch properties from Firestore, limited to 6 for homepage
   const { properties, loading } = useProperties({ limit: 6 });
 
+  // Generate homepage metadata
+  const metadata = generatePageMetadata(
+    'Home - UMY infra',
+    'Premium real estate platform for buying, renting, and leasing properties. Explore thousands of verified listings with detailed descriptions and high-quality photos.',
+    '/'
+  );
+
   return (
     <div className="min-h-screen bg-background">
+      <MetadataHead metadata={metadata} />
       <Header />
 
       <main>

@@ -23,6 +23,8 @@ import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useProperty } from '@/hooks/useProperties';
+import { MetadataHead } from '@/hooks/useMetadata';
+import { generatePropertyMetadata, getPrimaryImage, sanitizeMetaDescription } from '@/lib/metadata';
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -121,8 +123,12 @@ const PropertyDetail = () => {
     }
   };
 
+  // Generate dynamic metadata for the property
+  const metadata = property ? generatePropertyMetadata(property) : null;
+
   return (
     <div className="min-h-screen bg-background">
+      {metadata && <MetadataHead metadata={metadata} />}
       <Header />
 
       <main className="pt-20 pb-16">
