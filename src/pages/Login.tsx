@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import GoogleSignIn from '@/components/auth/GoogleSignIn';
+import GoogleSignIn from '@/components/auth/GoogleSignIn';
 
 const Login = () => {
   const [email, setEmail] = useState('');
