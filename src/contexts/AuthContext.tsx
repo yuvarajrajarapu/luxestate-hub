@@ -261,24 +261,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signInWithGoogle = async (): Promise<void> => {
-    try {
-      const googleProvider = new GoogleAuthProvider();
-      // Add custom parameters for better UX
-      googleProvider.addScope('profile');
-      googleProvider.addScope('email');
-      googleProvider.setCustomParameters({
-        prompt: 'consent',
-      });
-      
-      const result = await signInWithPopup(auth, googleProvider);
-      const currentUser = result.user;
-      
-      // Create or fetch user document
-      await createOrFetchUserDoc(currentUser);
-    } catch (error) {
-      console.error('Google sign-in error:', error);
-      throw error;
     }
   };
 
