@@ -33,24 +33,31 @@ function publicIdToUrl(publicId: string | any): string {
     return DEFAULT_IMAGE;
   }
 
-  // If already a full URL, return as-is
-  if (publicId.startsWith('https://')) {
+  // If already a full URL with correct version, return as-is
+  if (publicId.startsWith('https://') && publicId.includes('/v1763830265/')) {
     return publicId;
+  }
+
+  // If it's a full URL with WRONG version, fix it
+  if (publicId.startsWith('https://')) {
+    return publicId.replace(/\/v\d+\//, '/v1763830265/').replace(/\.png$/, '.jpg');
   }
 
   // Remove .png, .jpg, etc if present in public ID
   const cleaned = publicId.replace(/\.(png|jpg|jpeg|gif|webp)$/i, '');
 
-  // Build full Cloudinary URL
+  // Build full Cloudinary URL with correct version
   return `${CLOUDINARY_BASE_URL}/${cleaned}.jpg`;
 }
 
 /**
- * Validates if a URL is a valid Cloudinary URL
+ * Validates if a URL is a valid Cloudinary URL with correct version
  */
 function isValidCloudinaryUrl(url: any): boolean {
   if (!url || typeof url !== 'string') return false;
-  return url.startsWith('https://') && url.includes('cloudinary.com');
+  return url.startsWith('https://') && 
+         url.includes('cloudinary.com') && 
+         url.includes('/v1763830265/');
 }
 
 /**
@@ -64,7 +71,7 @@ async function fixPropertyImages(
     let needsFix = false;
     let imageUrl: string = DEFAULT_IMAGE;
 
-    // Case 1: Has images array with valid Cloudinary URL
+    // Case 1: Has images array
     if (
       data.images &&
       Array.isArray(data.images) &&
@@ -72,15 +79,23 @@ async function fixPropertyImages(
     ) {
       const firstImage = data.images[0];
       
-      // If URL is valid Cloudinary, no fix needed
-      if (isValidCloudinaryUrl(firstImage?.url)) {
+      // If URL is valid Cloudinary with correct version, no fix needed
+      if (isValidCloudinaryUrl(firstImage?.url) && firstImage?.url?.includes('/v1763830265/')) {
         return false;
       }
 
-      // If URL is invalid but exists, try to convert public ID
+      // If URL has WRONG version or invalid format, FIX IT
       if (firstImage?.url) {
-        imageUrl = publicIdToUrl(firstImage.url);
-        needsFix = true;
+        // Check if it's a full URL that needs version fix
+        if (firstImage.url.startsWith('https://') && firstImage.url.includes('cloudinary.com')) {
+          // Has wrong version - replace it
+          imageUrl = firstImage.url.replace(/\/v\d+\//, '/v1763830265/').replace(/\.png$/, '.jpg');
+          needsFix = true;
+        } else {
+          // Not a proper URL - convert from public ID
+          imageUrl = publicIdToUrl(firstImage.url);
+          needsFix = true;
+        }
       } else if (firstImage?.publicId) {
         imageUrl = publicIdToUrl(firstImage.publicId);
         needsFix = true;
