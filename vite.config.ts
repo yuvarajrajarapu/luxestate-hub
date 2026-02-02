@@ -11,13 +11,21 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    // Gzip compression for production builds
+    // Aggressive compression for production builds
     compression({
-      verbose: true,
+      verbose: false,
       disable: false,
-      threshold: 1024,
+      threshold: 512,
       algorithm: 'gzip',
       ext: '.gz',
+    }),
+    // Brotli compression for even better compression
+    compression({
+      verbose: false,
+      disable: false,
+      threshold: 512,
+      algorithm: 'brotliCompress',
+      ext: '.br',
     }),
   ],
   resolve: {
@@ -26,53 +34,53 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Production optimizations
+    // Aggressive production optimizations
     target: 'esnext',
-    minify: 'esbuild',
-    sourcemap: mode === 'development',
-    
-    // Optimize for mobile - better code splitting
-    rollupOptions: {
-      output: {
-        // Optimized manualChunks strategy
-        manualChunks: (id) => {
-          // React ecosystem
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) {
-            return 'react-vendor';
-          }
-          // Firebase
-          if (id.includes('node_modules/firebase')) {
-            return 'firebase';
-          }
-          // Radix UI components
-          if (id.includes('node_modules/@radix-ui')) {
-            return 'radix-ui';
-          }
-          // Animation libraries
-          if (id.includes('node_modules/framer-motion')) {
-            return 'animation';
-          }
-          // Charts and data visualization
-          if (id.includes('node_modules/recharts')) {
-            return 'charts';
-          }
-          // Forms
-          if (id.includes('node_modules/react-hook-form') || id.includes('node_modules/@hookform')) {
-            return 'forms';
-          }
-        },
-        // Ensure small chunks
-        entryFileNames: 'assets/[name]-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]',
+    minify: 'terser',
+    sourcemap: false, // Disable sourcemaps for production - NUCLEAR
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        passes: 3,
+      },
+      mangle: true,
+      format: {
+        comments: false,
       },
     },
     
-    // Chunk size warnings
-    chunkSizeWarningLimit: 600,
+    // Ultra-aggressive code splitting
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Core React
+          'react': ['react', 'react-dom', 'react-router-dom'],
+          // Firebase - lazy loaded
+          'firebase': ['firebase/app', 'firebase/firestore', 'firebase/auth'],
+          // Radix UI - only essential
+          'radix-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-navigation-menu'],
+          // Heavy dependencies
+          'framer': ['framer-motion'],
+          'forms': ['react-hook-form', '@hookform/resolvers'],
+          // Utilities
+          'utils': ['clsx', 'class-variance-authority', 'tailwind-merge'],
+        },
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        compact: true,
+      },
+    },
     
-    // Inline small chunks
-    assetsInlineLimit: 4096,
+    // Aggressive chunk size limits
+    chunkSizeWarningLimit: 300,
+    assetsInlineLimit: 2048,
+    
+    // Remove unused code
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
   },
   
   // CSS optimization
@@ -83,7 +91,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   
-  // Optimize dependencies
+  // Optimize dependencies - only critical ones pre-bundled
   optimizeDeps: {
     include: [
       'react',
@@ -92,12 +100,11 @@ export default defineConfig(({ mode }) => ({
       'firebase/app',
       'firebase/firestore',
       'firebase/auth',
-      '@radix-ui/react-alert-dialog',
+      '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
-      '@radix-ui/react-navigation-menu',
       'framer-motion',
-      'recharts',
       'react-hook-form',
     ],
+    exclude: ['recharts', '@radix-ui/react-accordion', '@radix-ui/react-tabs'],
   },
 }));
