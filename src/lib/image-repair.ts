@@ -3,33 +3,52 @@ import {
   getDocs, 
   doc, 
   updateDoc,
-  writeBatch,
-  query,
-  where
 } from 'firebase/firestore';
 import { db } from './firebase';
 
+const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dswoyink7/image/upload/v1763830265';
+
 // Cloudinary image URLs for each property category
 const CATEGORY_IMAGE_MAP: Record<string, string> = {
-  'flat-for-sale': 'https://res.cloudinary.com/dswoyink7/image/upload/v1763830265/flat-rent.jpg',
-  'house-for-sale': 'https://res.cloudinary.com/dswoyink7/image/upload/v1763830265/property-1.jpg',
-  'land-for-sale': 'https://res.cloudinary.com/dswoyink7/image/upload/v1763830265/plot-sale.jpg',
-  'flat-for-rent': 'https://res.cloudinary.com/dswoyink7/image/upload/v1763830265/flat-rent.jpg',
-  'house-for-rent': 'https://res.cloudinary.com/dswoyink7/image/upload/v1763830265/house-rent.jpg',
-  'office-for-rent-lease': 'https://res.cloudinary.com/dswoyink7/image/upload/v1763830265/agriculture-land.jpg',
-  'commercial-space-for-rent-lease': 'https://res.cloudinary.com/dswoyink7/image/upload/v1763830265/farmhouse-sale.jpg',
-  'pg-hostel-boys': 'https://res.cloudinary.com/dswoyink7/image/upload/v1763830265/agriculture-land.jpg',
-  'pg-hostel-girls': 'https://res.cloudinary.com/dswoyink7/image/upload/v1763830265/farmhouse-rent.jpg',
-  'pg-boys': 'https://res.cloudinary.com/dswoyink7/image/upload/v1763830265/property-5.jpg',
-  'pg-girls': 'https://res.cloudinary.com/dswoyink7/image/upload/v1763830265/property-6.jpg',
+  'flat-for-sale': `${CLOUDINARY_BASE_URL}/flat-rent.jpg`,
+  'house-for-sale': `${CLOUDINARY_BASE_URL}/property-1.jpg`,
+  'land-for-sale': `${CLOUDINARY_BASE_URL}/plot-sale.jpg`,
+  'flat-for-rent': `${CLOUDINARY_BASE_URL}/flat-rent.jpg`,
+  'house-for-rent': `${CLOUDINARY_BASE_URL}/house-rent.jpg`,
+  'office-for-rent-lease': `${CLOUDINARY_BASE_URL}/agriculture-land.jpg`,
+  'commercial-space-for-rent-lease': `${CLOUDINARY_BASE_URL}/farmhouse-sale.jpg`,
+  'pg-hostel-boys': `${CLOUDINARY_BASE_URL}/agriculture-land.jpg`,
+  'pg-hostel-girls': `${CLOUDINARY_BASE_URL}/farmhouse-rent.jpg`,
+  'pg-boys': `${CLOUDINARY_BASE_URL}/property-5.jpg`,
+  'pg-girls': `${CLOUDINARY_BASE_URL}/property-6.jpg`,
 };
 
-const DEFAULT_IMAGE = 'https://res.cloudinary.com/dswoyink7/image/upload/v1763830265/plot-sale.jpg';
+const DEFAULT_IMAGE = `${CLOUDINARY_BASE_URL}/plot-sale.jpg`;
 
 /**
- * Validates if an image URL is valid
+ * Convert a Cloudinary public ID to a full URL
  */
-function isValidImageUrl(url: any): boolean {
+function publicIdToUrl(publicId: string | any): string {
+  if (!publicId || typeof publicId !== 'string') {
+    return DEFAULT_IMAGE;
+  }
+
+  // If already a full URL, return as-is
+  if (publicId.startsWith('https://')) {
+    return publicId;
+  }
+
+  // Remove .png, .jpg, etc if present in public ID
+  const cleaned = publicId.replace(/\.(png|jpg|jpeg|gif|webp)$/i, '');
+
+  // Build full Cloudinary URL
+  return `${CLOUDINARY_BASE_URL}/${cleaned}.jpg`;
+}
+
+/**
+ * Validates if a URL is a valid Cloudinary URL
+ */
+function isValidCloudinaryUrl(url: any): boolean {
   if (!url || typeof url !== 'string') return false;
   return url.startsWith('https://') && url.includes('cloudinary.com');
 }
@@ -42,21 +61,48 @@ async function fixPropertyImages(
   data: any
 ): Promise<boolean> {
   try {
-    // Check if already has valid images
+    let needsFix = false;
+    let imageUrl: string = DEFAULT_IMAGE;
+
+    // Case 1: Has images array with valid Cloudinary URL
     if (
       data.images &&
       Array.isArray(data.images) &&
-      data.images.length > 0 &&
-      isValidImageUrl(data.images[0]?.url)
+      data.images.length > 0
     ) {
-      return false; // No fix needed
+      const firstImage = data.images[0];
+      
+      // If URL is valid Cloudinary, no fix needed
+      if (isValidCloudinaryUrl(firstImage?.url)) {
+        return false;
+      }
+
+      // If URL is invalid but exists, try to convert public ID
+      if (firstImage?.url) {
+        imageUrl = publicIdToUrl(firstImage.url);
+        needsFix = true;
+      } else if (firstImage?.publicId) {
+        imageUrl = publicIdToUrl(firstImage.publicId);
+        needsFix = true;
+      } else {
+        // No URL or publicId, use category-based image
+        const category = data.categorySlug || data.category || 'unknown';
+        imageUrl = CATEGORY_IMAGE_MAP[category] || DEFAULT_IMAGE;
+        needsFix = true;
+      }
+    } else {
+      // Case 2: No images at all - use category-based image
+      const category = data.categorySlug || data.category || 'unknown';
+      imageUrl = CATEGORY_IMAGE_MAP[category] || DEFAULT_IMAGE;
+      needsFix = true;
     }
 
-    // Determine the correct image URL based on category
-    const category = data.categorySlug || data.category || 'unknown';
-    const imageUrl = CATEGORY_IMAGE_MAP[category] || DEFAULT_IMAGE;
+    // If no fixes needed, skip
+    if (!needsFix) {
+      return false;
+    }
 
-    // Create proper MediaItem structure
+    // Create proper MediaItem structure with fixed URL
     const images = [
       {
         id: `image-${propertyId}`,
@@ -105,7 +151,7 @@ export async function fixAllPropertyImages(): Promise<void> {
         data.images &&
         Array.isArray(data.images) &&
         data.images.length > 0 &&
-        isValidImageUrl(data.images[0]?.url)
+        isValidCloudinaryUrl(data.images[0]?.url)
       ) {
         alreadyValidCount++;
         continue;
@@ -136,9 +182,8 @@ export async function fixAllPropertyImages(): Promise<void> {
  */
 export async function ensurePropertyHasValidImage(propertyId: string): Promise<void> {
   try {
-    const docSnap = await (await import('firebase/firestore')).getDoc(
-      doc(db, 'properties', propertyId)
-    );
+    const { getDoc } = await import('firebase/firestore');
+    const docSnap = await getDoc(doc(db, 'properties', propertyId));
 
     if (docSnap.exists()) {
       await fixPropertyImages(propertyId, docSnap.data());
@@ -146,6 +191,13 @@ export async function ensurePropertyHasValidImage(propertyId: string): Promise<v
   } catch (error) {
     console.error(`Error ensuring valid image for ${propertyId}:`, error);
   }
+}
+
+/**
+ * Convert public ID to full URL (for use in components)
+ */
+export function getCloudinaryUrl(publicIdOrUrl: string): string {
+  return publicIdToUrl(publicIdOrUrl);
 }
 
 export default fixAllPropertyImages;

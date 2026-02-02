@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import type { MediaItem } from '@/types/property';
+import { getCloudinaryUrl } from '@/lib/image-repair';
 
 interface PropertyImageProps {
   images: MediaItem[];
@@ -11,7 +12,7 @@ interface PropertyImageProps {
 /**
  * PropertyImage Component
  * - Handles image loading with fallbacks
- * - Optimizes images using Cloudinary transformations
+ * - Converts public IDs to full Cloudinary URLs
  * - Shows loading state and error fallback
  * - Implements lazy loading
  */
@@ -36,8 +37,8 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
       return;
     }
 
-    // Use the URL from the image object
-    const url = primaryImage.url || primaryImage.publicId;
+    // Get the URL or public ID
+    let url = primaryImage.url || primaryImage.publicId;
     
     if (!url || url.trim() === '') {
       setImageUrl('/placeholder.svg');
@@ -45,20 +46,13 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
       return;
     }
 
-    // Validate URL format - ensure it's a proper Cloudinary URL
-    if (typeof url === 'string' && url.includes('cloudinary')) {
-      setImageUrl(url);
-      setIsLoading(false);
-    } else if (typeof url === 'string' && url.startsWith('http')) {
-      // Valid HTTP URL
-      setImageUrl(url);
-      setIsLoading(false);
-    } else {
-      // Invalid URL format
-      console.warn(`Invalid image URL format for property: ${title}`, { url, primaryImage });
-      setImageUrl('/placeholder.svg');
-      setIsLoading(false);
+    // Convert public ID to full Cloudinary URL if needed
+    if (!url.startsWith('https://')) {
+      url = getCloudinaryUrl(url);
     }
+
+    setImageUrl(url);
+    setIsLoading(false);
   }, [images, title]);
 
   const handleImageError = () => {
