@@ -155,27 +155,43 @@ export async function fixAllPropertyImages(): Promise<void> {
 
     let fixedCount = 0;
     let alreadyValidCount = 0;
+    let errors: string[] = [];
 
     // Process each property
     for (const docSnap of snapshot.docs) {
       const data = docSnap.data();
       const propertyId = docSnap.id;
 
-      // Check if needs fixing
-      if (
-        data.images &&
-        Array.isArray(data.images) &&
-        data.images.length > 0 &&
-        isValidCloudinaryUrl(data.images[0]?.url)
-      ) {
+      // Aggressive check: mark as needing fix if:
+      // 1. No images
+      // 2. Images with wrong version
+      // 3. Images with .png extension
+      // 4. Images not starting with correct base URL
+      
+      const needsFix = 
+        !data.images ||
+        !Array.isArray(data.images) ||
+        data.images.length === 0 ||
+        !data.images[0]?.url ||
+        data.images[0].url.includes('v1768303065') || // WRONG version
+        data.images[0].url.endsWith('.png') || // Wrong extension
+        !data.images[0].url.includes('/v1763830265/'); // Missing correct version
+
+      if (!needsFix && isValidCloudinaryUrl(data.images[0]?.url)) {
         alreadyValidCount++;
         continue;
       }
 
       // Fix the property
-      const fixed = await fixPropertyImages(propertyId, data);
-      if (fixed) {
-        fixedCount++;
+      try {
+        const fixed = await fixPropertyImages(propertyId, data);
+        if (fixed) {
+          fixedCount++;
+        }
+      } catch (err) {
+        const errMsg = `Failed to fix ${propertyId}: ${err}`;
+        console.error(errMsg);
+        errors.push(errMsg);
       }
     }
 
@@ -183,6 +199,11 @@ export async function fixAllPropertyImages(): Promise<void> {
     console.log(`   ✅ Fixed: ${fixedCount} properties`);
     console.log(`   ✓ Already valid: ${alreadyValidCount} properties`);
     console.log(`   📦 Total: ${snapshot.docs.length} properties`);
+    
+    if (errors.length > 0) {
+      console.warn(`   ⚠️  Errors: ${errors.length}`);
+      errors.forEach(e => console.warn(`      - ${e}`));
+    }
 
     if (fixedCount > 0) {
       console.log(`\n✨ Global property image repair completed!`);
