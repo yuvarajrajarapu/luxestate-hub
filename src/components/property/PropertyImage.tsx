@@ -39,16 +39,27 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
     // Use the URL from the image object
     const url = primaryImage.url || primaryImage.publicId;
     
-    if (!url) {
+    if (!url || url.trim() === '') {
       setImageUrl('/placeholder.svg');
       setIsLoading(false);
       return;
     }
 
-    // Use URL as-is from database - Cloudinary handles all transformations server-side
-    setImageUrl(url);
-    setIsLoading(false);
-  }, [images]);
+    // Validate URL format - ensure it's a proper Cloudinary URL
+    if (typeof url === 'string' && url.includes('cloudinary')) {
+      setImageUrl(url);
+      setIsLoading(false);
+    } else if (typeof url === 'string' && url.startsWith('http')) {
+      // Valid HTTP URL
+      setImageUrl(url);
+      setIsLoading(false);
+    } else {
+      // Invalid URL format
+      console.warn(`Invalid image URL format for property: ${title}`, { url, primaryImage });
+      setImageUrl('/placeholder.svg');
+      setIsLoading(false);
+    }
+  }, [images, title]);
 
   const handleImageError = () => {
     console.warn(`Failed to load image for property: ${title}`);
