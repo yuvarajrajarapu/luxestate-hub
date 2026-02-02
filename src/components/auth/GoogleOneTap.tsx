@@ -27,6 +27,35 @@ const GoogleOneTap: React.FC<GoogleOneTapProps> = ({ onSkip }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const handleCredentialResponse = async (response: any) => {
+    try {
+      // Send credential to backend for authentication
+      await signInWithGoogleCredential(response.credential);
+
+      toast({
+        title: 'Success',
+        description: 'Welcome back! You\'re now signed in.',
+      });
+
+      // Redirect to dashboard after a short delay
+      setTimeout(() => {
+        navigate('/');
+      }, 500);
+    } catch (error: any) {
+      console.error('One Tap authentication error:', error);
+      toast({
+        title: 'Authentication failed',
+        description: error.message || 'Failed to sign in with Google',
+        variant: 'destructive',
+      });
+
+      // Allow user to dismiss and try another method
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.prompt();
+      }
+    }
+  };
+
   useEffect(() => {
     // Load Google Identity Services script
     const script = document.createElement('script');
@@ -62,36 +91,7 @@ const GoogleOneTap: React.FC<GoogleOneTapProps> = ({ onSkip }) => {
         document.head.removeChild(script);
       }
     };
-  }, []);
-
-  const handleCredentialResponse = async (response: any) => {
-    try {
-      // Send credential to backend for authentication
-      await signInWithGoogleCredential(response.credential);
-
-      toast({
-        title: 'Success',
-        description: 'Welcome back! You\'re now signed in.',
-      });
-
-      // Redirect to dashboard after a short delay
-      setTimeout(() => {
-        navigate('/');
-      }, 500);
-    } catch (error: any) {
-      console.error('One Tap authentication error:', error);
-      toast({
-        title: 'Authentication failed',
-        description: error.message || 'Failed to sign in with Google',
-        variant: 'destructive',
-      });
-
-      // Allow user to dismiss and try another method
-      if (window.google?.accounts?.id) {
-        window.google.accounts.id.prompt();
-      }
-    }
-  };
+  }, [signInWithGoogleCredential, toast, navigate]);
 
   return null; // One Tap renders globally, no need for visible component
 };
