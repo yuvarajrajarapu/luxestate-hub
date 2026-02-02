@@ -125,11 +125,9 @@ const Header = () => {
                         ? 'text-gray-900 font-medium'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
-                    asChild
+                    onClick={() => navigate(menuCategories[0].mainLink)}
                   >
-                    <Link to={menuCategories[0].mainLink}>
-                      Buy
-                    </Link>
+                    Buy
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
@@ -164,11 +162,9 @@ const Header = () => {
                         ? 'text-gray-900 font-medium'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
-                    asChild
+                    onClick={() => navigate(menuCategories[1].mainLink)}
                   >
-                    <Link to={menuCategories[1].mainLink}>
-                      Rent
-                    </Link>
+                    Rent
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
@@ -203,11 +199,9 @@ const Header = () => {
                         ? 'text-gray-900 font-medium'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
-                    asChild
+                    onClick={() => navigate(menuCategories[2].mainLink)}
                   >
-                    <Link to={menuCategories[2].mainLink}>
-                      Land
-                    </Link>
+                    Land
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
@@ -242,11 +236,9 @@ const Header = () => {
                         ? 'text-gray-900 font-medium'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
-                    asChild
+                    onClick={() => navigate(menuCategories[3].mainLink)}
                   >
-                    <Link to={menuCategories[3].mainLink}>
-                      Commercial
-                    </Link>
+                    Commercial
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
@@ -281,11 +273,9 @@ const Header = () => {
                         ? 'text-gray-900 font-medium'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
-                    asChild
+                    onClick={() => navigate(menuCategories[4].mainLink)}
                   >
-                    <Link to={menuCategories[4].mainLink}>
-                      PG
-                    </Link>
+                    PG
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg">
