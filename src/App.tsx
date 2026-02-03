@@ -4,11 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import AdminRoute from "./components/admin/AdminRoute";
-import { fixAllPropertyImages } from "@/lib/image-repair";
 
 // Route-based code splitting with lazy loading
 const Properties = lazy(() => import("./pages/Properties"));
@@ -48,10 +47,6 @@ const LoadingFallback = () => (
 );
 
 const App = () => {
-  // Run global property image repair on app initialization
-  useEffect(() => {
-    fixAllPropertyImages();
-  }, []);
 
   return (
     <HelmetProvider>
