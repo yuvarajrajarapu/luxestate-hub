@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import { lazy, Suspense } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Analytics } from "@vercel/analytics/react";
 import Index from "./pages/Index";
 import AdminRoute from "./components/admin/AdminRoute";
 
@@ -54,6 +55,7 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <Analytics />
             <BrowserRouter>
               <Suspense fallback={<LoadingFallback />}>
                 <Routes>
