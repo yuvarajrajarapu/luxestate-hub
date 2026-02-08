@@ -1,5 +1,6 @@
-import { useState } from "react";
-import type { MediaItem } from "@/types/property";
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import type { MediaItem } from '@/types/property';
 
 interface PropertyImageProps {
   images: MediaItem[];
@@ -8,36 +9,80 @@ interface PropertyImageProps {
 }
 
 /**
- * Fast, lightweight PropertyImage Component
- * - Direct image loading without complex transformations
- * - Minimal re-renders
- * - Instant rendering with lazy loading
+ * PropertyImage Component
+ * - Handles image loading with fallbacks
+ * - Optimizes images using Cloudinary transformations
+ * - Shows loading state and error fallback
+ * - Implements lazy loading
  */
-const PropertyImage = ({ images, title, className = "w-full h-full" }: PropertyImageProps) => {
+const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyImageProps) => {
+  const [imageUrl, setImageUrl] = useState<string>('/placeholder.svg');
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  // Get image URL directly - no processing
-  const imageUrl = images?.[0]?.url || "/placeholder.svg";
+  useEffect(() => {
+    // Handle empty images array
+    if (!images || images.length === 0) {
+      setImageUrl('/placeholder.svg');
+      setIsLoading(false);
+      return;
+    }
+
+    const primaryImage = images[0];
+    
+    if (!primaryImage) {
+      setImageUrl('/placeholder.svg');
+      setIsLoading(false);
+      return;
+    }
+
+    // Use the URL from the image object
+    const url = primaryImage.url || primaryImage.publicId;
+    
+    if (!url) {
+      setImageUrl('/placeholder.svg');
+      setIsLoading(false);
+      return;
+    }
+
+    // Use URL as-is from database - Cloudinary handles all transformations server-side
+    setImageUrl(url);
+    setIsLoading(false);
+  }, [images]);
+
+  const handleImageError = () => {
+    console.warn(`Failed to load image for property: ${title}`);
+    setError(true);
+    setImageUrl('/placeholder.svg');
+  };
 
   return (
-    <div className={className}>
-      {error || !imageUrl || imageUrl === "/placeholder.svg" ? (
-        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-          <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        </div>
-      ) : (
-        <img
-          src={imageUrl}
-          alt={title}
-          onError={() => setError(true)}
-          loading="lazy"
-          className="w-full h-full object-cover"
-          decoding="async"
-        />
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className={className}
+    >
+      <img
+        src={imageUrl}
+        alt={title}
+        onError={handleImageError}
+        loading="lazy"
+        className="w-full h-full object-cover"
+      />
+      
+      {/* Loading Skeleton */}
+      {isLoading && (
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" />
       )}
-    </div>
+      
+      {/* Error Indicator */}
+      {error && (
+        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+          <span className="text-gray-400 text-sm">Image unavailable</span>
+        </div>
+      )}
+    </motion.div>
   );
 };
 

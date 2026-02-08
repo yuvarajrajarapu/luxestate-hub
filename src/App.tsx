@@ -47,7 +47,6 @@ const LoadingFallback = () => (
 );
 
 const App = () => {
-
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
@@ -83,6 +82,9 @@ const App = () => {
       </QueryClientProvider>
     </HelmetProvider>
   );
+  </HelmetProvider>
+);
+
 };
 
 export default App;
