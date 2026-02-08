@@ -106,7 +106,11 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
           src={imageUrl}
           alt={title}
           onError={handleImageError}
-          loading="eager"          crossOrigin="anonymous"          className="w-full h-full object-cover"
+          loading="eager"
+          fetchPriority="high"
+          crossOrigin="anonymous"
+          className="w-full h-full object-cover"
+          style={{ contentVisibility: 'auto' }}
         />
       )}
       
@@ -115,6 +119,7 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
           src="/placeholder.svg"
           alt={`${title} - unavailable`}
           loading="eager"
+          fetchPriority="high"
           className="w-full h-full object-cover"
         />
       )}
