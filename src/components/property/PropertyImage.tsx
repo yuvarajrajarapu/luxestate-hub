@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import type { MediaItem } from '@/types/property';
+import { getOptimizedImageUrl, getResponsiveImageSrcSet } from '@/lib/image-optimization';
 
 interface PropertyImageProps {
   images: MediaItem[];
   title: string;
   className?: string;
+  priority?: 'high' | 'low';
 }
 
 /**
@@ -14,9 +16,12 @@ interface PropertyImageProps {
  * - Implements automatic retry on network failures  
  * - Prevents "Image Unavailable" on first load
  * - Uses eager loading for immediate display
+ * - Converts JPG to WebP for faster loading
+ * - Responsive image sizing
  */
-const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyImageProps) => {
+const PropertyImage = ({ images, title, className = 'w-full h-full', priority = 'low' }: PropertyImageProps) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [webpUrl, setWebpUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -27,6 +32,7 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
     setError(false);
     setRetryCount(0);
     setImageUrl(null);
+    setWebpUrl(null);
     
     // Handle empty images array
     if (!images || images.length === 0) {
@@ -52,13 +58,18 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
       return;
     }
 
-    // Preload the image before setting it as the active URL
+    // Generate optimized WebP URL for Cloudinary images
+    const optimizedWebpUrl = getOptimizedImageUrl(url, 'webp', 80);
+    const optimizedJpgUrl = getOptimizedImageUrl(url, 'jpg', 85);
+
+    // Preload the WebP image first, fallback to JPG
     setIsLoading(true);
     const preloadImg = new Image();
     
     preloadImg.onload = () => {
       // Image loaded successfully - safe to display
-      setImageUrl(url);
+      setWebpUrl(optimizedWebpUrl);
+      setImageUrl(optimizedJpgUrl);
       setIsLoading(false);
       setError(false);
     };
@@ -69,7 +80,7 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
         setRetryCount(prev => prev + 1);
         // Wait a bit then retry with cache-busting parameter
         setTimeout(() => {
-          preloadImg.src = url + '?retry=' + (retryCount + 1);
+          preloadImg.src = optimizedWebpUrl + '?retry=' + (retryCount + 1);
         }, 300);
       } else {
         // Max retries exceeded - show placeholder
@@ -80,8 +91,8 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
       }
     };
     
-    // Start the preload
-    preloadImg.src = url;
+    // Start the preload with WebP
+    preloadImg.src = optimizedWebpUrl;
   }, [images, retryCount, title]);
 
   const handleImageError = () => {
@@ -101,19 +112,26 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
       className={`${className} relative bg-gray-100`}
     >
       {imageUrl && !error && (
-        <img
-          key={imageUrl}
-          src={imageUrl}
-          alt={title}
-          onError={handleImageError}
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          crossOrigin="anonymous"
-          className="w-full h-full object-cover"
-          style={{ contentVisibility: 'auto', willChange: 'auto' }}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
+        <picture>
+          {webpUrl && (
+            <source
+              srcSet={webpUrl}
+              type="image/webp"
+            />
+          )}
+          <img
+            key={imageUrl}
+            src={imageUrl}
+            alt={title}
+            onError={handleImageError}
+            loading={priority === 'high' ? 'eager' : 'lazy'}
+            fetchPriority={priority}
+            crossOrigin="anonymous"
+            className="w-full h-full object-cover"
+            style={{ contentVisibility: 'auto', decoding: 'async' }}
+            sizes="(max-width: 640px) 320px, (max-width: 1024px) 640px, (max-width: 1920px) 1024px, 1920px"
+          />
+        </picture>
       )}
       
       {error && (

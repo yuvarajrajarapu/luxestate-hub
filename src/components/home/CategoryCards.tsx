@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Search, Building2, Home, LandPlot, Key, Briefcase, Store, Users, Trees, Fence } from 'lucide-react';
 import { usePropertyCounts } from '@/hooks/usePropertyCounts';
+import { getOptimizedImageUrl } from '@/lib/image-optimization';
 import property1 from '@/assets/properties/property-1.jpg';
 import property2 from '@/assets/properties/property-2.jpg';
 import property3 from '@/assets/properties/property-3.jpg';
@@ -238,11 +239,16 @@ const CategoryCards = () => {
 
                     {/* Image */}
                     <div className="absolute bottom-0 right-0 w-[80%] h-[55%]">
-                      <img
-                        src={category.image}
-                        alt={category.title}
-                        className="w-full h-full object-cover rounded-tl-xl group-hover:scale-105 transition-transform duration-500"
-                      />
+                      <picture>
+                        <source srcSet={getOptimizedImageUrl(category.image, 'webp', 75)} type="image/webp" />
+                        <img
+                          src={category.image}
+                          alt={category.title}
+                          className="w-full h-full object-cover rounded-tl-xl group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </picture>
                     </div>
 
                     {/* Hover Arrow */}
