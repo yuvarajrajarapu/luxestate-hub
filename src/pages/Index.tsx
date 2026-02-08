@@ -3,6 +3,7 @@ import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/home/HeroSection';
 import CategoryCards from '@/components/home/CategoryCards';
 import PropertyCard from '@/components/property/PropertyCard';
+import GoogleOneTap from '@/components/auth/GoogleOneTap';
 import { motion } from 'framer-motion';
 import { useProperties } from '@/hooks/useProperties';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Google One Tap Prompt - appears on initial load */}
+      <GoogleOneTap />
+      
       <MetadataHead metadata={metadata} />
       <Header />
 
