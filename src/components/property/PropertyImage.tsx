@@ -106,8 +106,7 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
           src={imageUrl}
           alt={title}
           onError={handleImageError}
-          loading="eager"
-          className="w-full h-full object-cover"
+          loading="eager"          crossOrigin="anonymous"          className="w-full h-full object-cover"
         />
       )}
       
