@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import GoogleSignIn from '@/components/auth/GoogleSignIn';
+import GoogleOneTap from '@/components/auth/GoogleOneTap';
 
 const Signup = () => {
   const [username, setUsername] = useState('');
@@ -63,6 +64,9 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      {/* Google One Tap Prompt */}
+      <GoogleOneTap />
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
