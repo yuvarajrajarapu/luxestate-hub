@@ -82,9 +82,6 @@ const App = () => {
       </QueryClientProvider>
     </HelmetProvider>
   );
-  </HelmetProvider>
-);
-
 };
 
 export default App;
