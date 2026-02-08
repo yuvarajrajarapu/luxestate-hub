@@ -10,17 +10,24 @@ interface PropertyImageProps {
 
 /**
  * PropertyImage Component
- * - Handles image loading with fallbacks
- * - Optimizes images using Cloudinary transformations
- * - Shows loading state and error fallback
- * - Implements lazy loading
+ * - Preloads images to detect failures before rendering
+ * - Implements automatic retry on network failures  
+ * - Prevents "Image Unavailable" on first load
+ * - Uses eager loading for immediate display
  */
 const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyImageProps) => {
-  const [imageUrl, setImageUrl] = useState<string>('/placeholder.svg');
-  const [isLoading, setIsLoading] = useState(true);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 2;
 
   useEffect(() => {
+    // Reset state when images change
+    setError(false);
+    setRetryCount(0);
+    setImageUrl(null);
+    
     // Handle empty images array
     if (!images || images.length === 0) {
       setImageUrl('/placeholder.svg');
@@ -45,15 +52,45 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
       return;
     }
 
-    // Use URL as-is from database - Cloudinary handles all transformations server-side
-    setImageUrl(url);
-    setIsLoading(false);
-  }, [images]);
+    // Preload the image before setting it as the active URL
+    setIsLoading(true);
+    const preloadImg = new Image();
+    
+    preloadImg.onload = () => {
+      // Image loaded successfully - safe to display
+      setImageUrl(url);
+      setIsLoading(false);
+      setError(false);
+    };
+    
+    preloadImg.onerror = () => {
+      // Image failed - retry if we haven't exceeded max retries
+      if (retryCount < MAX_RETRIES) {
+        setRetryCount(prev => prev + 1);
+        // Wait a bit then retry with cache-busting parameter
+        setTimeout(() => {
+          preloadImg.src = url + '?retry=' + (retryCount + 1);
+        }, 300);
+      } else {
+        // Max retries exceeded - show placeholder
+        console.warn(`Failed to load image for property: ${title} after ${MAX_RETRIES} retries`);
+        setError(true);
+        setIsLoading(false);
+        setImageUrl('/placeholder.svg');
+      }
+    };
+    
+    // Start the preload
+    preloadImg.src = url;
+  }, [images, retryCount, title]);
 
   const handleImageError = () => {
-    console.warn(`Failed to load image for property: ${title}`);
-    setError(true);
-    setImageUrl('/placeholder.svg');
+    // Fallback error handler
+    if (!error) {
+      console.warn(`Image render failed for property: ${title}`);
+      setError(true);
+      setImageUrl('/placeholder.svg');
+    }
   };
 
   return (
@@ -61,26 +98,31 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className={className}
+      className={`${className} relative bg-gray-100`}
     >
-      <img
-        src={imageUrl}
-        alt={title}
-        onError={handleImageError}
-        loading="lazy"
-        className="w-full h-full object-cover"
-      />
+      {imageUrl && !error && (
+        <img
+          key={imageUrl}
+          src={imageUrl}
+          alt={title}
+          onError={handleImageError}
+          loading="eager"
+          className="w-full h-full object-cover"
+        />
+      )}
+      
+      {error && (
+        <img
+          src="/placeholder.svg"
+          alt={`${title} - unavailable`}
+          loading="eager"
+          className="w-full h-full object-cover"
+        />
+      )}
       
       {/* Loading Skeleton */}
       {isLoading && (
         <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" />
-      )}
-      
-      {/* Error Indicator */}
-      {error && (
-        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-          <span className="text-gray-400 text-sm">Image unavailable</span>
-        </div>
       )}
     </motion.div>
   );
