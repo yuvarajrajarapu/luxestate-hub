@@ -108,9 +108,11 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
           onError={handleImageError}
           loading="eager"
           fetchPriority="high"
+          decoding="async"
           crossOrigin="anonymous"
           className="w-full h-full object-cover"
-          style={{ contentVisibility: 'auto' }}
+          style={{ contentVisibility: 'auto', willChange: 'auto' }}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
       )}
       
@@ -120,7 +122,9 @@ const PropertyImage = ({ images, title, className = 'w-full h-full' }: PropertyI
           alt={`${title} - unavailable`}
           loading="eager"
           fetchPriority="high"
+          decoding="async"
           className="w-full h-full object-cover"
+          style={{ contentVisibility: 'auto' }}
         />
       )}
       
