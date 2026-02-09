@@ -162,6 +162,9 @@ const PropertyDetail = () => {
                         className="w-full h-full"
                         allowFullScreen
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        sandbox="allow-same-origin allow-scripts allow-presentation allow-popups allow-popups-to-escape-sandbox"
+                        loading="lazy"
+                        referrerPolicy="strict-origin-when-cross-origin"
                       />
                     ) : (
                       <img
