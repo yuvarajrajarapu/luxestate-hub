@@ -128,7 +128,8 @@ const PropertyImage = ({ images, title, className = 'w-full h-full', priority = 
             fetchPriority={priority}
             crossOrigin="anonymous"
             className="w-full h-full object-cover"
-            style={{ contentVisibility: 'auto', decoding: 'async' }}
+            decoding="async"
+            style={{ contentVisibility: 'auto' }}
             sizes="(max-width: 640px) 320px, (max-width: 1024px) 640px, (max-width: 1920px) 1024px, 1920px"
           />
         </picture>
