@@ -59,7 +59,7 @@ export const setPropertyMetadata = (
   address: string,
   description: string,
   imageUrl: string,
-  baseUrl: string = 'https://luxestate-hub.vercel.app'
+  baseUrl: string = 'https://umyinfra.in'
 ) => {
   const shortDescription = description.substring(0, 160);
   const pageUrl = `${baseUrl}/properties/${propertyId}`;
