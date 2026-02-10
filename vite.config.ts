@@ -4,7 +4,7 @@ import path from "path";
 import compression from 'vite-plugin-compression';
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode, command, ssrBuild }) => ({
   server: {
     host: "::",
     port: 8080,
@@ -53,7 +53,8 @@ export default defineConfig(({ mode }) => ({
     // Ultra-aggressive code splitting
     rollupOptions: {
       output: {
-        manualChunks: {
+        ...(ssrBuild ? {} : {
+          manualChunks: {
           // Core React
           'react-vendor': ['react', 'react-dom', 'react-router-dom', 'react-helmet-async'],
           // Firebase - separate to lazy load
@@ -66,7 +67,8 @@ export default defineConfig(({ mode }) => ({
           'radix-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-navigation-menu', '@radix-ui/react-select', '@radix-ui/react-label', '@radix-ui/react-checkbox', '@radix-ui/react-slider', '@radix-ui/react-progress', '@radix-ui/react-tabs'],
           // Query
           'query': ['@tanstack/react-query'],
-        },
+          },
+        }),
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
