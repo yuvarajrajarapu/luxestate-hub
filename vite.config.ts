@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
     compression({
       verbose: false,
       disable: false,
-      threshold: 512,
+      threshold: 1024,
       algorithm: 'gzip',
       ext: '.gz',
     }),
@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => ({
     compression({
       verbose: false,
       disable: false,
-      threshold: 512,
+      threshold: 1024,
       algorithm: 'brotliCompress',
       ext: '.br',
     }),
@@ -40,9 +40,9 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false, // Disable sourcemaps for production - NUCLEAR
     terserOptions: {
       compress: {
-        drop_console: true,
+        drop_console: mode === 'production',
         drop_debugger: true,
-        passes: 3,
+        passes: 2,
       },
       mangle: true,
       format: {
@@ -77,19 +77,11 @@ export default defineConfig(({ mode }) => ({
     // Aggressive chunk size limits
     chunkSizeWarningLimit: 200,
     assetsInlineLimit: 2048,
-    
-    // Remove unused code
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
   },
   
   // CSS optimization
   css: {
     postcss: './postcss.config.js',
-    modules: {
-      localsConvention: 'camelCase',
-    },
   },
   
   // Optimize dependencies - only critical ones pre-bundled
