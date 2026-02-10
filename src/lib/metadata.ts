@@ -14,11 +14,22 @@ export interface MetadataConfig {
   twitterHandle?: string;
 }
 
-const SITE_NAME = 'UMY infra';
-const SITE_URL = 'https://www.umyinfra.in';
+const SITE_NAME = 'UMY Infra';
+const SITE_URL = 'https://umyinfra.in'; // Single canonical domain
 const DEFAULT_DESCRIPTION = 'Premium real estate platform for buying, renting, and leasing properties';
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.png`;
 const TWITTER_HANDLE = '@umyinfra';
+
+/**
+ * Normalize and canonicalize URLs consistently
+ */
+export const normalizeUrl = (url: string): string => {
+  if (!url) return SITE_URL;
+  if (url.startsWith('http')) {
+    return url.replace(/https?:\/\/(www\.)?[^/]+/, SITE_URL);
+  }
+  return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
 /**
  * Generate complete metadata config with fallbacks
@@ -55,12 +66,13 @@ export const generatePropertyMetadata = (property: any): MetadataConfig => {
     .join(' • ');
 
   const imageUrl = property.images?.[0] || property.featured_image || DEFAULT_IMAGE;
+  const canonicalUrl = normalizeUrl(`/properties/${property.id}`);
 
   return generateMetadata({
     title: `${property.title} - ${SITE_NAME}`,
     description: description || property.description?.substring(0, 160),
     image: imageUrl,
-    url: `${SITE_URL}/property/${property.id}`,
+    url: canonicalUrl,
     type: 'property',
     author: property.contactName || SITE_NAME,
     publishDate: property.createdAt,
@@ -76,11 +88,12 @@ export const generateListingPageMetadata = (
 ): MetadataConfig => {
   const categoryName = category?.replace(/-/g, ' ') || 'Properties';
   const title = type ? `${categoryName} for ${type}` : categoryName;
+  const canonicalUrl = normalizeUrl(`/properties${type ? `?type=${type}` : ''}`);
 
   return generateMetadata({
-    title: `${title} - UMY infra`,
-    description: `Browse premium ${title.toLowerCase()} on UMY infra. Find your perfect property today.`,
-    url: `${SITE_URL}/properties?category=${category}${type ? `&type=${type}` : ''}`,
+    title: `${title} - UMY Infra`,
+    description: `Browse premium ${title.toLowerCase()} on UMY Infra. Find your perfect property today.`,
+    url: canonicalUrl,
     type: 'website',
   });
 };
@@ -93,10 +106,11 @@ export const generatePageMetadata = (
   description: string,
   pathname: string
 ): MetadataConfig => {
+  const canonicalUrl = normalizeUrl(pathname);
   return generateMetadata({
     title: `${title} - ${SITE_NAME}`,
     description,
-    url: `${SITE_URL}${pathname}`,
+    url: canonicalUrl,
     type: 'website',
   });
 };

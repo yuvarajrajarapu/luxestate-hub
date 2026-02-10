@@ -21,9 +21,15 @@ export const usePageMetadata = (metadata: MetadataConfig) => {
 
 /**
  * Component wrapper for setting metadata using Helmet
- * Usage: <MetadataHead metadata={config} />
+ * Usage: <MetadataHead metadata={config} structuredData={schema} />
  */
-export const MetadataHead = ({ metadata }: { metadata: MetadataConfig }) => {
+export const MetadataHead = ({
+  metadata,
+  structuredData,
+}: {
+  metadata: MetadataConfig;
+  structuredData?: any;
+}) => {
   const ogMetadata = generateOGMetadata(metadata);
   const twitterMetadata = generateTwitterMetadata(metadata);
 
@@ -48,6 +54,11 @@ export const MetadataHead = ({ metadata }: { metadata: MetadataConfig }) => {
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta name="robots" content="index, follow" />
       <meta name="language" content="English" />
+
+      {/* Structured Data (JSON-LD) */}
+      {structuredData && (
+        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+      )}
     </Helmet>
   );
 };

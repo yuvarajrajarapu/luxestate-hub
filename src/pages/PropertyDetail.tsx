@@ -127,9 +127,35 @@ const PropertyDetail = () => {
   // Generate dynamic metadata for the property
   const metadata = property ? generatePropertyMetadata(property) : null;
 
+  // Generate structured data (JSON-LD) for the property
+  const structuredData = property ? {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateListing',
+    name: property.title,
+    description: property.description,
+    url: `https://umyinfra.in/properties/${id}`,
+    image: getPrimaryImage(property.images),
+    price: property.price,
+    priceCurrency: 'INR',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: property.address || '',
+      addressLocality: property.city || property.location || '',
+      addressRegion: property.state || '',
+      postalCode: property.postalCode || '',
+      addressCountry: 'IN',
+    },
+    areaServed: property.city || property.location,
+    propertyType: property.propertyType || 'Residential',
+    numberOfRooms: property.bedrooms || undefined,
+    ...(property.area && { floorSize: { value: property.area, unitCode: 'MTK' } }),
+    datePublished: property.createdAt,
+    ...(property.lastModified && { dateModified: property.lastModified }),
+  } : null;
+
   return (
     <div className="min-h-screen bg-background">
-      {metadata && <MetadataHead metadata={metadata} />}
+      {metadata && <MetadataHead metadata={metadata} structuredData={structuredData} />}
       <Header />
 
       <main className="pt-20 pb-16">

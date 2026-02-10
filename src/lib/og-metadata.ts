@@ -4,10 +4,20 @@ export interface OGMetadata {
   image: string;
   url: string;
   type?: 'website' | 'object' | 'article';
+  canonical?: string;
 }
 
+const normalizeUrl = (url: string): string => {
+  if (!url) return 'https://umyinfra.in';
+  if (url.startsWith('http')) {
+    return url.replace(/https?:\/\/(www\.)?[^/]+/, 'https://umyinfra.in');
+  }
+  return `https://umyinfra.in${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export const updateOGMetadata = (metadata: OGMetadata) => {
-  const { title, description, image, url, type = 'website' } = metadata;
+  const { title, description, image, url, type = 'website', canonical } = metadata;
+  const canonicalUrl = normalizeUrl(canonical || url);
 
   document.title = title;
   updateMetaTag('title', title);
@@ -21,9 +31,9 @@ export const updateOGMetadata = (metadata: OGMetadata) => {
   updateMetaTag('og:image:height', '630');
   updateMetaTag('twitter:image', image);
   updateMetaTag('twitter:card', 'summary_large_image');
-  updateMetaTag('og:url', url);
+  updateMetaTag('og:url', canonicalUrl);
   updateMetaTag('og:type', type);
-  updateCanonicalURL(url);
+  updateCanonicalURL(canonicalUrl);
 };
 
 const updateMetaTag = (property: string, content: string) => {
@@ -67,7 +77,7 @@ export const setPropertyMetadata = (
   baseUrl: string = 'https://umyinfra.in'
 ) => {
   const shortDescription = description.substring(0, 160);
-  const pageUrl = `${baseUrl}/properties/${propertyId}`;
+  const canonicalUrl = normalizeUrl(`/properties/${propertyId}`);
   
   // Generate dynamic OG image URL using Vercel Edge Function
   const ogImageParams = new URLSearchParams({
@@ -84,7 +94,8 @@ export const setPropertyMetadata = (
     title: `${title} - UMY Infra`,
     description: `${address}. ${shortDescription}`,
     image: dynamicOGImage,
-    url: pageUrl,
+    url: canonicalUrl,
+    canonical: canonicalUrl,
     type: 'object',
   });
 };
