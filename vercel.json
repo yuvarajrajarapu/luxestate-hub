@@ -1,6 +1,7 @@
 {
   "rewrites": [
-    { "source": "/((?!(?:manifest\\.json|robots\\.txt|sitemap\\.xml|favicon\\.ico|.*\\.js|.*\\.css)).*)", "destination": "/" }
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    { "source": "/((?!(?:manifest\\.json|robots\\.txt|sitemap\\.xml|favicon\\.ico|.*\\.js|.*\\.css|api/.*)).*)", "destination": "/" }
   ],
   "headers": [
     {
@@ -32,6 +33,43 @@
           "value": "SAMEORIGIN"
         }
       ]
+    },
+    {
+      "source": "/api/og-image",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800"
+        },
+        {
+          "key": "Content-Type",
+          "value": "image/png"
+        }
+      ]
+    },
+    {
+      "source": "/api/property-meta",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400"
+        }
+      ]
     }
-  ]
+  ],
+  "functions": {
+    "api/og-image.tsx": {
+      "runtime": "edge"
+    },
+    "api/property-meta.ts": {
+      "runtime": "edge"
+    },
+    "api/middleware.ts": {
+      "runtime": "edge"
+    },
+    "api/ssr.tsx": {
+      "runtime": "edge"
+    }
+  },
+  "crons": []
 }
