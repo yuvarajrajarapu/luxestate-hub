@@ -77,11 +77,11 @@ const App = () => {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
+              <SpeedInsights />
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>
       </QueryClientProvider>
-      <SpeedInsights />
     </HelmetProvider>
   );
 };
