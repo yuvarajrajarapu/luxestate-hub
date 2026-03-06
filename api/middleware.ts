@@ -56,7 +56,7 @@ export default async function middleware(request: Request) {
       };
 
       if (metaResponse.ok) {
-        const data = await metaResponse.json();
+        const data = await metaResponse.json() as any;
         if (data.metaTags) {
           metadata = {
             title: data.metaTags.title || metadata.title,

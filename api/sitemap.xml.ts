@@ -49,7 +49,7 @@ async function fetchProperties(): Promise<any[]> {
       return [];
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     return data.documents || [];
   } catch (error) {
     console.error('Error fetching properties:', error);
