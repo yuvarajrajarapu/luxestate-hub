@@ -48,7 +48,7 @@ export const measureLCP = (): void => {
     try {
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1];
+        const lastEntry = entries[entries.length - 1] as any;
         
         metrics.lcp = lastEntry.renderTime || lastEntry.loadTime;
         console.debug(`LCP: ${metrics.lcp.toFixed(2)}ms`);
@@ -73,7 +73,7 @@ export const measureCLS = (): void => {
       let clsValue = 0;
       
       const observer = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
+        for (const entry of list.getEntries() as any[]) {
           if (!entry.hadRecentInput) {
             clsValue += entry.value;
             metrics.cls = clsValue;

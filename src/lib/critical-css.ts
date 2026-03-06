@@ -94,7 +94,7 @@ export const setupPerformanceObserver = (): void => {
       // Observe largest contentful paint
       const lcpObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1];
+        const lastEntry = entries[entries.length - 1] as any;
         console.debug(`LCP: ${lastEntry.renderTime || lastEntry.loadTime}ms`);
       });
       

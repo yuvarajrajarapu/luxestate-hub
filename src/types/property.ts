@@ -104,6 +104,12 @@ export interface Property {
   createdAt: Date;
   updatedAt: Date;
   userId?: string;
+
+  // Extended fields (used in structured data / SEO)
+  address?: string;
+  postalCode?: string;
+  propertyType?: string;
+  lastModified?: Date | string;
 }
 
 export const PROPERTY_CATEGORIES: { 
