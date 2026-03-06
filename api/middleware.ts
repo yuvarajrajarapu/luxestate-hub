@@ -1,5 +1,3 @@
-import { NextRequest, NextResponse } from 'next/server';
-
 export const config = {
   runtime: 'edge',
   matcher: ['/properties/:path*', '/land/:path*'],
@@ -22,8 +20,8 @@ function isBot(userAgent: string): boolean {
 }
 
 // Prerender middleware for dynamic routes
-export default async function middleware(request: NextRequest) {
-  const url = request.nextUrl;
+export default async function middleware(request: Request) {
+  const url = new URL(request.url);
   const pathname = url.pathname;
 
   // Extract property ID from URL
@@ -32,7 +30,7 @@ export default async function middleware(request: NextRequest) {
   const propertyId = propertyMatch?.[1] || landMatch?.[1];
 
   if (!propertyId) {
-    return NextResponse.next();
+    return new Response(null, { status: 200 });
   }
 
   // Check if this is a bot/crawler
@@ -81,11 +79,11 @@ export default async function middleware(request: NextRequest) {
       });
     } catch (error) {
       console.error('Prerender error:', error);
-      return NextResponse.next();
+      return new Response(null, { status: 200 });
     }
   }
 
-  return NextResponse.next();
+  return new Response(null, { status: 200 });
 }
 
 function generatePrerenderHTML(metadata: {

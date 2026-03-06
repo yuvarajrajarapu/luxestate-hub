@@ -1,5 +1,3 @@
-import { NextRequest, NextResponse } from 'next/server';
-
 export const config = {
   runtime: 'edge',
 };
@@ -112,7 +110,7 @@ function getTodayDate(): string {
 /**
  * Main handler
  */
-export default async function handler(request: NextRequest) {
+export default async function handler(request: Request) {
   try {
     const entries: SitemapEntry[] = [];
     const today = getTodayDate();
@@ -186,7 +184,7 @@ export default async function handler(request: NextRequest) {
 
     const xml = generateSitemapXml(entries);
 
-    return new NextResponse(xml, {
+    return new Response(xml, {
       headers: {
         'Content-Type': 'application/xml; charset=utf-8',
         'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
@@ -207,7 +205,7 @@ export default async function handler(request: NextRequest) {
   </url>
 </urlset>`;
 
-    return new NextResponse(fallbackXml, {
+    return new Response(fallbackXml, {
       headers: {
         'Content-Type': 'application/xml; charset=utf-8',
       },

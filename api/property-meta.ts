@@ -1,5 +1,3 @@
-import { NextRequest, NextResponse } from 'next/server';
-
 export const config = {
   runtime: 'edge',
 };
@@ -18,48 +16,42 @@ interface PropertyData {
 const FIREBASE_PROJECT_ID = 'umy-infra';
 const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || '';
 
-export default async function handler(req: NextRequest) {
+function jsonResponse(data: unknown, options: { status?: number; headers?: Record<string, string> } = {}): Response {
+  return new Response(JSON.stringify(data), {
+    status: options.status || 200,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  });
+}
+
+export default async function handler(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const propertyId = searchParams.get('id');
 
     if (!propertyId) {
-      return NextResponse.json(
-        { error: 'Property ID is required' },
-        { status: 400 }
-      );
+      return jsonResponse({ error: 'Property ID is required' }, { status: 400 });
     }
 
     // Fetch property data from Firestore
     const propertyData = await fetchPropertyData(propertyId);
 
     if (!propertyData) {
-      return NextResponse.json(
-        { error: 'Property not found' },
-        { status: 404 }
-      );
+      return jsonResponse({ error: 'Property not found' }, { status: 404 });
     }
 
     // Generate meta tags
     const metaTags = generateMetaTags(propertyData, req.url);
 
-    return NextResponse.json(
-      { 
-        property: propertyData,
-        metaTags 
-      },
-      {
-        headers: {
-          'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
-        },
-      }
+    return jsonResponse(
+      { property: propertyData, metaTags },
+      { headers: { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' } }
     );
   } catch (error: any) {
     console.error('Error fetching property data:', error);
-    return NextResponse.json(
-      { error: 'Internal server error', message: error.message },
-      { status: 500 }
-    );
+    return jsonResponse({ error: 'Internal server error', message: error.message }, { status: 500 });
   }
 }
 

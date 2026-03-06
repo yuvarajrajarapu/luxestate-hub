@@ -18,6 +18,7 @@
     "noUnusedLocals": false,
     "strictNullChecks": false,
     "types": ["node", "next"],
-    "noEmit": true
+    "noEmit": true,
+    "jsx": "react-jsx"
   }
 }

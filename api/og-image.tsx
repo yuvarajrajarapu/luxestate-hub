@@ -1,12 +1,11 @@
 import { ImageResponse } from '@vercel/og';
-import { NextRequest } from 'next/server';
 
 export const config = {
   runtime: 'nodejs',
   maxDuration: 60,
 };
 
-export default async function handler(req: NextRequest) {
+export default async function handler(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     

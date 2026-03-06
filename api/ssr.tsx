@@ -1,11 +1,9 @@
-import { NextRequest } from 'next/server';
-
 export const config = {
   runtime: 'edge',
 };
 
 // Main SSR handler for property pages
-export default async function handler(req: NextRequest) {
+export default async function handler(req: Request) {
   try {
     const url = new URL(req.url);
     const pathname = url.pathname;
