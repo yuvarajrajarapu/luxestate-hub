@@ -12,7 +12,7 @@
     "analyze-build": "node build-analyzer.js",
     "build:ssr": "vite build --ssr src/entry-server.tsx",
     "build:all": "npm run build && npm run build:ssr",
-    "vercel-build": "npm run build:all"
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
