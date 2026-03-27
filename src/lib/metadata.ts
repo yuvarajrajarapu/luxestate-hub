@@ -3,6 +3,8 @@
  * Ensures proper SEO and social sharing across platforms
  */
 
+import { formatPropertyPrice } from '@/lib/formatPrice';
+
 export interface MetadataConfig {
   title: string;
   description: string;
@@ -15,7 +17,7 @@ export interface MetadataConfig {
 }
 
 const SITE_NAME = 'UMY Infra';
-const SITE_URL = 'https://umyinfra.in'; // Single canonical domain
+const SITE_URL = 'https://www.umyinfra.in'; // Single canonical domain
 const DEFAULT_DESCRIPTION = 'Premium real estate platform for buying, renting, and leasing properties';
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.png`;
 const TWITTER_HANDLE = '@umyinfra';
@@ -52,7 +54,7 @@ export const generateMetadata = (config: Partial<MetadataConfig>): MetadataConfi
  * Extracts key information for compact description
  */
 export const generatePropertyMetadata = (property: any): MetadataConfig => {
-  const priceText = property.price ? `₹${(property.price / 100000).toFixed(1)}L` : '';
+  const priceText = property.price ? formatPropertyPrice(property.price) : '';
   const categoryText = property.category?.replace(/-/g, ' ') || 'Property';
   const locationText = property.location || property.area || '';
   

@@ -8,11 +8,11 @@ export interface OGMetadata {
 }
 
 const normalizeUrl = (url: string): string => {
-  if (!url) return 'https://umyinfra.in';
+  if (!url) return 'https://www.umyinfra.in';
   if (url.startsWith('http')) {
-    return url.replace(/https?:\/\/(www\.)?[^/]+/, 'https://umyinfra.in');
+    return url.replace(/https?:\/\/(www\.)?[^/]+/, 'https://www.umyinfra.in');
   }
-  return `https://umyinfra.in${url.startsWith('/') ? '' : '/'}${url}`;
+  return `https://www.umyinfra.in${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
 export const updateOGMetadata = (metadata: OGMetadata) => {
@@ -74,7 +74,7 @@ export const setPropertyMetadata = (
   imageUrl: string,
   price?: string,
   propertyType?: string,
-  baseUrl: string = 'https://umyinfra.in'
+  baseUrl: string = 'https://www.umyinfra.in'
 ) => {
   const shortDescription = description.substring(0, 160);
   const canonicalUrl = normalizeUrl(`/properties/${propertyId}`);
@@ -103,7 +103,7 @@ export const setPropertyMetadata = (
 // Helper to fetch and apply metadata for property pages
 export const fetchAndApplyPropertyMetadata = async (
   propertyId: string,
-  baseUrl: string = 'https://umyinfra.in'
+  baseUrl: string = 'https://www.umyinfra.in'
 ) => {
   try {
     const response = await fetch(`${baseUrl}/api/property-meta?id=${propertyId}`);

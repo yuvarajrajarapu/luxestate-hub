@@ -5,6 +5,7 @@ import { MapPin, Square, Heart, Share2 } from 'lucide-react';
 import type { Property } from '@/types/property';
 import { useShortlist } from '@/hooks/useShortlist';
 import { useToast } from '@/hooks/use-toast';
+import { formatPropertyPrice } from '@/lib/formatPrice';
 import PropertyImage from './PropertyImage';
 
 interface PropertyCardProps {
@@ -19,15 +20,6 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
   const [isAnimating, setIsAnimating] = useState(false);
 
   const shortlisted = isShortlisted(property.id);
-
-  const formatPrice = (price: number, priceUnit: string) => {
-    if (price >= 10000000) {
-      return `${(price / 10000000).toFixed(2).replace(/\.00$/, '')},00,000/-`;
-    } else if (price >= 100000) {
-      return `${(price / 100000).toFixed(2).replace(/\.00$/, '')},00,000/-`;
-    }
-    return `${price.toLocaleString('en-IN')}/-`;
-  };
 
   const handleShortlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -174,7 +166,7 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
 
           {/* Price */}
           <p className="text-lg font-bold text-gray-900">
-            {formatPrice(property.price, property.priceUnit)}
+            {formatPropertyPrice(property.price)}
           </p>
 
           {/* Area */}

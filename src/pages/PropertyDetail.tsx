@@ -26,6 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { useProperty } from '@/hooks/useProperties';
 import { MetadataHead } from '@/hooks/useMetadata';
 import { generatePropertyMetadata, getPrimaryImage, sanitizeMetaDescription } from '@/lib/metadata';
+import { formatPropertyPrice } from '@/lib/formatPrice';
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -62,20 +63,6 @@ const PropertyDetail = () => {
     );
   }
 
-  const formatPrice = (price: number, priceUnit: string) => {
-    if (price >= 10000000) {
-      return `₹${(price / 10000000).toFixed(2)} Cr`;
-    } else if (price >= 100000) {
-      return `₹${(price / 100000).toFixed(2)} L`;
-    }
-    if (priceUnit === 'per-month') {
-      return `₹${price.toLocaleString('en-IN')}/mo`;
-    } else if (priceUnit === 'per-year') {
-      return `₹${price.toLocaleString('en-IN')}/yr`;
-    }
-    return `₹${price.toLocaleString('en-IN')}`;
-  };
-
   const handleWhatsApp = () => {
     const phone = '9059611547';
     const message = `Hello, I am interested in this property: ${property.title}. Please share more details.`;
@@ -87,13 +74,32 @@ const PropertyDetail = () => {
   };
 
   const handleShare = async () => {
+    const shareUrl = `https://www.umyinfra.in/api/og?id=${property.id}`;
+    const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(
+      `${property.title} - ${formatPropertyPrice(property.price)}\n📍 ${property.location}\n\n${shareUrl}`
+    )}`;
+
     if (navigator.share) {
-      await navigator.share({
-        title: property.title,
-        text: property.description,
-        url: window.location.href,
-      });
+      try {
+        await navigator.share({
+          title: property.title,
+          text: `${property.title} - ${formatPropertyPrice(property.price)} | ${property.location}`,
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // Fall back to WhatsApp share URL when native share is dismissed/unavailable
+      }
     }
+
+    window.open(whatsappShareUrl, '_blank');
+  };
+
+  const formatDisplayPrice = (price: number, priceUnit: string) => {
+    const basePrice = formatPropertyPrice(price);
+    if (priceUnit === 'per-month') return `${basePrice}/mo`;
+    if (priceUnit === 'per-year') return `${basePrice}/yr`;
+    return basePrice;
   };
 
   const nextImage = () => {
@@ -133,7 +139,7 @@ const PropertyDetail = () => {
     '@type': 'RealEstateListing',
     name: property.title,
     description: property.description,
-    url: `https://umyinfra.in/properties/${id}`,
+    url: `https://www.umyinfra.in/property/${id}`,
     image: getPrimaryImage(property.images),
     price: property.price,
     priceCurrency: 'INR',
@@ -333,7 +339,7 @@ const PropertyDetail = () => {
                 <div className="flex flex-wrap items-center gap-4">
                   <div>
                     <p className="text-3xl font-bold text-foreground">
-                      {formatPrice(property.price, property.priceUnit)}
+                      {formatDisplayPrice(property.price, property.priceUnit)}
                     </p>
                     {property.pricePerSqft && (
                       <p className="text-sm text-muted-foreground">

@@ -18,6 +18,7 @@ import {
   getAmenityLabel,
   hasSectionContent,
 } from '@/lib/property-display';
+import { formatPropertyPrice } from '@/lib/formatPrice';
 import { Badge } from '@/components/ui/badge';
 
 interface PropertyDetailsDisplayProps {
@@ -254,7 +255,7 @@ export const PropertyDetailsDisplay: React.FC<PropertyDetailsDisplayProps> = ({
         <div className="mb-6 text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
           <p className="text-sm text-blue-600 mb-1">Price</p>
           <p className="text-3xl font-bold text-blue-900">
-            ₹{(property.price / 10000000).toFixed(2)}Cr
+            {formatPropertyPrice(property.price)}
           </p>
           {property.pricePerSqft && (
             <p className="text-sm text-blue-600 mt-1">₹{property.pricePerSqft}/sqft</p>
