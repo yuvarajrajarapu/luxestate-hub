@@ -12,7 +12,7 @@
     "analyze-build": "node build-analyzer.js",
     "build:ssr": "vite build --ssr src/entry-server.tsx",
     "build:all": "npm run build && npm run build:ssr",
-    "vercel-build": "node -e \"const fs=require('fs');const p='/tmp/vercel_build_once';if(fs.existsSync(p)){console.log('Skipping duplicate vercel-build run');process.exit(0);}fs.writeFileSync(p,'done');\" && vite build"
+    "vercel-build": "node -e \"const fs=require('fs');const {execSync}=require('child_process');const p='/tmp/vercel_build_once';if(fs.existsSync(p)){console.log('Skipping duplicate vercel-build run');process.exit(0);}fs.writeFileSync(p,'done');execSync('vite build',{stdio:'inherit'});\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
