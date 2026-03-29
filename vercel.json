@@ -1,6 +1,8 @@
 {
   "outputDirectory": "dist",
-  "framework": "vite",
+  "framework": null,
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
   "redirects": [
     {
       "source": "/:path*",
