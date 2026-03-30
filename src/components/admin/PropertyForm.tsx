@@ -294,7 +294,12 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
 
       let ensuredCode = normalizePropertyCode(propertyCode);
       if (!ensuredCode) {
-        ensuredCode = await reservePropertyCode(formData.city || 'CITY', categoryMapping.mainCategory);
+        try {
+          ensuredCode = await reservePropertyCode(formData.city || 'CITY', categoryMapping.mainCategory);
+        } catch (err) {
+          console.warn('Failed to reserve property code, using fallback', err);
+          ensuredCode = `${(formData.city || 'CITY').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4) || 'PRP'}-${Date.now().toString().slice(-5)}`;
+        }
         setPropertyCode(ensuredCode);
       }
 

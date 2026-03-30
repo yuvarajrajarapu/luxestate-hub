@@ -18,25 +18,31 @@ export async function reservePropertyCode(city: string, mainCategory: string) {
   const categorySegment = sanitizeSegment(mainCategory, 'CAT');
   const prefix = `${citySegment}-${categorySegment}`;
 
-  const code = await runTransaction(db, async (transaction) => {
-    const snapshot = await transaction.get(COUNTER_DOC);
-    const counters = snapshot.exists() ? snapshot.data() : {};
-    const current = Number((counters as Record<string, any>)[prefix]) || 1000;
-    const next = current + 1;
+  try {
+    const code = await runTransaction(db, async (transaction) => {
+      const snapshot = await transaction.get(COUNTER_DOC);
+      const counters = snapshot.exists() ? snapshot.data() : {};
+      const current = Number((counters as Record<string, any>)[prefix]) || 1000;
+      const next = current + 1;
 
-    transaction.set(
-      COUNTER_DOC,
-      {
-        [prefix]: next,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true }
-    );
+      transaction.set(
+        COUNTER_DOC,
+        {
+          [prefix]: next,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
 
-    return `${prefix}-${next.toString().padStart(4, '0')}`;
-  });
+      return `${prefix}-${next.toString().padStart(4, '0')}`;
+    });
 
-  return code;
+    return code;
+  } catch (error) {
+    console.warn('reservePropertyCode failed, falling back to timestamp code', error);
+    const fallback = `${prefix}-${Math.floor(Date.now() % 100000).toString().padStart(5, '0')}`;
+    return fallback;
+  }
 }
 
 export const buildPropertyUrl = (code: string, baseUrl = 'https://www.umyinfra.in') => {
