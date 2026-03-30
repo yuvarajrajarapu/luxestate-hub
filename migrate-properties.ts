@@ -18,8 +18,8 @@
  */
 
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { getCategoryMapping, PROPERTY_CATEGORIES } from './src/types/property';
+import { getFirestore, collection, getDocs, doc, updateDoc, runTransaction, serverTimestamp } from 'firebase/firestore';
+import { getCategoryMapping } from './src/types/property';
 
 // Your Firebase config (use environment variables in production)
 const firebaseConfig = {
@@ -28,6 +28,42 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+const COUNTER_DOC = doc(db, 'metadata', 'property-counters');
+
+const sanitizeSegment = (value: string, fallback: string) => {
+  const cleaned = (value || fallback)
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 4);
+  return cleaned || fallback;
+};
+
+async function reservePropertyCode(city: string, mainCategory: string) {
+  const citySegment = sanitizeSegment(city, 'PRP');
+  const categorySegment = sanitizeSegment(mainCategory, 'CAT');
+  const prefix = `${citySegment}-${categorySegment}`;
+
+  const code = await runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(COUNTER_DOC);
+    const counters = snapshot.exists() ? snapshot.data() : {};
+    const current = Number((counters as Record<string, any>)[prefix]) || 1000;
+    const next = current + 1;
+
+    transaction.set(
+      COUNTER_DOC,
+      {
+        [prefix]: next,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    return `${prefix}-${next.toString().padStart(4, '0')}`;
+  });
+
+  return code;
+}
 
 async function migrateProperties() {
   console.log('Starting property migration...');
@@ -64,10 +100,13 @@ async function migrateProperties() {
         const mapping = getCategoryMapping(category);
         
         // Update the property
+        const propertyCode = propertyData.propertyCode || await reservePropertyCode(propertyData.city || 'CITY', mapping.mainCategory);
+
         await updateDoc(doc(db, 'properties', propertyId), {
           categorySlug: mapping.categorySlug,
           mainCategory: mapping.mainCategory,
           listingType: mapping.listingType,
+          propertyCode,
         });
         
         console.log(`✅ Updated ${propertyId}: ${category} → ${mapping.mainCategory}/${mapping.categorySlug}`);

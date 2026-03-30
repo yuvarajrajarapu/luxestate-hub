@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -25,15 +25,19 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useProperty } from '@/hooks/useProperties';
 import { MetadataHead } from '@/hooks/useMetadata';
-import { generatePropertyMetadata, getPrimaryImage, sanitizeMetaDescription } from '@/lib/metadata';
+import { generatePropertyMetadata, getPrimaryImage } from '@/lib/metadata';
 import { formatPropertyPrice } from '@/lib/formatPrice';
+import { buildPropertyUrl } from '@/lib/propertyCode';
 
 const PropertyDetail = () => {
-  const { id } = useParams();
+  const { propertyCode } = useParams();
   const navigate = useNavigate();
-  const { property, loading, error } = useProperty(id);
+  const { property, loading, error } = useProperty(propertyCode);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+
+  const shareCode = useMemo(() => property?.propertyCode || property?.id || propertyCode || '', [property?.propertyCode, property?.id, propertyCode]);
+  const propertyUrl = useMemo(() => (shareCode ? buildPropertyUrl(shareCode) : ''), [shareCode]);
 
   // Combine images and videos into a single media array
   const allMedia = property ? [...(property.images || []), ...(property.videos || [])] : [];
@@ -74,9 +78,11 @@ const PropertyDetail = () => {
   };
 
   const handleShare = async () => {
-    const shareUrl = `https://www.umyinfra.in/api/og?id=${property.id}`;
+    if (!shareCode) return;
+
+    const ogShareUrl = `https://www.umyinfra.in/api/og?code=${encodeURIComponent(shareCode)}`;
     const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(
-      `${property.title} - ${formatPropertyPrice(property.price)}\n📍 ${property.location}\n\n${shareUrl}`
+      `${property.title} - ${formatPropertyPrice(property.price)}\n📍 ${property.location}\n\n${ogShareUrl}`
     )}`;
 
     if (navigator.share) {
@@ -84,7 +90,7 @@ const PropertyDetail = () => {
         await navigator.share({
           title: property.title,
           text: `${property.title} - ${formatPropertyPrice(property.price)} | ${property.location}`,
-          url: shareUrl,
+          url: ogShareUrl,
         });
         return;
       } catch {
@@ -92,7 +98,7 @@ const PropertyDetail = () => {
       }
     }
 
-    window.open(whatsappShareUrl, '_blank');
+    window.open(whatsappShareUrl || ogShareUrl, '_blank');
   };
 
   const formatDisplayPrice = (price: number, priceUnit: string) => {
@@ -139,7 +145,7 @@ const PropertyDetail = () => {
     '@type': 'RealEstateListing',
     name: property.title,
     description: property.description,
-    url: `https://www.umyinfra.in/property/${id}`,
+    url: propertyUrl,
     image: getPrimaryImage(property.images),
     price: property.price,
     priceCurrency: 'INR',

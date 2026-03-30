@@ -33,6 +33,7 @@ export interface MediaItem {
 
 export interface Property {
   id: string;
+  propertyCode?: string;
   title: string;
   description: string;
   category: PropertyCategory;

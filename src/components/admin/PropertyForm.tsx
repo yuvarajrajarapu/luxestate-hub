@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import MediaUploader from './MediaUploader';
+import { reservePropertyCode, normalizePropertyCode } from '@/lib/propertyCode';
 
 interface PropertyFormProps {
   propertyId?: string;
@@ -95,6 +96,8 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
     isFeatured: false,
     isSoldOut: false,
   });
+
+  const [propertyCode, setPropertyCode] = useState('');
 
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [images, setImages] = useState<MediaItem[]>([]);
@@ -165,6 +168,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
         setSelectedAmenities(data.amenities);
         setImages(data.images || []);
         setVideos(data.videos || []);
+        setPropertyCode(normalizePropertyCode((data as any).propertyCode) || propertyId || '');
       } else {
         toast.error('Property not found');
         navigate('/admin/dashboard');
@@ -287,6 +291,14 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
       if (formData.landFacing) propertyDataRaw.landFacing = formData.landFacing;
       if (formData.roadAccess) propertyDataRaw.roadAccess = formData.roadAccess;
       if (formData.legalClearances) propertyDataRaw.legalClearances = formData.legalClearances;
+
+      let ensuredCode = normalizePropertyCode(propertyCode);
+      if (!ensuredCode) {
+        ensuredCode = await reservePropertyCode(formData.city || 'CITY', categoryMapping.mainCategory);
+        setPropertyCode(ensuredCode);
+      }
+
+      propertyDataRaw.propertyCode = ensuredCode;
 
       if (mode === 'create') {
         propertyDataRaw.createdAt = Timestamp.now();

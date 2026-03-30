@@ -19,7 +19,7 @@ export interface MetadataConfig {
 const SITE_NAME = 'UMY Infra';
 const SITE_URL = 'https://www.umyinfra.in'; // Single canonical domain
 const DEFAULT_DESCRIPTION = 'Premium real estate platform for buying, renting, and leasing properties';
-const DEFAULT_IMAGE = `${SITE_URL}/og-image.png`;
+const DEFAULT_IMAGE = 'https://res.cloudinary.com/dswoyink7/image/upload/w_1200,h_630,c_fill,q_auto/umy-infra/logo-192.png';
 const TWITTER_HANDLE = '@umyinfra';
 
 /**
@@ -67,8 +67,9 @@ export const generatePropertyMetadata = (property: any): MetadataConfig => {
     .filter(Boolean)
     .join(' • ');
 
-  const imageUrl = property.images?.[0] || property.featured_image || DEFAULT_IMAGE;
-  const canonicalUrl = normalizeUrl(`/properties/${property.id}`);
+  const imageUrl = property.images?.[0]?.url || property.images?.[0] || property.featured_image || DEFAULT_IMAGE;
+  const propertyCode = property.propertyCode || property.id;
+  const canonicalUrl = normalizeUrl(`/property/${propertyCode}`);
 
   return generateMetadata({
     title: `${property.title} - ${SITE_NAME}`,

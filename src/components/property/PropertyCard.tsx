@@ -19,6 +19,7 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
   const { isShortlisted, toggleShortlist, isAuthenticated } = useShortlist();
   const [isAnimating, setIsAnimating] = useState(false);
 
+  const shareCode = property.propertyCode || property.id;
   const shortlisted = isShortlisted(property.id);
 
   const handleShortlistToggle = async (e: React.MouseEvent) => {
@@ -66,7 +67,7 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const shareUrl = `${window.location.origin}/property/${property.id}`;
+    const shareUrl = `${window.location.origin}/api/og?code=${shareCode}`;
     
     if (navigator.share) {
       try {
@@ -95,7 +96,7 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
       transition={{ delay: index * 0.1, duration: 0.4 }}
       className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
     >
-      <Link to={`/property/${property.id}`}>
+      <Link to={`/property/${shareCode}`}>
         {/* Image Section */}
         <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
           <PropertyImage 

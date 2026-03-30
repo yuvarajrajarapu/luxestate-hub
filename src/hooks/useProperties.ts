@@ -6,7 +6,9 @@ import {
   onSnapshot, 
   doc, 
   getDoc,
+  getDocs,
   where,
+  limit,
   QueryConstraint,
   Timestamp
 } from 'firebase/firestore';
@@ -33,6 +35,7 @@ const convertFirestoreDoc = (doc: any): Property => {
   return {
     ...data,
     id: doc.id,
+    propertyCode: typeof data.propertyCode === 'string' ? data.propertyCode.toUpperCase() : doc.id,
     createdAt: data.createdAt instanceof Timestamp 
       ? data.createdAt.toDate() 
       : new Date(data.createdAt),
@@ -101,21 +104,38 @@ export const useProperties = (options: UsePropertiesOptions = {}): UseProperties
 };
 
 // Hook to fetch a single property by ID
-export const useProperty = (id: string | undefined) => {
+export const useProperty = (codeOrId: string | undefined) => {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) {
+    if (!codeOrId) {
       setLoading(false);
-      setError('Property ID is required');
+      setError('Property code is required');
       return;
     }
 
     const fetchProperty = async () => {
       try {
-        const docRef = doc(db, 'properties', id);
+        const code = codeOrId.trim();
+        const propertiesRef = collection(db, 'properties');
+
+        // Prefer propertyCode lookup to keep URLs stable; fall back to document ID.
+        const codeQuery = query(
+          propertiesRef,
+          where('propertyCode', '==', code.toUpperCase()),
+          limit(1)
+        );
+        const codeSnapshot = await getDocs(codeQuery);
+
+        if (!codeSnapshot.empty) {
+          setProperty(convertFirestoreDoc(codeSnapshot.docs[0]));
+          setError(null);
+          return;
+        }
+
+        const docRef = doc(db, 'properties', code);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -134,7 +154,7 @@ export const useProperty = (id: string | undefined) => {
     };
 
     fetchProperty();
-  }, [id]);
+  }, [codeOrId]);
 
   return { property, loading, error };
 };

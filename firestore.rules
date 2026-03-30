@@ -66,5 +66,10 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && 
         resource.data.userId == request.auth.uid;
     }
+
+    // Metadata / counters (e.g., property code counters)
+    match /metadata/{docId} {
+      allow read, write: if isAdmin();
+    }
   }
 }

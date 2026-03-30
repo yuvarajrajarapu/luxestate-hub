@@ -97,6 +97,7 @@ export function getStaticSitemapEntries(): SitemapEntry[] {
 export function generatePropertySitemapEntries(
   properties: Array<{
     id: string;
+    propertyCode?: string;
     title: string;
     city: string;
     images?: string[];
@@ -106,7 +107,7 @@ export function generatePropertySitemapEntries(
   const today = new Date().toISOString().split('T')[0];
   
   return properties.map(property => ({
-    loc: `https://umyinfra.in/properties/${property.id}`,
+    loc: `https://umyinfra.in/property/${encodeURIComponent(property.propertyCode || property.id)}`,
     lastmod: property.updatedAt?.split('T')[0] || today,
     changefreq: 'weekly' as const,
     priority: 0.7,

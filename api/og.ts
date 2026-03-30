@@ -1,5 +1,8 @@
 export const config = { runtime: 'edge' };
 
+const DEFAULT_DESCRIPTION = 'Discover premium properties for sale, rent, and investment opportunities with UMY Infra.';
+const FALLBACK_IMAGE = 'https://res.cloudinary.com/dswoyink7/image/upload/w_1200,h_630,c_fill,q_auto/umy-infra/logo-192.png';
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -9,83 +12,106 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-function toNumber(value: unknown): number {
-  if (typeof value === 'number') return value;
-  if (typeof value === 'string') {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : 0;
-  }
-  return 0;
+function getBaseUrl(req: Request): string {
+  const host = req.headers.get('host') ?? 'www.umyinfra.in';
+  return `https://${host}`;
 }
 
-function formatPrice(price: number): string {
-  if (price >= 10000000) return `₹${(price / 10000000).toFixed(price % 10000000 === 0 ? 0 : 1)} Cr`;
-  if (price >= 100000) return `₹${(price / 100000).toFixed(price % 100000 === 0 ? 0 : 1)} L`;
-  return `₹${price.toLocaleString('en-IN')}`;
-}
+async function fetchPropertyByCode(propertyCode: string) {
+  const projectId = process.env.VITE_FIREBASE_PROJECT_ID ?? process.env.FIREBASE_PROJECT_ID ?? 'umy-infra';
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`;
 
-function getStringField(fields: any, key: string, fallback = ''): string {
-  return fields?.[key]?.stringValue || fallback;
-}
+  const body = {
+    structuredQuery: {
+      from: [{ collectionId: 'properties' }],
+      where: {
+        fieldFilter: {
+          field: { fieldPath: 'propertyCode' },
+          op: 'EQUAL',
+          value: { stringValue: propertyCode.toUpperCase() },
+        },
+      },
+      limit: 1,
+    },
+  };
 
-function getNumberField(fields: any, key: string): number {
-  return toNumber(fields?.[key]?.integerValue ?? fields?.[key]?.doubleValue ?? fields?.[key]?.stringValue ?? 0);
-}
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
 
-function getFirstImage(fields: any): string {
-  const values = fields?.images?.arrayValue?.values;
-  if (!Array.isArray(values) || values.length === 0) {
-    return 'https://www.umyinfra.in/og-image.png';
-  }
+  if (!response.ok) return null;
 
-  const first = values[0];
-  if (first?.stringValue) return first.stringValue;
-  if (first?.mapValue?.fields?.url?.stringValue) return first.mapValue.fields.url.stringValue;
+  const results = await response.json();
+  const document = Array.isArray(results) ? results[0]?.document : null;
+  const fields = document?.fields;
 
-  return 'https://www.umyinfra.in/og-image.png';
+  if (!fields) return null;
+
+  const stringField = (key: string, fallback = '') => fields[key]?.stringValue ?? fallback;
+
+  const images = fields.images?.arrayValue?.values;
+  const imageUrl = Array.isArray(images)
+    ? images
+        .map((image: any) => image?.mapValue?.fields?.url?.stringValue || image?.stringValue)
+        .find(Boolean) || FALLBACK_IMAGE
+    : FALLBACK_IMAGE;
+
+  return {
+    title: stringField('title', 'UMY Infra Property'),
+    description: stringField('description', DEFAULT_DESCRIPTION),
+    location: stringField('location', 'Kakinada, AP'),
+    imageUrl,
+  };
 }
 
 export default async function handler(req: Request) {
   const { searchParams } = new URL(req.url);
-  const id = searchParams.get('id');
+  const propertyCode = searchParams.get('code')?.trim();
 
-  if (!id) {
-    return new Response('Missing property id', { status: 400 });
+  if (!propertyCode) {
+    return new Response('Missing property code', { status: 400 });
   }
 
+  const baseUrl = getBaseUrl(req);
+  const propertyUrl = `${baseUrl}/property/${encodeURIComponent(propertyCode)}`;
+
   try {
-    const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || 'umy-infra';
-    const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/properties/${id}`;
+    const property = await fetchPropertyByCode(propertyCode);
 
-    const res = await fetch(firestoreUrl);
-    const data = res.ok ? ((await res.json()) as any) : {};
-    const fields = data?.fields || {};
+    if (!property) {
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: propertyUrl,
+          'Cache-Control': 'no-store',
+        },
+      });
+    }
 
-    const title = getStringField(fields, 'title', 'Property | UMY Infra');
-    const price = getNumberField(fields, 'price') || getNumberField(fields, 'totalPrice');
-    const location = getStringField(fields, 'location', 'Kakinada, AP');
-    const imageUrl = getFirstImage(fields);
-    const description = `${formatPrice(price)} | ${location} | UMY Infra Real Estate`;
-    const propertyUrl = `https://www.umyinfra.in/property/${encodeURIComponent(id)}`;
+    const title = escapeHtml(`${property.title} | UMY Infra`);
+    const description = escapeHtml(property.description || `${property.location} | UMY Infra`);
+    const image = escapeHtml(property.imageUrl || FALLBACK_IMAGE);
 
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${escapeHtml(title)} | UMY Infra</title>
-  <meta property="og:title" content="${escapeHtml(title)} | UMY Infra" />
-  <meta property="og:description" content="${escapeHtml(description)}" />
-  <meta property="og:image" content="${escapeHtml(imageUrl)}" />
+  <title>${title}</title>
+  <meta property="og:title" content="${title}" />
+  <meta property="og:description" content="${description}" />
+  <meta property="og:image" content="${image}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:url" content="${escapeHtml(propertyUrl)}" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="UMY Infra" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="${escapeHtml(title)} | UMY Infra" />
-  <meta name="twitter:description" content="${escapeHtml(description)}" />
-  <meta name="twitter:image" content="${escapeHtml(imageUrl)}" />
+  <meta name="twitter:title" content="${title}" />
+  <meta name="twitter:description" content="${description}" />
+  <meta name="twitter:image" content="${image}" />
   <meta http-equiv="refresh" content="0;url=${escapeHtml(propertyUrl)}" />
   <link rel="canonical" href="${escapeHtml(propertyUrl)}" />
 </head>
@@ -98,12 +124,12 @@ export default async function handler(req: Request) {
         'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
       },
     });
-  } catch {
-    const fallbackUrl = `https://www.umyinfra.in/property/${encodeURIComponent(id)}`;
+  } catch (error) {
+    console.error('OG generation failed', error);
     return new Response(null, {
       status: 302,
       headers: {
-        Location: fallbackUrl,
+        Location: propertyUrl,
         'Cache-Control': 'no-store',
       },
     });

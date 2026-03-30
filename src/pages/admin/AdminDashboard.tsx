@@ -401,7 +401,7 @@ const AdminDashboard: React.FC = () => {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem asChild>
                               <Link
-                                to={`/property/${property.id}`}
+                                to={`/property/${property.propertyCode || property.id}`}
                                 className="flex items-center gap-2"
                               >
                                 <Eye className="w-4 h-4" />
