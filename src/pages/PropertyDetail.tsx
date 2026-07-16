@@ -24,8 +24,6 @@ import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useProperty } from '@/hooks/useProperties';
-import { MetadataHead } from '@/hooks/useMetadata';
-import { generatePropertyMetadata, getPrimaryImage } from '@/lib/metadata';
 import { formatPropertyPrice } from '@/lib/formatPrice';
 import { buildPropertyUrl } from '@/lib/propertyCode';
 
@@ -80,9 +78,8 @@ const PropertyDetail = () => {
   const handleShare = async () => {
     if (!shareCode) return;
 
-    const ogShareUrl = `https://www.umyinfra.in/api/og?code=${encodeURIComponent(shareCode)}`;
     const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(
-      `${property.title} - ${formatPropertyPrice(property.price)}\n📍 ${property.location}\n\n${ogShareUrl}`
+      `${property.title} - ${formatPropertyPrice(property.price)}\n📍 ${property.location}\n\n${propertyUrl}`
     )}`;
 
     if (navigator.share) {
@@ -90,7 +87,7 @@ const PropertyDetail = () => {
         await navigator.share({
           title: property.title,
           text: `${property.title} - ${formatPropertyPrice(property.price)} | ${property.location}`,
-          url: ogShareUrl,
+          url: propertyUrl,
         });
         return;
       } catch {
@@ -136,38 +133,8 @@ const PropertyDetail = () => {
     }
   };
 
-  // Generate dynamic metadata for the property
-  const metadata = property ? generatePropertyMetadata(property) : null;
-
-  // Generate structured data (JSON-LD) for the property
-  const structuredData = property ? {
-    '@context': 'https://schema.org',
-    '@type': 'RealEstateListing',
-    name: property.title,
-    description: property.description,
-    url: propertyUrl,
-    image: getPrimaryImage(property.images),
-    price: property.price,
-    priceCurrency: 'INR',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: property.address || '',
-      addressLocality: property.city || property.location || '',
-      addressRegion: property.state || '',
-      postalCode: property.postalCode || '',
-      addressCountry: 'IN',
-    },
-    areaServed: property.city || property.location,
-    propertyType: property.propertyType || 'Residential',
-    numberOfRooms: property.bedrooms || undefined,
-    ...(property.area && { floorSize: { value: property.area, unitCode: 'MTK' } }),
-    datePublished: property.createdAt,
-    ...(property.lastModified && { dateModified: property.lastModified }),
-  } : null;
-
   return (
     <div className="min-h-screen bg-background">
-      {metadata && <MetadataHead metadata={metadata} structuredData={structuredData} />}
       <Header />
 
       <main className="pt-20 pb-16">

@@ -49,7 +49,7 @@ const LoadingFallback = () => (
 
 const App = () => {
   return (
-    <HelmetProvider>
+    <div className="min-h-screen">
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <TooltipProvider>
@@ -82,7 +82,7 @@ const App = () => {
         </AuthProvider>
       </QueryClientProvider>
       <SpeedInsights />
-    </HelmetProvider>
+    </div>
   );
 };
 
