@@ -159,7 +159,7 @@ const AdminLogin: React.FC = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@yuvainfraedge.com"
+                  placeholder="Type email address here"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
