@@ -1,5 +1,4 @@
 import { Navigate, useLocation, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ShieldX, ArrowLeft, Home } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -33,19 +32,10 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center max-w-md"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-red-500/20 mb-6"
-          >
+        <div className="text-center max-w-md">
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-red-500/20 mb-6">
             <ShieldX className="w-12 h-12 text-red-500" />
-          </motion.div>
+          </div>
           
           <h1 className="text-3xl font-playfair font-bold text-white mb-4">
             Access Denied
@@ -72,7 +62,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
               </Button>
             </Link>
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }

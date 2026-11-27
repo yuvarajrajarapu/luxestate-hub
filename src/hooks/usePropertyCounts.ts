@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import type { PropertyCategory, LandType } from '@/types/property';
 
 interface CategoryCount {
@@ -19,47 +17,60 @@ export const usePropertyCounts = (): UsePropertyCountsReturn => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
     let unsubscribe: (() => void) | undefined;
     let subscriptionTimer: number | undefined;
 
     const subscribeToCounts = () => {
       // Category counts are non-critical and query the full collection.
       subscriptionTimer = window.setTimeout(() => {
-        const q = query(collection(db, 'properties'));
+        void Promise.all([
+          import('firebase/firestore'),
+          import('@/lib/firebase'),
+        ]).then(([firestore, firebase]) => {
+          if (!active) return;
+          const q = firestore.query(firestore.collection(firebase.db, 'properties'));
 
-        unsubscribe = onSnapshot(
-          q,
-          (snapshot) => {
-            const countMap: Record<string, number> = {};
+          unsubscribe = firestore.onSnapshot(
+            q,
+            (snapshot) => {
+              if (!active) return;
+              const countMap: Record<string, number> = {};
 
-            snapshot.docs.forEach((doc) => {
-              const data = doc.data();
-              const categorySlug = data.categorySlug as string;
-              const landType = data.landType as LandType | undefined;
-              const listingType = data.listingType as string | undefined;
+              snapshot.docs.forEach((doc) => {
+                const data = doc.data();
+                const categorySlug = data.categorySlug as string;
+                const landType = data.landType as LandType | undefined;
+                const listingType = data.listingType as string | undefined;
 
-              if (categorySlug) {
-                countMap[categorySlug] = (countMap[categorySlug] || 0) + 1;
-              }
-
-              if (categorySlug === 'land-for-sale' && landType) {
-                countMap[landType] = (countMap[landType] || 0) + 1;
-
-                if (landType === 'farm-houses' && listingType) {
-                  const farmKey = `farm-houses-${listingType}`;
-                  countMap[farmKey] = (countMap[farmKey] || 0) + 1;
+                if (categorySlug) {
+                  countMap[categorySlug] = (countMap[categorySlug] || 0) + 1;
                 }
-              }
-            });
 
-            setCounts(countMap);
-            setLoading(false);
-          },
-          (err) => {
-            console.error('Error fetching property counts:', err);
-            setLoading(false);
-          }
-        );
+                if (categorySlug === 'land-for-sale' && landType) {
+                  countMap[landType] = (countMap[landType] || 0) + 1;
+
+                  if (landType === 'farm-houses' && listingType) {
+                    const farmKey = `farm-houses-${listingType}`;
+                    countMap[farmKey] = (countMap[farmKey] || 0) + 1;
+                  }
+                }
+              });
+
+              setCounts(countMap);
+              setLoading(false);
+            },
+            (err) => {
+              if (!active) return;
+              console.error('Error fetching property counts:', err);
+              setLoading(false);
+            }
+          );
+        }).catch((err) => {
+          if (!active) return;
+          console.error('Error initializing property counts:', err);
+          setLoading(false);
+        });
       }, 1500);
     };
 
@@ -70,6 +81,7 @@ export const usePropertyCounts = (): UsePropertyCountsReturn => {
     }
 
     return () => {
+      active = false;
       window.removeEventListener('load', subscribeToCounts);
       if (subscriptionTimer !== undefined) window.clearTimeout(subscriptionTimer);
       unsubscribe?.();

@@ -1,18 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {
-  User,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  updateProfile,
-  UserCredential,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithCredential,
-} from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
+import type { User, UserCredential } from 'firebase/auth';
 
 interface UserData {
   uid: string;
@@ -38,6 +25,22 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const loadFirebaseAuth = async () => {
+  const [firebaseAuth, authSdk] = await Promise.all([
+    import('@/lib/firebase-auth'),
+    import('firebase/auth'),
+  ]);
+  return { auth: firebaseAuth.auth, ...authSdk };
+};
+
+const loadFirebaseFirestore = async () => {
+  const [firestore, firebase] = await Promise.all([
+    import('firebase/firestore'),
+    import('@/lib/firebase'),
+  ]);
+  return { ...firestore, db: firebase.db };
+};
+
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -56,6 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Function to fetch user data and check admin status
   const fetchUserData = async (currentUser: User) => {
     try {
+      const { doc, getDoc, db } = await loadFirebaseFirestore();
       const userDocRef = doc(db, 'users', currentUser.uid);
       const userDoc = await getDoc(userDocRef);
       
@@ -83,6 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Refresh user data (useful after role change)
   const refreshUserData = async () => {
+    const { auth } = await loadFirebaseAuth();
     if (auth.currentUser) {
       setCheckingAdmin(true);
       await fetchUserData(auth.currentUser);
@@ -91,30 +96,74 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      setCheckingAdmin(true);
-      
-      if (currentUser) {
-        await fetchUserData(currentUser);
-      } else {
-        setUserData(null);
-        setIsAdmin(false);
-      }
-      
-      setCheckingAdmin(false);
-      setLoading(false);
-    });
+    let active = true;
+    let unsubscribe: (() => void) | undefined;
+    let authTimer: number | undefined;
 
-    return () => unsubscribe();
+    const initializeAuthState = async () => {
+      try {
+        const { auth, onAuthStateChanged } = await loadFirebaseAuth();
+        if (!active) return;
+
+        unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+          if (!active) return;
+
+          setUser(currentUser);
+          setCheckingAdmin(true);
+
+          if (currentUser) {
+            await fetchUserData(currentUser);
+          } else {
+            setUserData(null);
+            setIsAdmin(false);
+          }
+
+          if (!active) return;
+          setCheckingAdmin(false);
+          setLoading(false);
+        });
+      } catch (error) {
+        console.error('Error initializing authentication:', error);
+        if (active) {
+          setCheckingAdmin(false);
+          setLoading(false);
+        }
+      }
+    };
+
+    const scheduleAuthInitialization = () => {
+      authTimer = window.setTimeout(() => {
+        void initializeAuthState();
+      }, 1500);
+    };
+
+    if (document.readyState === 'complete') {
+      scheduleAuthInitialization();
+    } else {
+      window.addEventListener('load', scheduleAuthInitialization, { once: true });
+    }
+
+    return () => {
+      active = false;
+      unsubscribe?.();
+      window.removeEventListener('load', scheduleAuthInitialization);
+      if (authTimer !== undefined) window.clearTimeout(authTimer);
+    };
   }, []);
 
   const signIn = async (email: string, password: string): Promise<UserCredential> => {
+    const { auth, signInWithEmailAndPassword } = await loadFirebaseAuth();
     return await signInWithEmailAndPassword(auth, email, password);
   };
 
   // User signup - automatically assigns role: "user"
   const signUp = async (email: string, password: string, username: string) => {
+    const {
+      auth,
+      createUserWithEmailAndPassword,
+      updateProfile,
+    } = await loadFirebaseAuth();
+    const { doc, setDoc, serverTimestamp, db } = await loadFirebaseFirestore();
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const newUser = userCredential.user;
     
@@ -141,6 +190,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
+      const { auth, GoogleAuthProvider, signInWithPopup } = await loadFirebaseAuth();
+      const { doc, getDoc, setDoc, serverTimestamp, db } = await loadFirebaseFirestore();
       const googleProvider = new GoogleAuthProvider();
       googleProvider.addScope('profile');
       googleProvider.addScope('email');
@@ -177,6 +228,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogleCredential = async (credential: string): Promise<void> => {
     try {
+      const { auth, GoogleAuthProvider, signInWithCredential } = await loadFirebaseAuth();
+      const { doc, getDoc, setDoc, serverTimestamp, db } = await loadFirebaseFirestore();
       // Authenticate with Google credential token from One Tap
       const googleCredential = GoogleAuthProvider.credential(null, credential);
       
@@ -208,6 +261,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    const { auth, signOut } = await loadFirebaseAuth();
     await signOut(auth);
     setUserData(null);
     setIsAdmin(false);
@@ -216,6 +270,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Helper function to create or fetch user document
   const createOrFetchUserDoc = async (currentUser: User): Promise<UserData | null> => {
     try {
+      const { doc, getDoc, setDoc, serverTimestamp, db } = await loadFirebaseFirestore();
       const userDocRef = doc(db, 'users', currentUser.uid);
       const userDoc = await getDoc(userDocRef);
       

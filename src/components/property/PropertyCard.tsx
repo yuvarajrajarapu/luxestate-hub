@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Square, Heart, Share2 } from 'lucide-react';
 import type { Property } from '@/types/property';
 import { useShortlist } from '@/hooks/useShortlist';
@@ -13,7 +12,7 @@ interface PropertyCardProps {
   index?: number;
 }
 
-const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
+const PropertyCard = ({ property }: PropertyCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isShortlisted, toggleShortlist, isAuthenticated } = useShortlist();
@@ -90,10 +89,7 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.4 }}
+    <div
       className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
     >
       <Link to={`/property/${shareCode}`}>
@@ -108,53 +104,23 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
           {/* Top Right Icons */}
           <div className="absolute top-2 right-2 flex gap-2">
             {/* Heart Icon with Premium Animation */}
-            <motion.button
+            <button
+              type="button"
               onClick={handleShortlistToggle}
-              className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all shadow-md"
-              whileTap={{ scale: 0.85 }}
+              className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white active:scale-90 transition-all shadow-md"
               disabled={isAnimating}
             >
-              <AnimatePresence mode="wait">
-                {shortlisted ? (
-                  <motion.div
-                    key="filled"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    transition={{ 
-                      type: "spring", 
-                      stiffness: 500, 
-                      damping: 15 
-                    }}
-                  >
-                    <Heart className="w-4 h-4 fill-red-500 text-red-500" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="empty"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    transition={{ 
-                      type: "spring", 
-                      stiffness: 500, 
-                      damping: 15 
-                    }}
-                  >
-                    <Heart className="w-4 h-4 text-gray-700" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.button>
+              <Heart className={`w-4 h-4 transition-colors ${shortlisted ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
+            </button>
 
             {/* Share Icon */}
-            <motion.button
+            <button
+              type="button"
               onClick={handleShare}
-              className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all shadow-md"
-              whileTap={{ scale: 0.9 }}
+              className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white active:scale-90 transition-all shadow-md"
             >
               <Share2 className="w-4 h-4 text-gray-700" />
-            </motion.button>
+            </button>
           </div>
         </div>
 
@@ -185,7 +151,7 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 };
 

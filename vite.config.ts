@@ -7,9 +7,11 @@ import compression from 'vite-plugin-compression';
 const projectRoot = fileURLToPath(new URL(".", import.meta.url));
 const manualChunkGroups = {
   "react-vendor": ["react", "react-dom", "react-router-dom", "react-helmet-async"],
-  "firebase-vendor": ["firebase/app", "firebase/firestore", "firebase/auth"],
+  "firebase-core": ["firebase/app"],
+  "firebase-firestore": ["firebase/firestore"],
+  "firebase-auth": ["firebase/auth"],
+  "firebase-analytics": ["firebase/analytics"],
   "forms-vendor": ["react-hook-form", "@hookform/resolvers"],
-  animation: ["framer-motion"],
   "radix-ui": [
     "@radix-ui/react-dialog",
     "@radix-ui/react-dropdown-menu",

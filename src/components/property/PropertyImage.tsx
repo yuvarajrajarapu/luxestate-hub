@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
 import type { MediaItem } from '@/types/property';
 import { getOptimizedImageUrl, getResponsiveImageSrcSet } from '@/lib/image-optimization';
 
@@ -123,12 +122,7 @@ const PropertyImage = ({ images, title, className = 'w-full h-full', priority = 
   const imagePriorityAttribute = { fetchpriority: priority };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-      className={`${className} relative bg-gray-100`}
-    >
+    <div className={`${className} relative bg-gray-100`}>
       {imageUrl && !error && (
         <picture>
           {webpUrl && (
@@ -168,7 +162,7 @@ const PropertyImage = ({ images, title, className = 'w-full h-full', priority = 
       {isLoading && (
         <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" />
       )}
-    </motion.div>
+    </div>
   );
 };
 

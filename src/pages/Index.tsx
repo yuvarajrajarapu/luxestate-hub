@@ -1,23 +1,21 @@
+import { lazy, Suspense } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/home/HeroSection';
 import CategoryCards from '@/components/home/CategoryCards';
-import PropertyCard from '@/components/property/PropertyCard';
-import GoogleOneTap from '@/components/auth/GoogleOneTap';
-import { motion } from 'framer-motion';
 import { useProperties } from '@/hooks/useProperties';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Loader2 } from 'lucide-react';
 
+const PropertyCard = lazy(() => import('@/components/property/PropertyCard'));
+
 const Index = () => {
   // Fetch properties from Firestore, limited to 6 for homepage
-  const { properties, loading } = useProperties({ limit: 6 });
+  const { properties, loading } = useProperties({ limit: 6, deferUntilLoad: true });
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Google One Tap Prompt - appears on initial load */}
-      <GoogleOneTap />
       <Header />
 
       <main>
@@ -61,11 +59,13 @@ const Index = () => {
             ) : (
               <div className="overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
                 <div className="flex gap-3" style={{ width: 'max-content' }}>
-                  {properties.map((property, index) => (
-                    <div key={property.id} className="w-48">
-                      <PropertyCard property={property} index={index} />
-                    </div>
-                  ))}
+                  <Suspense fallback={<div className="flex w-full items-center justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+                    {properties.map((property, index) => (
+                      <div key={property.id} className="w-48">
+                        <PropertyCard property={property} index={index} />
+                      </div>
+                    ))}
+                  </Suspense>
                 </div>
               </div>
             )}
@@ -81,19 +81,15 @@ const Index = () => {
                 { value: '1000+', label: 'Happy Customers' },
                 { value: '50+', label: 'Cities Covered' },
                 { value: '₹500 Cr+', label: 'Worth Properties Sold' },
-              ].map((stat, index) => (
-                <motion.div
+              ].map((stat) => (
+                <div
                   key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
                 >
                   <p className="text-3xl md:text-4xl font-display font-bold mb-2">
                     {stat.value}
                   </p>
                   <p className="text-primary-foreground/70 text-sm">{stat.label}</p>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -102,19 +98,14 @@ const Index = () => {
         {/* Property Categories */}
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
+            <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
                 Browse by Category
               </h2>
               <p className="text-muted-foreground">
                 Find exactly what you're looking for
               </p>
-            </motion.div>
+            </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {[
@@ -130,13 +121,9 @@ const Index = () => {
                 { label: 'Commercial', href: '/properties?category=commercial-space-for-rent-lease', icon: '🏪' },
                 { label: 'PG for Men', href: '/properties?category=pg-hostel-boys', icon: '🛏️' },
                 { label: 'PG for Women', href: '/properties?category=pg-hostel-girls', icon: '🛋️' },
-              ].map((category, index) => (
-                <motion.div
+              ].map((category) => (
+                <div
                   key={category.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
                 >
                   <Link
                     to={category.href}
@@ -147,7 +134,7 @@ const Index = () => {
                       {category.label}
                     </p>
                   </Link>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>

@@ -1,18 +1,5 @@
 import { useState, useEffect } from 'react';
-import { 
-  collection, 
-  query, 
-  orderBy, 
-  onSnapshot, 
-  doc, 
-  getDoc,
-  getDocs,
-  where,
-  limit,
-  QueryConstraint,
-  Timestamp
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import type { QueryConstraint } from 'firebase/firestore';
 import type { Property, ListingType, MainCategory } from '@/types/property';
 
 interface UsePropertiesOptions {
@@ -21,6 +8,7 @@ interface UsePropertiesOptions {
   categorySlug?: string;
   featured?: boolean;
   limit?: number;
+  deferUntilLoad?: boolean;
 }
 
 interface UsePropertiesReturn {
@@ -30,7 +18,10 @@ interface UsePropertiesReturn {
 }
 
 // Convert Firestore document to Property type
-const convertFirestoreDoc = (doc: any): Property => {
+const convertFirestoreDoc = (
+  doc: any,
+  Timestamp: typeof import('firebase/firestore').Timestamp
+): Property => {
   const data = doc.data();
   return {
     ...data,
@@ -52,51 +43,101 @@ export const useProperties = (options: UsePropertiesOptions = {}): UseProperties
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const constraints: QueryConstraint[] = [orderBy('createdAt', 'desc')];
-    
-    // Filter by mainCategory if specified
-    if (options.mainCategory) {
-      constraints.unshift(where('mainCategory', '==', options.mainCategory));
-    }
-    
-    // Filter by categorySlug if specified (most specific filter)
-    if (options.categorySlug) {
-      constraints.unshift(where('categorySlug', '==', options.categorySlug));
-    }
-    
-    // Filter by listing type if specified
-    if (options.listingType && options.listingType !== 'all') {
-      constraints.unshift(where('listingType', '==', options.listingType));
-    }
-    
-    // Filter by featured if specified
-    if (options.featured) {
-      constraints.unshift(where('isFeatured', '==', true));
-    }
+    let active = true;
+    let unsubscribe: (() => void) | undefined;
+    let subscriptionTimer: number | undefined;
 
-    if (options.limit) {
-      constraints.push(limit(options.limit));
-    }
+    const subscribeToProperties = async () => {
+      try {
+        const [firestore, firebase] = await Promise.all([
+          import('firebase/firestore'),
+          import('@/lib/firebase'),
+        ]);
+        if (!active) return;
 
-    const q = query(collection(db, 'properties'), ...constraints);
+        const constraints: QueryConstraint[] = [firestore.orderBy('createdAt', 'desc')];
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const propertiesData = snapshot.docs.map(convertFirestoreDoc);
-        setProperties(propertiesData);
-        setLoading(false);
-        setError(null);
-      },
-      (err) => {
-        console.error('Error fetching properties:', err);
+        if (options.mainCategory) {
+          constraints.unshift(firestore.where('mainCategory', '==', options.mainCategory));
+        }
+
+        if (options.categorySlug) {
+          constraints.unshift(firestore.where('categorySlug', '==', options.categorySlug));
+        }
+
+        if (options.listingType && options.listingType !== 'all') {
+          constraints.unshift(firestore.where('listingType', '==', options.listingType));
+        }
+
+        if (options.featured) {
+          constraints.unshift(firestore.where('isFeatured', '==', true));
+        }
+
+        if (options.limit) {
+          constraints.push(firestore.limit(options.limit));
+        }
+
+        const q = firestore.query(
+          firestore.collection(firebase.db, 'properties'),
+          ...constraints
+        );
+
+        unsubscribe = firestore.onSnapshot(
+          q,
+          (snapshot) => {
+            if (!active) return;
+            const propertiesData = snapshot.docs.map((doc) =>
+              convertFirestoreDoc(doc, firestore.Timestamp)
+            );
+            setProperties(propertiesData);
+            setLoading(false);
+            setError(null);
+          },
+          (err) => {
+            if (!active) return;
+            console.error('Error fetching properties:', err);
+            setError('Failed to load properties');
+            setLoading(false);
+          }
+        );
+      } catch (err) {
+        if (!active) return;
+        console.error('Error initializing properties query:', err);
         setError('Failed to load properties');
         setLoading(false);
       }
-    );
+    };
 
-    return () => unsubscribe();
-  }, [options.listingType, options.mainCategory, options.categorySlug, options.featured, options.limit]);
+    const scheduleSubscription = () => {
+      if (options.deferUntilLoad) {
+        subscriptionTimer = window.setTimeout(() => {
+          void subscribeToProperties();
+        }, 1500);
+      } else {
+        void subscribeToProperties();
+      }
+    };
+
+    if (options.deferUntilLoad && document.readyState !== 'complete') {
+      window.addEventListener('load', scheduleSubscription, { once: true });
+    } else {
+      scheduleSubscription();
+    }
+
+    return () => {
+      active = false;
+      unsubscribe?.();
+      window.removeEventListener('load', scheduleSubscription);
+      if (subscriptionTimer !== undefined) window.clearTimeout(subscriptionTimer);
+    };
+  }, [
+    options.listingType,
+    options.mainCategory,
+    options.categorySlug,
+    options.featured,
+    options.limit,
+    options.deferUntilLoad,
+  ]);
 
   return { properties, loading, error };
 };
@@ -108,50 +149,65 @@ export const useProperty = (codeOrId: string | undefined) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let active = true;
+
     if (!codeOrId) {
       setLoading(false);
       setError('Property code is required');
-      return;
+      return () => {
+        active = false;
+      };
     }
 
     const fetchProperty = async () => {
       try {
+        const [firestore, firebase] = await Promise.all([
+          import('firebase/firestore'),
+          import('@/lib/firebase'),
+        ]);
+        if (!active) return;
+
         const code = codeOrId.trim();
-        const propertiesRef = collection(db, 'properties');
+        const propertiesRef = firestore.collection(firebase.db, 'properties');
 
         // Prefer propertyCode lookup to keep URLs stable; fall back to document ID.
-        const codeQuery = query(
+        const codeQuery = firestore.query(
           propertiesRef,
-          where('propertyCode', '==', code.toUpperCase()),
-          limit(1)
+          firestore.where('propertyCode', '==', code.toUpperCase()),
+          firestore.limit(1)
         );
-        const codeSnapshot = await getDocs(codeQuery);
+        const codeSnapshot = await firestore.getDocs(codeQuery);
 
         if (!codeSnapshot.empty) {
-          setProperty(convertFirestoreDoc(codeSnapshot.docs[0]));
+          setProperty(convertFirestoreDoc(codeSnapshot.docs[0], firestore.Timestamp));
           setError(null);
           return;
         }
 
-        const docRef = doc(db, 'properties', code);
-        const docSnap = await getDoc(docRef);
+        const docRef = firestore.doc(firebase.db, 'properties', code);
+        const docSnap = await firestore.getDoc(docRef);
 
         if (docSnap.exists()) {
-          setProperty(convertFirestoreDoc(docSnap));
+          setProperty(convertFirestoreDoc(docSnap, firestore.Timestamp));
           setError(null);
         } else {
           setError('Property not found');
           setProperty(null);
         }
       } catch (err) {
+        if (!active) return;
         console.error('Error fetching property:', err);
         setError('Failed to load property');
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
-    fetchProperty();
+    void fetchProperty();
+
+    return () => {
+      active = false;
+    };
   }, [codeOrId]);
 
   return { property, loading, error };

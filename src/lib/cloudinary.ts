@@ -1,4 +1,4 @@
-import { auth } from '@/lib/firebase';
+import { auth } from '@/lib/firebase-auth';
 
 export const MAX_UPLOAD_BYTES = {
   image: 10 * 1024 * 1024,

@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import heroBg from '@/assets/hero-bg.jpg';
 
 const HeroSection = () => {
@@ -26,46 +25,27 @@ const HeroSection = () => {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-16 md:py-24 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="max-w-4xl mx-auto"
-        >
+        <div className="max-w-4xl mx-auto">
           <h1 className="text-display text-primary-foreground mb-4">
             Find Your Perfect Property
           </h1>
           <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto">
             Explore homes, plots, commercial spaces, and agricultural land across India's prime locations.
           </p>
-        </motion.div>
+        </div>
 
         {/* Breadcrumb */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="text-primary-foreground/60 mt-6 text-sm"
-        >
+        <p className="text-primary-foreground/60 mt-6 text-sm">
           Home / Properties in India
-        </motion.p>
+        </p>
       </div>
 
       {/* Scroll Indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2"
-      >
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="w-6 h-10 rounded-full border-2 border-primary-foreground/30 flex items-start justify-center p-2"
-        >
+      <div className="hero-scroll-indicator absolute bottom-6 left-1/2 -translate-x-1/2">
+        <div className="hero-scroll-indicator__mouse w-6 h-10 rounded-full border-2 border-primary-foreground/30 flex items-start justify-center p-2">
           <div className="w-1.5 h-3 rounded-full bg-primary-foreground/50" />
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 };

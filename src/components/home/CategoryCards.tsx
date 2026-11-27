@@ -1,5 +1,4 @@
 import { useRef } from 'react';
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Search, Building2, Home, LandPlot, Key, Briefcase, Store, Users, Trees, Fence } from 'lucide-react';
 import { usePropertyCounts } from '@/hooks/usePropertyCounts';
@@ -211,12 +210,7 @@ const CategoryCards = () => {
   return (
     <section className="py-10 md:py-16">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-6 flex items-end justify-between"
-        >
+        <div className="mb-6 flex items-end justify-between">
           <div>
             <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">
               Explore Properties
@@ -243,7 +237,7 @@ const CategoryCards = () => {
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* Scrollable Container */}
         <div className="relative">
@@ -252,18 +246,14 @@ const CategoryCards = () => {
             className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 snap-x snap-mandatory"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {categories.map((category, index) => {
+            {categories.map((category) => {
               const countDisplay = getCountDisplay(category.id);
               const hasProperties = countDisplay !== null;
               const IconComponent = category.icon;
 
               return (
-                <motion.div
+                <div
                   key={category.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05, duration: 0.4 }}
                   className="flex-shrink-0 w-[260px] md:w-[300px] snap-start"
                 >
                   <Link
@@ -325,7 +315,7 @@ const CategoryCards = () => {
                       </svg>
                     </div>
                   </Link>
-                </motion.div>
+                </div>
               );
             })}
           </div>
