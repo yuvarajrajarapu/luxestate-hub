@@ -1,8 +1,8 @@
 {
   "outputDirectory": "dist",
   "framework": null,
-  "buildCommand": "npm run build",
-  "installCommand": "npm install",
+  "buildCommand": "unset npm_config_cache_dir && npm run build",
+  "installCommand": "unset npm_config_cache_dir && npm install",
   "redirects": [
     {
       "source": "/:path*",
