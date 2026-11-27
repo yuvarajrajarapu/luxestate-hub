@@ -1,4 +1,4 @@
-import { buildPropertyMetadata, fetchPropertyByCode } from './_shared/property-metadata';
+import { buildPropertyMetadata, fetchPropertyByCode } from './_shared/property-metadata.js';
 
 export const config = {
   runtime: 'edge',

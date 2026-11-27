@@ -1,4 +1,4 @@
-import { buildPropertyMetaHtml, buildPropertyMetadata, fetchPropertyByCode } from './_shared/property-metadata';
+import { buildPropertyMetaHtml, buildPropertyMetadata, fetchPropertyByCode } from './_shared/property-metadata.js';
 
 export const config = { runtime: 'edge' };
 

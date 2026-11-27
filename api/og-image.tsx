@@ -1,5 +1,5 @@
 import { ImageResponse } from '@vercel/og';
-import { buildPropertyMetadata, fetchPropertyByCode, escapeHtml } from './_shared/property-metadata';
+import { buildPropertyMetadata, fetchPropertyByCode, escapeHtml } from './_shared/property-metadata.js';
 
 export const config = {
   runtime: 'edge',
