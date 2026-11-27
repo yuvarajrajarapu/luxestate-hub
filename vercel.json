@@ -1,8 +1,8 @@
 {
   "outputDirectory": "dist",
   "framework": null,
-  "buildCommand": "unset npm_config_cache_dir && npm run build",
-  "installCommand": "unset npm_config_cache_dir && npm install",
+  "buildCommand": "env -u npm_config_cache_dir -u NPM_CONFIG_CACHE_DIR -u npm_config_cache-dir -u NPM_CONFIG_CACHE-DIR npm run build",
+  "installCommand": "env -u npm_config_cache_dir -u NPM_CONFIG_CACHE_DIR -u npm_config_cache-dir -u NPM_CONFIG_CACHE-DIR npm install",
   "redirects": [
     {
       "source": "/:path*",
