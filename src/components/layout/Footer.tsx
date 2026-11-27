@@ -73,6 +73,16 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/properties?categorySlug=development-land-for-sale" className="hover:text-primary-foreground transition-colors">
+                  Land for Developers
+                </Link>
+              </li>
+              <li>
+                <Link to="/properties?categorySlug=venture-for-marketing" className="hover:text-primary-foreground transition-colors">
+                  Venture for Marketing
+                </Link>
+              </li>
+              <li>
                 <Link to="/properties?category=commercial-space-for-rent-lease" className="hover:text-primary-foreground transition-colors">
                   Commercial Spaces
                 </Link>

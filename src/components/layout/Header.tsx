@@ -80,6 +80,8 @@ const Header = () => {
       mainLink: '/properties?category=land-for-sale',
       items: [
         { label: 'Plot for Sale', href: '/land/plot' },
+        { label: 'Land for Developers', href: '/properties?categorySlug=development-land-for-sale' },
+        { label: 'Venture for Marketing', href: '/properties?categorySlug=venture-for-marketing' },
         { label: 'Agriculture Land', href: '/land/agricultural' },
         { label: 'Farmhouse for Sale', href: '/land/farm-houses?type=sale' },
         { label: 'Farmhouse for Rent', href: '/land/farm-houses?type=rent' },

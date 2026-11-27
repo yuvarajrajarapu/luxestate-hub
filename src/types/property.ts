@@ -2,6 +2,8 @@ export type MainCategory = 'buy' | 'rent' | 'land' | 'commercial' | 'pg';
 
 export type PropertyCategory = 
   | 'land-for-sale'
+  | 'development-land-for-sale'
+  | 'venture-for-marketing'
   | 'flat-for-sale'
   | 'house-for-sale'
   | 'house-for-rent'
@@ -14,6 +16,15 @@ export type PropertyCategory =
   | 'pg-girls';
 
 export type LandType = 'plot' | 'agricultural' | 'farm-houses';
+
+export type DevelopmentPurpose =
+  | 'apartments'
+  | 'villa-project'
+  | 'commercial-development'
+  | 'commercial-plot-subdivision'
+  | 'mixed-use';
+
+export type VentureType = 'layout' | 'non-layout';
 
 export type ListingType = 'sale' | 'rent' | 'lease';
 
@@ -74,6 +85,11 @@ export interface Property {
   landFacing?: string; // For Land - facing direction
   roadAccess?: string; // For Land - road access details
   legalClearances?: string; // For Land - legal clearance info
+  developmentPurpose?: DevelopmentPurpose;
+  landZoning?: string;
+  roadWidthFeet?: number;
+  roadFrontageFeet?: number;
+  ventureType?: VentureType;
   
   // Status
   furnishingStatus?: FurnishingStatus;
@@ -121,6 +137,8 @@ export const PROPERTY_CATEGORIES: {
   categorySlug: string;
 }[] = [
   { value: 'land-for-sale', label: 'Land for Sale', listingType: 'sale', mainCategory: 'land', categorySlug: 'land-for-sale' },
+  { value: 'development-land-for-sale', label: 'Development Land for Sale', listingType: 'sale', mainCategory: 'land', categorySlug: 'development-land-for-sale' },
+  { value: 'venture-for-marketing', label: 'Venture for Marketing', listingType: 'sale', mainCategory: 'land', categorySlug: 'venture-for-marketing' },
   { value: 'flat-for-sale', label: 'Flat for Sale', listingType: 'sale', mainCategory: 'buy', categorySlug: 'flat-for-sale' },
   { value: 'house-for-sale', label: 'House for Sale', listingType: 'sale', mainCategory: 'buy', categorySlug: 'house-for-sale' },
   { value: 'house-for-rent', label: 'House for Rent', listingType: 'rent', mainCategory: 'rent', categorySlug: 'house-for-rent' },
@@ -203,6 +221,22 @@ export const getCategoryAmenities = (category: PropertyCategory): string[] => {
       return [
         'Road Access',
         'Legal Clearances',
+      ];
+    case 'development-land-for-sale':
+      return [
+        'Electricity Access',
+        'Water Availability',
+        'Drainage Access',
+        'Nearby Infrastructure',
+      ];
+    case 'venture-for-marketing':
+      return [
+        'Internal Roads',
+        'Electricity Access',
+        'Water Availability',
+        'Drainage Access',
+        'Street Lighting',
+        'Gated Entry',
       ];
     default:
       return [];

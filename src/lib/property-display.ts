@@ -49,6 +49,11 @@ export const getDisplayableFields = (
       landFacing: 'Facing',
       roadAccess: 'Road Access',
       legalClearances: 'Legal Clearances',
+      ventureType: 'Venture Type',
+      developmentPurpose: 'Suitable Project Type',
+      landZoning: 'Land Use / Zoning',
+      roadWidthFeet: 'Approach Road Width',
+      roadFrontageFeet: 'Road Frontage',
     },
     status: {
       possessionStatus: 'Possession',
@@ -156,6 +161,23 @@ export const formatFieldValue = (
         'farm-houses': 'Farm Houses',
       };
       return landTypeMap[value] || value;
+
+    case 'developmentPurpose':
+      const developmentPurposeMap: Record<string, string> = {
+        apartments: 'Apartment Project',
+        'villa-project': 'Villa Project',
+        'commercial-development': 'Commercial Development',
+        'commercial-plot-subdivision': 'Commercial Plot Subdivision',
+        'mixed-use': 'Mixed-use / Flexible Development',
+      };
+      return developmentPurposeMap[value] || value;
+
+    case 'ventureType':
+      return value === 'non-layout' ? 'Non Layout' : value === 'layout' ? 'Layout' : value;
+
+    case 'roadWidthFeet':
+    case 'roadFrontageFeet':
+      return `${value} ft`;
 
     case 'roadAccess':
       const roadAccessMap: Record<string, string> = {
@@ -294,7 +316,17 @@ export const hasSectionContent = (
       );
     case 'land':
       return fields.some((f) =>
-        ['landType', 'landFacing', 'roadAccess', 'legalClearances'].includes(f.field)
+        [
+          'landType',
+          'landFacing',
+          'roadAccess',
+          'legalClearances',
+          'ventureType',
+          'developmentPurpose',
+          'landZoning',
+          'roadWidthFeet',
+          'roadFrontageFeet',
+        ].includes(f.field)
       );
     case 'amenities':
       return getDisplayableAmenities(property).length > 0;

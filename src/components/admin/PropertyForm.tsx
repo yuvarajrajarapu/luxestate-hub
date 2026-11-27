@@ -84,6 +84,11 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
     landFacing: '',
     roadAccess: '',
     legalClearances: '',
+    developmentPurpose: '' as Property['developmentPurpose'] | '',
+    landZoning: '',
+    roadWidthFeet: '',
+    roadFrontageFeet: '',
+    ventureType: '' as Property['ventureType'] | '',
     furnishingStatus: undefined as FurnishingStatus | undefined,
     possessionStatus: 'ready-to-move' as PossessionStatus,
     postedBy: 'dealer' as PostedBy,
@@ -107,6 +112,12 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
   const availableAmenities = formData.category
     ? getCategoryAmenities(formData.category)
     : [];
+  const isLandCategory =
+    formData.category === 'land-for-sale' ||
+    formData.category === 'development-land-for-sale' ||
+    formData.category === 'venture-for-marketing';
+  const isDevelopmentLand = formData.category === 'development-land-for-sale';
+  const isVentureMarketing = formData.category === 'venture-for-marketing';
 
   // Load property for edit mode
   useEffect(() => {
@@ -153,6 +164,11 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
           landFacing: (data as any).landFacing || '',
           roadAccess: (data as any).roadAccess || '',
           legalClearances: (data as any).legalClearances || '',
+          developmentPurpose: data.developmentPurpose || '',
+          landZoning: data.landZoning || '',
+          roadWidthFeet: data.roadWidthFeet?.toString() || '',
+          roadFrontageFeet: data.roadFrontageFeet?.toString() || '',
+          ventureType: data.ventureType || '',
           furnishingStatus: data.furnishingStatus || undefined,
           possessionStatus: data.possessionStatus || 'ready-to-move',
           postedBy: data.postedBy || 'dealer',
@@ -199,6 +215,17 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
           ...prev,
           category: value as PropertyCategory,
           listingType: category.listingType,
+          landType: undefined,
+          areaUnit: ['development-land-for-sale', 'venture-for-marketing'].includes(value)
+            ? 'acres'
+            : prev.areaUnit,
+          developmentPurpose: '',
+          landZoning: '',
+          roadWidthFeet: '',
+          roadFrontageFeet: '',
+          ventureType: '',
+          roadAccess: '',
+          legalClearances: '',
         }));
         // Reset amenities when category changes
         setSelectedAmenities([]);
@@ -224,6 +251,19 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
     // Validation
     if (!formData.title || !formData.category || !formData.price) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (
+      formData.category === 'development-land-for-sale' &&
+      !formData.developmentPurpose
+    ) {
+      toast.error('Please select the suitable development project type');
+      return;
+    }
+
+    if (formData.category === 'venture-for-marketing' && !formData.ventureType) {
+      toast.error('Please select whether this venture is a layout or non-layout');
       return;
     }
 
@@ -291,6 +331,11 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
       if (formData.landFacing) propertyDataRaw.landFacing = formData.landFacing;
       if (formData.roadAccess) propertyDataRaw.roadAccess = formData.roadAccess;
       if (formData.legalClearances) propertyDataRaw.legalClearances = formData.legalClearances;
+      if (formData.developmentPurpose) propertyDataRaw.developmentPurpose = formData.developmentPurpose;
+      if (formData.landZoning) propertyDataRaw.landZoning = formData.landZoning;
+      if (formData.roadWidthFeet) propertyDataRaw.roadWidthFeet = parseFloat(formData.roadWidthFeet);
+      if (formData.roadFrontageFeet) propertyDataRaw.roadFrontageFeet = parseFloat(formData.roadFrontageFeet);
+      if (formData.ventureType) propertyDataRaw.ventureType = formData.ventureType;
 
       let ensuredCode = normalizePropertyCode(propertyCode);
       if (!ensuredCode) {
@@ -671,7 +716,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
               )}
 
               {/* Common Area Fields - Show for all except Land */}
-              {formData.category !== 'land-for-sale' && (
+              {!isLandCategory && (
                 <>
                   <div>
                     <Label htmlFor="area">Area (sq.ft) *</Label>
@@ -796,20 +841,33 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
               )}
 
               {/* Land Area Fields */}
-              {formData.category === 'land-for-sale' && (
+              {isLandCategory && (
                 <>
                   <div>
-                    <Label htmlFor="area">Area *</Label>
+                    <Label htmlFor="area">
+                      {isDevelopmentLand
+                        ? 'Total Land Area *'
+                        : isVentureMarketing
+                          ? 'Total Venture Area *'
+                          : 'Area *'}
+                    </Label>
                     <Input
                       id="area"
                       name="area"
                       type="number"
                       value={formData.area}
                       onChange={handleInputChange}
-                      placeholder="e.g., 1500"
+                      placeholder={isLandCategory && (isDevelopmentLand || isVentureMarketing)
+                        ? 'e.g., 5'
+                        : 'e.g., 1500'}
                       required
                       className="mt-1.5"
                     />
+                    {(isDevelopmentLand || isVentureMarketing) && (
+                      <p className="text-xs text-slate-500 mt-1">
+                        Enter the full parcel area; acres are recommended for large properties.
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -828,6 +886,140 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
                         <SelectItem value="cents">Cents</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                </>
+              )}
+
+              {isVentureMarketing && (
+                <>
+                  <div className="md:col-span-3">
+                    <h3 className="text-md font-medium text-slate-800">
+                      Venture Details
+                    </h3>
+                    <p className="text-sm text-slate-500 mt-1">
+                      Select whether the whole venture is a plotted layout or a non-layout property.
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="ventureType">Venture Type *</Label>
+                    <Select
+                      value={formData.ventureType || ''}
+                      onValueChange={(value) => handleSelectChange('ventureType', value)}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Select venture type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="layout">Layout</SelectItem>
+                        <SelectItem value="non-layout">Non Layout</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {isDevelopmentLand && (
+                <>
+                  <div className="md:col-span-3">
+                    <h3 className="text-md font-medium text-slate-800">
+                      Development Details
+                    </h3>
+                    <p className="text-sm text-slate-500 mt-1">
+                      Share the site details developers need to assess residential or commercial projects.
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="developmentPurpose">Suitable Project Type *</Label>
+                    <Select
+                      value={formData.developmentPurpose || ''}
+                      onValueChange={(value) => handleSelectChange('developmentPurpose', value)}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Select project type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="apartments">Apartment Project</SelectItem>
+                        <SelectItem value="villa-project">Villa Project</SelectItem>
+                        <SelectItem value="commercial-development">Commercial Development</SelectItem>
+                        <SelectItem value="commercial-plot-subdivision">
+                          Commercial Plot Subdivision
+                        </SelectItem>
+                        <SelectItem value="mixed-use">Mixed-use / Flexible Development</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="landZoning">Land Use / Zoning</Label>
+                    <Input
+                      id="landZoning"
+                      name="landZoning"
+                      value={formData.landZoning}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Residential"
+                      className="mt-1.5"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="roadWidthFeet">Approach Road Width (ft)</Label>
+                    <Input
+                      id="roadWidthFeet"
+                      name="roadWidthFeet"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={formData.roadWidthFeet}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 40"
+                      className="mt-1.5"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="roadFrontageFeet">Road Frontage (ft)</Label>
+                    <Input
+                      id="roadFrontageFeet"
+                      name="roadFrontageFeet"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={formData.roadFrontageFeet}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 200"
+                      className="mt-1.5"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="roadAccess">Road Access</Label>
+                    <Select
+                      value={formData.roadAccess}
+                      onValueChange={(value) => handleSelectChange('roadAccess', value)}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Select road access" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="road-access">Available</SelectItem>
+                        <SelectItem value="partial-road-access">Partial</SelectItem>
+                        <SelectItem value="no-road-access">Not Available</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <Label htmlFor="legalClearances">Title / Approval Notes</Label>
+                    <Input
+                      id="legalClearances"
+                      name="legalClearances"
+                      value={formData.legalClearances}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Clear title, residential conversion approved"
+                      className="mt-1.5"
+                    />
                   </div>
                 </>
               )}
@@ -939,7 +1131,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
               )}
 
               {/* Floor and Total Floors - Hide for Land */}
-              {formData.category !== 'land-for-sale' && (
+              {!isLandCategory && (
                 <>
                   <div>
                     <Label htmlFor="floor">Floor</Label>
@@ -1040,7 +1232,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
               )}
 
               {/* Possession Status - Hide for Land */}
-              {formData.category !== 'land-for-sale' && (
+              {!isLandCategory && (
                 <div>
                   <Label htmlFor="possessionStatus">Possession Status</Label>
                   <Select

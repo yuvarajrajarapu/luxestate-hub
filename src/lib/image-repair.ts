@@ -13,6 +13,8 @@ const CATEGORY_IMAGE_MAP: Record<string, string> = {
   'flat-for-sale': `${CLOUDINARY_BASE_URL}/flat-rent.jpg`,
   'house-for-sale': `${CLOUDINARY_BASE_URL}/property-1.jpg`,
   'land-for-sale': `${CLOUDINARY_BASE_URL}/plot-sale.jpg`,
+  'development-land-for-sale': `${CLOUDINARY_BASE_URL}/plot-sale.jpg`,
+  'venture-for-marketing': `${CLOUDINARY_BASE_URL}/plot-sale.jpg`,
   'flat-for-rent': `${CLOUDINARY_BASE_URL}/flat-rent.jpg`,
   'house-for-rent': `${CLOUDINARY_BASE_URL}/house-rent.jpg`,
   'office-for-rent-lease': `${CLOUDINARY_BASE_URL}/agriculture-land.jpg`,

@@ -128,14 +128,63 @@ const LandSection: React.FC<{ property: Property }> = ({ property }) => {
     property.areaAcres ||
     property.landFacing ||
     property.roadAccess ||
-    property.legalClearances;
+    property.legalClearances ||
+    property.ventureType ||
+    property.developmentPurpose ||
+    property.landZoning ||
+    property.roadWidthFeet !== undefined ||
+    property.roadFrontageFeet !== undefined;
 
   if (!hasLandInfo) return null;
 
   return (
     <div className="mb-6">
-      <h3 className="text-lg font-semibold mb-3 text-gray-900">Land Details</h3>
+      <h3 className="text-lg font-semibold mb-3 text-gray-900">
+        {property.category === 'development-land-for-sale'
+          ? 'Development Details'
+          : property.category === 'venture-for-marketing'
+            ? 'Venture Details'
+            : 'Land Details'}
+      </h3>
       <div className="space-y-3">
+        {property.ventureType && (
+          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            <span className="text-gray-600">Venture Type</span>
+            <span className="font-medium text-gray-900">
+              {formatFieldValue('ventureType', property.ventureType)}
+            </span>
+          </div>
+        )}
+        {property.developmentPurpose && (
+          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            <span className="text-gray-600">Suitable Project Type</span>
+            <span className="font-medium text-gray-900">
+              {formatFieldValue('developmentPurpose', property.developmentPurpose)}
+            </span>
+          </div>
+        )}
+        {property.landZoning && (
+          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            <span className="text-gray-600">Land Use / Zoning</span>
+            <span className="font-medium text-gray-900">{property.landZoning}</span>
+          </div>
+        )}
+        {property.roadWidthFeet !== undefined && (
+          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            <span className="text-gray-600">Approach Road Width</span>
+            <span className="font-medium text-gray-900">
+              {formatFieldValue('roadWidthFeet', property.roadWidthFeet)}
+            </span>
+          </div>
+        )}
+        {property.roadFrontageFeet !== undefined && (
+          <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            <span className="text-gray-600">Road Frontage</span>
+            <span className="font-medium text-gray-900">
+              {formatFieldValue('roadFrontageFeet', property.roadFrontageFeet)}
+            </span>
+          </div>
+        )}
         {property.landType && (
           <div className="flex justify-between items-center py-2 border-b border-gray-100">
             <span className="text-gray-600">Land Type</span>
@@ -158,14 +207,14 @@ const LandSection: React.FC<{ property: Property }> = ({ property }) => {
           <div className="flex justify-between items-center py-2 border-b border-gray-100">
             <span className="text-gray-600">Road Access</span>
             <span className="font-medium text-gray-900 capitalize">
-              {property.roadAccess === 'road-access' ? 'Available' : 'Not Available'}
+              {formatFieldValue('roadAccess', property.roadAccess)}
             </span>
           </div>
         )}
         {property.legalClearances && (
           <div className="flex justify-between items-center py-2 border-b border-gray-100">
             <span className="text-gray-600">Legal Clearances</span>
-            <Badge variant="outline">{property.legalClearances}</Badge>
+            <Badge variant="outline">{formatFieldValue('legalClearances', property.legalClearances)}</Badge>
           </div>
         )}
       </div>

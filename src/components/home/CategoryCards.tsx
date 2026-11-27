@@ -12,6 +12,7 @@ import property2_640 from '@/assets/properties/property-2-640.avif';
 import property3 from '@/assets/properties/property-3.jpg';
 import property3_320 from '@/assets/properties/property-3-320.avif';
 import property3_640 from '@/assets/properties/property-3-640.avif';
+import property4 from '@/assets/properties/property-4.jpg';
 import property5 from '@/assets/properties/property-5.jpg';
 import property5_320 from '@/assets/properties/property-5-320.avif';
 import property5_640 from '@/assets/properties/property-5-640.avif';
@@ -64,6 +65,25 @@ const categories = [
     imageSrcSet: `${plotSale_320} 320w, ${plotSale_640} 640w`,
     bgColor: 'bg-blue-50 dark:bg-blue-950/30',
     icon: Fence,
+  },
+  {
+    id: 'development-land-for-sale',
+    title: 'Land for Developers',
+    subtitle: 'Residential, commercial & plot projects',
+    href: '/properties?categorySlug=development-land-for-sale',
+    image: property4,
+    bgColor: 'bg-amber-50 dark:bg-amber-950/30',
+    icon: LandPlot,
+  },
+  {
+    id: 'venture-for-marketing',
+    title: 'Venture for Marketing',
+    subtitle: 'Layout & Non Layout Ventures',
+    href: '/properties?categorySlug=venture-for-marketing',
+    image: plotSale,
+    imageSrcSet: `${plotSale_320} 320w, ${plotSale_640} 640w`,
+    bgColor: 'bg-indigo-50 dark:bg-indigo-950/30',
+    icon: LandPlot,
   },
   {
     id: 'agricultural',
@@ -160,13 +180,13 @@ const categories = [
 const CategoryImage = ({ title, image, imageSrcSet }: {
   title: string;
   image: string;
-  imageSrcSet: string;
+  imageSrcSet?: string;
 }) => {
   const { ref, isVisible } = useImageLazyLoad({ rootMargin: '100px 80px' });
 
   return (
     <picture>
-      {isVisible && (
+      {isVisible && imageSrcSet && (
         <source
           srcSet={imageSrcSet}
           sizes="(min-width: 768px) 240px, 208px"

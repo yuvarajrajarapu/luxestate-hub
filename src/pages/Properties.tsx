@@ -45,6 +45,9 @@ const Properties = () => {
 
   // Fetch properties from Firestore
   const { properties, loading, error } = useProperties();
+  const categorySlugParam = searchParams.get('categorySlug');
+  const isDevelopmentLandListing = categorySlugParam === 'development-land-for-sale';
+  const isVentureMarketingListing = categorySlugParam === 'venture-for-marketing';
 
   const handleClearFilters = () => {
     setFilters({
@@ -67,7 +70,6 @@ const Properties = () => {
     }
 
     // Filter by URL params - categorySlug filtering (most specific)
-    const categorySlugParam = searchParams.get('categorySlug');
     if (categorySlugParam) {
       result = result.filter((p) => p.categorySlug === categorySlugParam);
     }
@@ -122,8 +124,16 @@ const Properties = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
-        title="Properties for Sale, Rent & Lease in India | UMY Infra"
-        description="Browse homes, apartments, plots and commercial properties for sale, rent or lease across India with UMY Infra."
+        title={isDevelopmentLandListing
+          ? 'Development Land for Sale in India | UMY Infra'
+          : isVentureMarketingListing
+            ? 'Venture for Marketing in India | UMY Infra'
+            : 'Properties for Sale, Rent & Lease in India | UMY Infra'}
+        description={isDevelopmentLandListing
+          ? 'Explore large land parcels for apartment, villa, commercial development and commercial plot subdivision projects across India.'
+          : isVentureMarketingListing
+            ? 'Browse whole ventures for marketing, including layout and non-layout properties, across India.'
+            : 'Browse homes, apartments, plots and commercial properties for sale, rent or lease across India with UMY Infra.'}
         path="/properties"
       />
       <Header />
@@ -138,10 +148,18 @@ const Properties = () => {
             className="py-8"
           >
             <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
-              Property Listings
+              {isDevelopmentLandListing
+                ? 'Development Land for Sale'
+                : isVentureMarketingListing
+                  ? 'Venture for Marketing'
+                  : 'Property Listings'}
             </h1>
             <p className="text-muted-foreground">
-              Find your dream property from our curated collection
+              {isDevelopmentLandListing
+                ? 'Large land parcels for residential, commercial and commercial plot projects'
+                : isVentureMarketingListing
+                  ? 'Explore complete ventures offered as a layout or non-layout property'
+                  : 'Find your dream property from our curated collection'}
             </p>
           </motion.div>
 
