@@ -111,18 +111,20 @@ const Index = () => {
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {[
-                { label: 'Flats for Sale', href: '/properties?category=flat-for-sale', icon: '🏢' },
-                { label: 'Houses for Sale', href: '/properties?category=house-for-sale', icon: '🏠' },
+                { label: 'Flats for Sale', href: '/properties?categorySlug=flat-for-sale', icon: '🏢' },
+                { label: 'Houses for Sale', href: '/properties?categorySlug=house-for-sale', icon: '🏠' },
                 { label: 'Plot for Sale', href: '/land/plot', icon: '📐' },
+                { label: 'Land for Developers', href: '/properties?categorySlug=development-land-for-sale', icon: '🏗️' },
+                { label: 'Venture for Marketing', href: '/properties?categorySlug=venture-for-marketing', icon: '🗺️' },
                 { label: 'Agriculture Land', href: '/land/agricultural', icon: '🌾' },
                 { label: 'Farmhouse for Sale', href: '/land/farm-houses?type=sale', icon: '🏡' },
                 { label: 'Farmhouse for Rent', href: '/land/farm-houses?type=rent', icon: '🔑' },
-                { label: 'Flats for Rent', href: '/properties?category=flat-for-rent', icon: '🏨' },
-                { label: 'Houses for Rent', href: '/properties?category=house-for-rent', icon: '🏘️' },
-                { label: 'Office Spaces', href: '/properties?category=office-for-rent-lease', icon: '🏬' },
-                { label: 'Commercial', href: '/properties?category=commercial-space-for-rent-lease', icon: '🏪' },
-                { label: 'PG for Men', href: '/properties?category=pg-hostel-boys', icon: '🛏️' },
-                { label: 'PG for Women', href: '/properties?category=pg-hostel-girls', icon: '🛋️' },
+                { label: 'Flats for Rent', href: '/properties?categorySlug=flat-for-rent', icon: '🏨' },
+                { label: 'Houses for Rent', href: '/properties?categorySlug=house-for-rent', icon: '🏘️' },
+                { label: 'Office Spaces', href: '/properties?categorySlug=office-for-rent-lease', icon: '🏬' },
+                { label: 'Commercial', href: '/properties?categorySlug=commercial-space-for-rent-lease', icon: '🏪' },
+                { label: 'PG for Men', href: '/properties?categorySlug=pg-hostel-boys', icon: '🛏️' },
+                { label: 'PG for Women', href: '/properties?categorySlug=pg-hostel-girls', icon: '🛋️' },
               ].map((category) => (
                 <div
                   key={category.label}

@@ -60,9 +60,9 @@ const Header = () => {
       icon: Home,
       mainLink: '/properties?type=sale',
       items: [
-        { label: 'Flats & Apartments', href: '/properties?category=flat-for-sale' },
-        { label: 'Houses & Villas', href: '/properties?category=house-for-sale' },
-        { label: 'Land & Plots', href: '/properties?category=land-for-sale' },
+        { label: 'Flats & Apartments', href: '/properties?categorySlug=flat-for-sale' },
+        { label: 'Houses & Villas', href: '/properties?categorySlug=house-for-sale' },
+        { label: 'Land & Plots', href: '/land/plot' },
       ]
     },
     {
@@ -70,14 +70,14 @@ const Header = () => {
       icon: Building2,
       mainLink: '/properties?type=rent',
       items: [
-        { label: 'Flats & Apartments', href: '/properties?category=flat-for-rent' },
-        { label: 'Houses', href: '/properties?category=house-for-rent' },
+        { label: 'Flats & Apartments', href: '/properties?categorySlug=flat-for-rent' },
+        { label: 'Houses', href: '/properties?categorySlug=house-for-rent' },
       ]
     },
     {
       title: 'Land',
       icon: MapPin,
-      mainLink: '/properties?category=land-for-sale',
+      mainLink: '/properties?categorySlug=land-for-sale',
       items: [
         { label: 'Plot for Sale', href: '/land/plot' },
         { label: 'Land for Developers', href: '/properties?categorySlug=development-land-for-sale' },
@@ -90,19 +90,19 @@ const Header = () => {
     {
       title: 'Commercial',
       icon: Store,
-      mainLink: '/properties?category=commercial-space-for-rent-lease',
+      mainLink: '/properties?categorySlug=commercial-space-for-rent-lease',
       items: [
-        { label: 'Office Space', href: '/properties?category=office-for-rent-lease' },
-        { label: 'Commercial Space', href: '/properties?category=commercial-space-for-rent-lease' },
+        { label: 'Office Space', href: '/properties?categorySlug=office-for-rent-lease' },
+        { label: 'Commercial Space', href: '/properties?categorySlug=commercial-space-for-rent-lease' },
       ]
     },
     {
       title: 'PG',
       icon: Users,
-      mainLink: '/properties?type=rent&category=pg-boys',
+      mainLink: '/properties?categorySlug=pg-hostel-boys',
       items: [
-        { label: 'Men\'s PG', href: '/properties?category=pg-boys' },
-        { label: 'Women\'s PG', href: '/properties?category=pg-girls' },
+        { label: 'Men\'s PG', href: '/properties?categorySlug=pg-hostel-boys' },
+        { label: 'Women\'s PG', href: '/properties?categorySlug=pg-hostel-girls' },
       ]
     }
   ];
