@@ -7,14 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Heart, LogOut, Mail, Calendar, User as UserIcon } from 'lucide-react';
+import { Heart, LogOut, Mail, Calendar, Shield, User as UserIcon } from 'lucide-react';
 import { useShortlist } from '@/hooks/useShortlist';
 import { getUserShortlistedProperties } from '@/lib/shortlist';
 import PropertyCard from '@/components/property/PropertyCard';
 import type { Property } from '@/types/property';
 
 const Profile = () => {
-  const { user, userData, logout, loading: authLoading } = useAuth();
+  const { user, userData, logout, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const { shortlistedIds, loading: shortlistLoading } = useShortlist();
@@ -138,7 +138,9 @@ const Profile = () => {
                           <h2 className="text-3xl font-semibold text-gray-900">
                             {userData?.username || user.email?.split('@')[0]}
                           </h2>
-                          <p className="text-gray-600 mt-1">Member Account</p>
+                          <p className="text-gray-600 mt-1">
+                            {isAdmin ? 'Admin Account' : 'Member Account'}
+                          </p>
                         </div>
                       </div>
 
@@ -189,7 +191,16 @@ const Profile = () => {
                   </Card>
 
                   {/* Logout Button */}
-                  <div className="mt-6 flex justify-center">
+                  <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                    {isAdmin && (
+                      <Button
+                        onClick={() => navigate('/admin/dashboard')}
+                        className="gap-2"
+                      >
+                        <Shield className="h-4 w-4" />
+                        Open Admin Portal
+                      </Button>
+                    )}
                     <Button
                       onClick={handleLogout}
                       variant="ghost"
