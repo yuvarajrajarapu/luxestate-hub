@@ -5,7 +5,7 @@ export const config = {
   maxDuration: 60,
 };
 
-export default async function handler(req: Request) {
+async function handler(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const propertyCode = searchParams.get('code') || searchParams.get('propertyCode') || '';
@@ -171,3 +171,5 @@ export default async function handler(req: Request) {
     return new Response(`Failed to generate image: ${error.message}`, { status: 500 });
   }
 }
+
+export default { fetch: handler };

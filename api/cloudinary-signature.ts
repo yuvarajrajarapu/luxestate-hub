@@ -30,7 +30,7 @@ async function createCloudinarySignature(parameters: Record<string, string>, api
   return createHash('sha1').update(`${stringToSign}${apiSecret}`).digest('hex');
 }
 
-export default async function handler(request: Request): Promise<Response> {
+async function handler(request: Request): Promise<Response> {
   if (request.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
@@ -107,3 +107,5 @@ export default async function handler(request: Request): Promise<Response> {
     200
   );
 }
+
+export default { fetch: handler };
