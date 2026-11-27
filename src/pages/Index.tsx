@@ -28,7 +28,7 @@ const Index = () => {
         <CategoryCards />
 
         {/* Featured Properties */}
-        <section className="py-8 md:py-16">
+        <section className="pb-8 pt-4 md:pb-16 md:pt-6">
           <div className="container mx-auto px-4">
             {/* Header with See All */}
             <div className="flex items-center justify-between mb-6">

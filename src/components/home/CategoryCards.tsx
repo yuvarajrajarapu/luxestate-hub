@@ -208,7 +208,7 @@ const CategoryCards = () => {
   };
 
   return (
-    <section className="py-10 md:py-16">
+    <section className="pt-10 pb-4 md:pb-6 md:pt-16">
       <div className="container mx-auto px-4">
         <div className="mb-6 flex items-end justify-between">
           <div>
