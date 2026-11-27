@@ -74,19 +74,17 @@ export const useProperties = (options: UsePropertiesOptions = {}): UseProperties
       constraints.unshift(where('isFeatured', '==', true));
     }
 
+    if (options.limit) {
+      constraints.push(limit(options.limit));
+    }
+
     const q = query(collection(db, 'properties'), ...constraints);
 
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
         const propertiesData = snapshot.docs.map(convertFirestoreDoc);
-        
-        // Apply limit if specified (done client-side for real-time updates)
-        const limitedData = options.limit 
-          ? propertiesData.slice(0, options.limit) 
-          : propertiesData;
-        
-        setProperties(limitedData);
+        setProperties(propertiesData);
         setLoading(false);
         setError(null);
       },

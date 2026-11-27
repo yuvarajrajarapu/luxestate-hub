@@ -19,48 +19,61 @@ export const usePropertyCounts = (): UsePropertyCountsReturn => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Listen to all properties and compute counts client-side
-    const q = query(collection(db, 'properties'));
+    let unsubscribe: (() => void) | undefined;
+    let subscriptionTimer: number | undefined;
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const countMap: Record<string, number> = {};
-        
-        snapshot.docs.forEach((doc) => {
-          const data = doc.data();
-          const categorySlug = data.categorySlug as string;
-          const landType = data.landType as LandType | undefined;
-          const listingType = data.listingType as string | undefined;
-          
-          // Count by categorySlug (this is the main category identifier)
-          if (categorySlug) {
-            countMap[categorySlug] = (countMap[categorySlug] || 0) + 1;
-          }
-          
-          // Count land types separately (plot, agricultural, farm-houses)
-          if (categorySlug === 'land-for-sale' && landType) {
-            // Count the landType directly (e.g., 'plot', 'agricultural', 'farm-houses')
-            countMap[landType] = (countMap[landType] || 0) + 1;
-            
-            // For farm-houses, also count by sale/rent
-            if (landType === 'farm-houses' && listingType) {
-              const farmKey = `farm-houses-${listingType}`;
-              countMap[farmKey] = (countMap[farmKey] || 0) + 1;
-            }
-          }
-        });
-        
-        setCounts(countMap);
-        setLoading(false);
-      },
-      (err) => {
-        console.error('Error fetching property counts:', err);
-        setLoading(false);
-      }
-    );
+    const subscribeToCounts = () => {
+      // Category counts are non-critical and query the full collection.
+      subscriptionTimer = window.setTimeout(() => {
+        const q = query(collection(db, 'properties'));
 
-    return () => unsubscribe();
+        unsubscribe = onSnapshot(
+          q,
+          (snapshot) => {
+            const countMap: Record<string, number> = {};
+
+            snapshot.docs.forEach((doc) => {
+              const data = doc.data();
+              const categorySlug = data.categorySlug as string;
+              const landType = data.landType as LandType | undefined;
+              const listingType = data.listingType as string | undefined;
+
+              if (categorySlug) {
+                countMap[categorySlug] = (countMap[categorySlug] || 0) + 1;
+              }
+
+              if (categorySlug === 'land-for-sale' && landType) {
+                countMap[landType] = (countMap[landType] || 0) + 1;
+
+                if (landType === 'farm-houses' && listingType) {
+                  const farmKey = `farm-houses-${listingType}`;
+                  countMap[farmKey] = (countMap[farmKey] || 0) + 1;
+                }
+              }
+            });
+
+            setCounts(countMap);
+            setLoading(false);
+          },
+          (err) => {
+            console.error('Error fetching property counts:', err);
+            setLoading(false);
+          }
+        );
+      }, 1500);
+    };
+
+    if (document.readyState === 'complete') {
+      subscribeToCounts();
+    } else {
+      window.addEventListener('load', subscribeToCounts, { once: true });
+    }
+
+    return () => {
+      window.removeEventListener('load', subscribeToCounts);
+      if (subscriptionTimer !== undefined) window.clearTimeout(subscriptionTimer);
+      unsubscribe?.();
+    };
   }, []);
 
   return { counts, loading };

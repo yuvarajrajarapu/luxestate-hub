@@ -19,14 +19,16 @@ export const useImageLazyLoad = (options: UseImageLazyLoadOptions = {}) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    if (!('IntersectionObserver' in window)) {
+      setIsVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          // Unobserve once image is loaded to free up resources
-          if (ref.current) {
-            observer.unobserve(ref.current);
-          }
+          observer.disconnect();
         }
       },
       {

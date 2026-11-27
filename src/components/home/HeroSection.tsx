@@ -2,6 +2,8 @@ import { motion } from 'framer-motion';
 import heroBg from '@/assets/hero-bg.jpg';
 
 const HeroSection = () => {
+  const imagePriorityAttribute = { fetchpriority: 'high' };
+
   return (
     <section className="relative min-h-[50vh] md:min-h-[60vh] flex items-center justify-center overflow-hidden pt-16">
       {/* Background Image */}
@@ -15,7 +17,8 @@ const HeroSection = () => {
             height={900}
             className="w-full h-full object-cover"
             loading="eager"
-            decoding="async"
+            decoding="sync"
+            {...imagePriorityAttribute}
           />
         </picture>
         <div className="absolute inset-0 bg-gradient-hero" />

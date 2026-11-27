@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import type { MediaItem } from '@/types/property';
 import { getOptimizedImageUrl, getResponsiveImageSrcSet } from '@/lib/image-optimization';
@@ -12,10 +12,8 @@ interface PropertyImageProps {
 
 /**
  * PropertyImage Component
- * - Preloads images to detect failures before rendering
- * - Implements automatic retry on network failures  
- * - Prevents "Image Unavailable" on first load
- * - Uses eager loading for immediate display
+ * - Uses lazy loading for standard cards and eager loading for prioritized images
+ * - Retries network failures before showing a placeholder
  * - Converts JPG to WebP for faster loading
  * - Responsive image sizing
  */
@@ -24,13 +22,13 @@ const PropertyImage = ({ images, title, className = 'w-full h-full', priority = 
   const [webpUrl, setWebpUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
+  const retryCountRef = useRef(0);
   const MAX_RETRIES = 2;
 
   useEffect(() => {
     // Reset state when images change
     setError(false);
-    setRetryCount(0);
+    retryCountRef.current = 0;
     setImageUrl(null);
     setWebpUrl(null);
     
@@ -62,6 +60,13 @@ const PropertyImage = ({ images, title, className = 'w-full h-full', priority = 
     const optimizedWebpUrl = getOptimizedImageUrl(url, 'webp', 80);
     const optimizedJpgUrl = getOptimizedImageUrl(url, 'jpg', 85);
 
+    if (priority === 'low') {
+      setWebpUrl(optimizedWebpUrl);
+      setImageUrl(optimizedJpgUrl);
+      setIsLoading(true);
+      return;
+    }
+
     // Preload the WebP image first, fallback to JPG
     setIsLoading(true);
     const preloadImg = new Image();
@@ -76,11 +81,11 @@ const PropertyImage = ({ images, title, className = 'w-full h-full', priority = 
     
     preloadImg.onerror = () => {
       // Image failed - retry if we haven't exceeded max retries
-      if (retryCount < MAX_RETRIES) {
-        setRetryCount(prev => prev + 1);
+      if (retryCountRef.current < MAX_RETRIES) {
+        const nextRetry = ++retryCountRef.current;
         // Wait a bit then retry with cache-busting parameter
         setTimeout(() => {
-          preloadImg.src = optimizedWebpUrl + '?retry=' + (retryCount + 1);
+          preloadImg.src = `${optimizedWebpUrl}?retry=${nextRetry}`;
         }, 300);
       } else {
         // Max retries exceeded - show placeholder
@@ -93,16 +98,29 @@ const PropertyImage = ({ images, title, className = 'w-full h-full', priority = 
     
     // Start the preload with WebP
     preloadImg.src = optimizedWebpUrl;
-  }, [images, retryCount, title]);
+  }, [images, priority, title]);
 
   const handleImageError = () => {
-    // Fallback error handler
-    if (!error) {
-      console.warn(`Image render failed for property: ${title}`);
-      setError(true);
-      setImageUrl('/placeholder.svg');
+    if (error) return;
+
+    if (retryCountRef.current < MAX_RETRIES) {
+      const nextRetry = ++retryCountRef.current;
+      const addRetryParam = (url: string) =>
+        `${url}${url.includes('?') ? '&' : '?'}retry=${nextRetry}`;
+
+      setWebpUrl(current => current ? addRetryParam(current) : current);
+      setImageUrl(current => current ? addRetryParam(current) : current);
+      setIsLoading(true);
+      return;
     }
+
+    console.warn(`Image render failed for property: ${title}`);
+    setError(true);
+    setIsLoading(false);
+    setImageUrl('/placeholder.svg');
   };
+
+  const imagePriorityAttribute = { fetchpriority: priority };
 
   return (
     <motion.div
@@ -124,9 +142,9 @@ const PropertyImage = ({ images, title, className = 'w-full h-full', priority = 
             src={imageUrl}
             alt={title}
             onError={handleImageError}
+            onLoad={() => setIsLoading(false)}
             loading={priority === 'high' ? 'eager' : 'lazy'}
-            fetchPriority={priority}
-            crossOrigin="anonymous"
+            {...imagePriorityAttribute}
             className="w-full h-full object-cover"
             decoding="async"
             style={{ contentVisibility: 'auto' }}
@@ -140,7 +158,6 @@ const PropertyImage = ({ images, title, className = 'w-full h-full', priority = 
           src="/placeholder.svg"
           alt={`${title} - unavailable`}
           loading="eager"
-          fetchPriority="high"
           decoding="async"
           className="w-full h-full object-cover"
           style={{ contentVisibility: 'auto' }}

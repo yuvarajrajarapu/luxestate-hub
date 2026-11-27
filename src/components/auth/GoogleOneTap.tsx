@@ -111,15 +111,30 @@ const GoogleOneTap: React.FC<GoogleOneTapProps> = ({ onSkip }) => {
       console.error('Failed to load Google Identity Services script');
     };
 
-    // Check if script already exists (e.g., on page re-render)
-    const existingScript = document.getElementById('google-one-tap-script');
-    if (!existingScript) {
-      document.head.appendChild(script);
+    const appendScript = () => {
+      const existingScript = document.getElementById('google-one-tap-script');
+      if (!existingScript) {
+        document.head.appendChild(script);
+      } else {
+        scriptLoadedRef.current = true;
+      }
+    };
+
+    let loadTimer: number | undefined;
+    const scheduleScript = () => {
+      loadTimer = window.setTimeout(appendScript, 1500);
+    };
+
+    if (document.readyState === 'complete') {
+      scheduleScript();
     } else {
-      scriptLoadedRef.current = true;
+      window.addEventListener('load', scheduleScript, { once: true });
     }
 
     return () => {
+      window.removeEventListener('load', scheduleScript);
+      if (loadTimer !== undefined) window.clearTimeout(loadTimer);
+
       // Don't remove script on unmount - let it persist across pages
       // Only cancel the prompt if user is navigating away
       if (window.google?.accounts?.id) {

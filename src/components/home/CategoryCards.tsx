@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Search, Building2, Home, LandPlot, Key, Briefcase, Store, Users, Trees, Fence } from 'lucide-react';
 import { usePropertyCounts } from '@/hooks/usePropertyCounts';
+import { useImageLazyLoad } from '@/hooks/useImageLazyLoad';
 import property1 from '@/assets/properties/property-1.jpg';
 import property1_320 from '@/assets/properties/property-1-320.avif';
 import property1_640 from '@/assets/properties/property-1-640.avif';
@@ -157,6 +158,36 @@ const categories = [
   },
 ];
 
+const CategoryImage = ({ title, image, imageSrcSet }: {
+  title: string;
+  image: string;
+  imageSrcSet: string;
+}) => {
+  const { ref, isVisible } = useImageLazyLoad({ rootMargin: '100px 80px' });
+
+  return (
+    <picture>
+      {isVisible && (
+        <source
+          srcSet={imageSrcSet}
+          sizes="(min-width: 768px) 240px, 208px"
+          type="image/avif"
+        />
+      )}
+      <img
+        ref={ref}
+        src={isVisible ? image : undefined}
+        alt={title}
+        width={640}
+        height={512}
+        className="w-full h-full object-cover rounded-tl-xl group-hover:scale-105 transition-transform duration-500"
+        loading="lazy"
+        decoding="async"
+      />
+    </picture>
+  );
+};
+
 const CategoryCards = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { counts, loading } = usePropertyCounts();
@@ -270,22 +301,11 @@ const CategoryCards = () => {
 
                     {/* Image */}
                     <div className="absolute bottom-0 right-0 w-[80%] h-[55%]">
-                      <picture>
-                        <source
-                          srcSet={category.imageSrcSet}
-                          sizes="(min-width: 768px) 240px, 208px"
-                          type="image/avif"
-                        />
-                        <img
-                          src={category.image}
-                          alt={category.title}
-                          width={640}
-                          height={512}
-                          className="w-full h-full object-cover rounded-tl-xl group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </picture>
+                      <CategoryImage
+                        title={category.title}
+                        image={category.image}
+                        imageSrcSet={category.imageSrcSet}
+                      />
                     </div>
 
                     {/* Hover Arrow */}
