@@ -63,6 +63,14 @@ const GoogleOneTap: React.FC<GoogleOneTapProps> = ({ onSkip }) => {
     // Only load script once
     if (scriptLoadedRef.current) return;
 
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
+    if (!googleClientId?.endsWith('.apps.googleusercontent.com')) {
+      console.warn(
+        'Google One Tap is disabled. Configure VITE_GOOGLE_CLIENT_ID with a Google OAuth Web client ID.'
+      );
+      return;
+    }
+
     // Load Google Identity Services script
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
@@ -77,7 +85,7 @@ const GoogleOneTap: React.FC<GoogleOneTapProps> = ({ onSkip }) => {
         try {
           // Initialize Google One Tap with proper configuration
           window.google.accounts.id.initialize({
-            client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '1:242203271636:web:a9418ae485bde9b145b641',
+            client_id: googleClientId,
             callback: handleCredentialResponse,
             auto_select: true,
             cancel_on_tap_outside: true,
