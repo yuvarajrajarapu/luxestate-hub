@@ -424,8 +424,8 @@ export function buildPropertyMetaHtml(metadata: PropertyMetadata, appHtml = ''):
     <meta name="twitter:site" content="${escapeHtml(metadata.twitterSite)}" />
     <meta name="twitter:creator" content="${escapeHtml(metadata.twitterCreator)}" />
 
-    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dswoyink7/image/upload/w_192,h_192,c_fill,q_auto/umy-infra/logo-192.png" sizes="any" />
-    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dswoyink7/image/upload/w_192,h_192,c_fill,q_auto/umy-infra/logo-192.png" />
+    <link rel="icon" type="image/png" href="/favicon-clipped.png" sizes="480x480" />
+    <link rel="apple-touch-icon" href="/favicon-clipped.png" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import GoogleSignIn from '@/components/auth/GoogleSignIn';
-import GoogleOneTap from '@/components/auth/GoogleOneTap';
+import AuthLayout from '@/components/auth/AuthLayout';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -42,22 +41,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      {/* Google One Tap Prompt */}
-      <GoogleOneTap />
-      
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
-      >
-        {/* Logo */}
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-gradient-luxury flex items-center justify-center">
-            <span className="text-primary-foreground font-display font-bold text-2xl">Y</span>
-          </div>
-        </Link>
-
+    <AuthLayout>
         <div className="bg-card rounded-2xl border border-border p-8 shadow-card">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-display font-bold text-foreground mb-2">
@@ -126,8 +110,7 @@ const Login = () => {
             </Link>
           </p>
         </div>
-      </motion.div>
-    </div>
+    </AuthLayout>
   );
 };
 

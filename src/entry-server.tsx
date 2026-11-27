@@ -41,7 +41,7 @@ export function generateHTML(url: string, metaTags: Record<string, string> = {})
     <link rel="preconnect" href="https://firestore.googleapis.com" />
     <link rel="dns-prefetch" href="https://apis.google.com" />
     
-    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dswoyink7/image/upload/w_192,h_192,c_fill,q_auto/umy-infra/logo-192.png" sizes="any" />
+    <link rel="icon" type="image/png" href="/favicon-clipped.png" sizes="480x480" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="index, follow" />
     

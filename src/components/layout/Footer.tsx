@@ -11,9 +11,13 @@ const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-lg bg-primary-foreground/10 flex items-center justify-center">
-                <span className="text-primary-foreground font-display font-bold text-xl">Y</span>
-              </div>
+              <img
+                src="/favicon-clipped.png"
+                alt=""
+                width={40}
+                height={40}
+                className="h-10 w-10 rounded-lg bg-white p-1 object-contain"
+              />
               <span className="font-display text-xl font-bold">UMY Infra</span>
             </div>
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
@@ -90,7 +94,7 @@ const Footer = () => {
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-0.5" />
-                <span>Kakinada, Andhra Pradesh,India</span>
+                <span>Kakinada, Andhra Pradesh, India</span>
               </li>
             </ul>
           </div>
