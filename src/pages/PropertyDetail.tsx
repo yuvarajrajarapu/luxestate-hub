@@ -50,6 +50,10 @@ const PropertyDetail = () => {
   } | null>(null);
   const activePointersRef = useRef(new Map<number, { x: number; y: number }>());
   const pinchStartRef = useRef<{ distance: number; scale: number } | null>(null);
+  const pinchGestureRef = useRef(false);
+  const draggedRef = useRef(false);
+  const handledImageTapRef = useRef(false);
+  const zoomImageRef = useRef<HTMLImageElement>(null);
 
   const shareCode = useMemo(() => property?.propertyCode || property?.id || propertyCode || '', [property?.propertyCode, property?.id, propertyCode]);
   const propertyUrl = useMemo(() => (shareCode ? buildPropertyUrl(shareCode) : ''), [shareCode]);
@@ -64,12 +68,28 @@ const PropertyDetail = () => {
     dragRef.current = null;
     activePointersRef.current.clear();
     pinchStartRef.current = null;
+    pinchGestureRef.current = false;
+    draggedRef.current = false;
+    handledImageTapRef.current = false;
   };
 
-  const updateZoom = (scale: number) => {
+  const getZoomAnchor = (clientX: number, clientY: number, bounds: DOMRect) => ({
+    x: clientX - bounds.left - bounds.width / 2,
+    y: clientY - bounds.top - bounds.height / 2,
+  });
+
+  const updateZoom = (scale: number, anchor = { x: 0, y: 0 }) => {
     const nextScale = Math.min(4, Math.max(1, scale));
     setZoomScale(nextScale);
-    if (nextScale === 1) setZoomPosition({ x: 0, y: 0 });
+    if (nextScale === 1) {
+      setZoomPosition({ x: 0, y: 0 });
+    } else if (nextScale !== zoomScale) {
+      const zoomRatio = nextScale / zoomScale;
+      setZoomPosition((position) => ({
+        x: anchor.x + (position.x - anchor.x) * zoomRatio,
+        y: anchor.y + (position.y - anchor.y) * zoomRatio,
+      }));
+    }
   };
 
   const changeZoomImage = (direction: -1 | 1) => {
@@ -81,11 +101,11 @@ const PropertyDetail = () => {
   };
 
   const handleZoomPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    event.currentTarget.setPointerCapture(event.pointerId);
     activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
     const pointers = Array.from(activePointersRef.current.values());
     if (pointers.length >= 2) {
+      pinchGestureRef.current = true;
       const [first, second] = pointers;
       pinchStartRef.current = {
         distance: Math.hypot(second.x - first.x, second.y - first.y),
@@ -111,11 +131,24 @@ const PropertyDetail = () => {
     if (pointers.length >= 2 && pinchStartRef.current) {
       const [first, second] = pointers;
       const distance = Math.hypot(second.x - first.x, second.y - first.y);
-      updateZoom(pinchStartRef.current.scale * (distance / pinchStartRef.current.distance));
+      const midpointX = (first.x + second.x) / 2;
+      const midpointY = (first.y + second.y) / 2;
+      updateZoom(
+        pinchStartRef.current.scale * (distance / pinchStartRef.current.distance),
+        getZoomAnchor(midpointX, midpointY, event.currentTarget.getBoundingClientRect()),
+      );
       return;
     }
 
     if (dragRef.current?.pointerId === event.pointerId) {
+      if (
+        Math.hypot(
+          event.clientX - dragRef.current.startX,
+          event.clientY - dragRef.current.startY,
+        ) > 4
+      ) {
+        draggedRef.current = true;
+      }
       setZoomPosition({
         x: dragRef.current.originX + event.clientX - dragRef.current.startX,
         y: dragRef.current.originY + event.clientY - dragRef.current.startY,
@@ -123,7 +156,12 @@ const PropertyDetail = () => {
     }
   };
 
-  const handleZoomPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+  const handleZoomPointerUp = (
+    event: ReactPointerEvent<HTMLDivElement>,
+    cancelled = false,
+  ) => {
+    const pointerWasTracked = activePointersRef.current.has(event.pointerId);
+    const wasPinchGesture = pinchGestureRef.current;
     activePointersRef.current.delete(event.pointerId);
     if (activePointersRef.current.size < 2) pinchStartRef.current = null;
     if (dragRef.current?.pointerId === event.pointerId) dragRef.current = null;
@@ -138,6 +176,35 @@ const PropertyDetail = () => {
         originY: zoomPosition.y,
       };
     }
+
+    const imageBounds = zoomImageRef.current?.getBoundingClientRect();
+    const pointerIsOverImage =
+      imageBounds &&
+      event.clientX >= imageBounds.left &&
+      event.clientX <= imageBounds.right &&
+      event.clientY >= imageBounds.top &&
+      event.clientY <= imageBounds.bottom;
+
+    if (
+      pointerWasTracked &&
+      activePointersRef.current.size === 0 &&
+      !cancelled &&
+      !wasPinchGesture &&
+      !draggedRef.current &&
+      pointerIsOverImage
+    ) {
+      updateZoom(
+        zoomScale >= 4 ? 1 : Math.min(zoomScale * 2, 4),
+        getZoomAnchor(
+          event.clientX,
+          event.clientY,
+          event.currentTarget.getBoundingClientRect(),
+        ),
+      );
+      handledImageTapRef.current = true;
+    }
+
+    if (activePointersRef.current.size === 0) pinchGestureRef.current = false;
   };
 
   if (loading) {
@@ -687,19 +754,33 @@ const PropertyDetail = () => {
           aria-describedby={undefined}
           className="!left-0 !top-0 !h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 overflow-hidden rounded-none border-0 bg-black p-0 text-white shadow-none"
           onPointerDown={(event) => {
+            handledImageTapRef.current = false;
             if ((event.target as HTMLElement).closest('button')) return;
             handleZoomPointerDown(event);
           }}
           onPointerMove={handleZoomPointerMove}
           onPointerUp={handleZoomPointerUp}
-          onPointerCancel={handleZoomPointerUp}
+          onPointerCancel={(event) => handleZoomPointerUp(event, true)}
           onClick={(event) => {
             const target = event.target as HTMLElement;
-            if (target.closest('button') || target instanceof HTMLImageElement) return;
+            if (handledImageTapRef.current) {
+              handledImageTapRef.current = false;
+              return;
+            }
+            if (draggedRef.current) {
+              draggedRef.current = false;
+              return;
+            }
+            if (target.closest('button') || target === zoomImageRef.current) return;
+
             setIsZoomOpen(false);
           }}
           onWheel={(event) => {
-            updateZoom(zoomScale + (event.deltaY < 0 ? 0.25 : -0.25));
+            const bounds = event.currentTarget.getBoundingClientRect();
+            updateZoom(
+              zoomScale + (event.deltaY < 0 ? 0.25 : -0.25),
+              getZoomAnchor(event.clientX, event.clientY, bounds),
+            );
           }}
           onKeyDown={(event) => {
             if (event.key === 'ArrowLeft' && imageIndices.length > 1) {
@@ -758,10 +839,18 @@ const PropertyDetail = () => {
 
           <div className="absolute inset-0 flex touch-none items-center justify-center overflow-hidden">
             <img
+              ref={zoomImageRef}
               src={allMedia[currentMediaIndex]?.url || '/placeholder.svg'}
               alt={`${property.title} - photo ${imageIndices.indexOf(currentMediaIndex) + 1}`}
               draggable={false}
-              onDoubleClick={() => updateZoom(zoomScale === 1 ? 2 : 1)}
+              role="button"
+              tabIndex={0}
+              aria-label="Zoom into this part of the photo"
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                updateZoom(zoomScale >= 4 ? 1 : Math.min(zoomScale * 2, 4));
+              }}
               className={`max-h-[85dvh] max-w-[92vw] select-none object-contain transition-transform duration-150 ease-out ${
                 zoomScale > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'
               }`}
@@ -793,7 +882,7 @@ const PropertyDetail = () => {
           )}
 
           <p className="absolute inset-x-0 bottom-4 z-10 text-center text-xs text-white/70">
-            Scroll or pinch to zoom · Drag to move · Double-click to toggle zoom
+            Click or scroll a point to zoom · Pinch to zoom · Drag to move
           </p>
         </DialogContent>
       </Dialog>
