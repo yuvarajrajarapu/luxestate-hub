@@ -9,14 +9,16 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { GoogleIcon } from '@/components/auth/GoogleSignIn';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signIn, user, isAdmin, loading, checkingAdmin, logout, refreshUserData } = useAuth();
+  const { signIn, signInWithGoogleForAdmin, user, isAdmin, loading, checkingAdmin, logout } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already logged in as admin
@@ -55,6 +57,32 @@ const AdminLogin: React.FC = () => {
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+    setError('');
+
+    try {
+      await signInWithGoogleForAdmin();
+      toast.success('Welcome back, Admin!');
+      navigate('/admin/dashboard', { replace: true });
+    } catch (error) {
+      const popupClosed =
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'auth/popup-closed-by-user';
+      const errorMessage = popupClosed
+        ? 'Google sign-in was cancelled.'
+        : error instanceof Error
+          ? error.message
+          : 'Google sign-in failed. Please try again.';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -167,7 +195,7 @@ const AdminLogin: React.FC = () => {
 
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isGoogleLoading}
               className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-amber-500/25 transition-all duration-300"
             >
               {isLoading ? (
@@ -183,6 +211,32 @@ const AdminLogin: React.FC = () => {
               )}
             </Button>
           </form>
+
+          <div className="my-6 flex items-center gap-3 text-sm text-slate-400">
+            <span className="h-px flex-1 bg-white/10" />
+            <span>Or continue with</span>
+            <span className="h-px flex-1 bg-white/10" />
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleGoogleSignIn}
+            disabled={isLoading || isGoogleLoading}
+            className="h-12 w-full border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+          >
+            {isGoogleLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                Checking administrator access...
+              </div>
+            ) : (
+              <>
+                <GoogleIcon className="mr-2 h-5 w-5" />
+                Continue with Google
+              </>
+            )}
+          </Button>
 
           <div className="mt-6 pt-6 border-t border-white/10">
             <p className="text-center text-slate-400 text-sm">

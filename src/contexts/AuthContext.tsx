@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User, UserCredential } from 'firebase/auth';
+import type { DocumentSnapshot } from 'firebase/firestore';
 
 interface UserData {
   uid: string;
@@ -16,6 +17,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<UserCredential>;
   signUp: (email: string, password: string, username: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithGoogleForAdmin: () => Promise<void>;
   signInWithGoogleCredential: (credential: string) => Promise<void>;
   logout: () => Promise<void>;
   isAdmin: boolean;
@@ -78,9 +80,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAdmin(data.role === 'admin');
         return fetchedUserData;
       }
+      setUserData(null);
+      setIsAdmin(false);
       return null;
     } catch (error) {
       console.error('Error fetching user data:', error);
+      setUserData(null);
+      setIsAdmin(false);
       return null;
     }
   };
@@ -109,6 +115,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (!active) return;
 
           setUser(currentUser);
+          setUserData(null);
+          setIsAdmin(false);
           setCheckingAdmin(true);
 
           if (currentUser) {
@@ -226,6 +234,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithGoogleForAdmin = async (): Promise<void> => {
+    const { auth, GoogleAuthProvider, signInWithPopup, signOut } = await loadFirebaseAuth();
+    const googleProvider = new GoogleAuthProvider();
+    googleProvider.addScope('profile');
+    googleProvider.addScope('email');
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+    const { user: googleUser } = await signInWithPopup(auth, googleProvider);
+
+    const clearSession = async () => {
+      try {
+        await signOut(auth);
+      } finally {
+        setUser(null);
+        setUserData(null);
+        setIsAdmin(false);
+        setCheckingAdmin(false);
+      }
+    };
+
+    let userDocument: DocumentSnapshot;
+    try {
+      const { doc, getDoc, db } = await loadFirebaseFirestore();
+      userDocument = await getDoc(doc(db, 'users', googleUser.uid));
+    } catch (error) {
+      await clearSession();
+      throw error;
+    }
+
+    if (!userDocument.exists() || userDocument.data().role !== 'admin') {
+      await clearSession();
+      throw new Error('Access denied. This Google account does not have admin privileges.');
+    }
+
+    const data = userDocument.data();
+    setUser(googleUser);
+    setUserData({
+      uid: data.uid || googleUser.uid,
+      email: data.email || googleUser.email || '',
+      username: data.username || googleUser.displayName || googleUser.email?.split('@')[0] || 'Admin',
+      role: 'admin',
+      createdAt: data.createdAt?.toDate() || new Date(),
+    });
+    setIsAdmin(true);
+    setCheckingAdmin(false);
+  };
+
   const signInWithGoogleCredential = async (credential: string): Promise<void> => {
     try {
       const { auth, GoogleAuthProvider, signInWithCredential } = await loadFirebaseAuth();
@@ -324,6 +379,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signUp,
     signInWithGoogle,
+    signInWithGoogleForAdmin,
     signInWithGoogleCredential,
     logout,
     isAdmin,
