@@ -307,7 +307,7 @@ function readPrimaryImageFromProperty(property: PropertyRecord): string {
 
 export async function fetchPropertyByCode(code: string): Promise<PropertyRecord | null> {
   const normalizedCode = normalizePropertyCode(code);
-  const projectId = process.env.VITE_FIREBASE_PROJECT_ID ?? process.env.FIREBASE_PROJECT_ID ?? 'umy-infra';
+  const projectId = process.env.VITE_FIREBASE_PROJECT_ID ?? process.env.FIREBASE_PROJECT_ID ?? 'yuvainfraedge';
 
   const runQueryUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`;
 
