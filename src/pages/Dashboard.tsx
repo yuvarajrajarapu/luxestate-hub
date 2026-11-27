@@ -9,13 +9,13 @@ import { useEffect } from 'react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, userData, logout } = useAuth();
+  const { user, userData, logout, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
+    if (!authLoading && !user) {
+      navigate('/login', { replace: true });
     }
-  }, [user, navigate]);
+  }, [authLoading, user, navigate]);
 
   const handleLogout = async () => {
     try {
@@ -25,6 +25,14 @@ const Dashboard = () => {
       console.error('Logout error:', error);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center" role="status" aria-label="Checking your session">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   if (!user) {
     return null;

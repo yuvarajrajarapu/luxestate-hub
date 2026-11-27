@@ -14,7 +14,7 @@ import PropertyCard from '@/components/property/PropertyCard';
 import type { Property } from '@/types/property';
 
 const Profile = () => {
-  const { user, userData, logout } = useAuth();
+  const { user, userData, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const { shortlistedIds, loading: shortlistLoading } = useShortlist();
@@ -22,14 +22,18 @@ const Profile = () => {
   const [loadingProperties, setLoadingProperties] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
+    if (!authLoading && !user) {
+      navigate('/login', { replace: true });
     }
-  }, [user, navigate]);
+  }, [authLoading, user, navigate]);
 
   // Fetch shortlisted properties
   useEffect(() => {
     const fetchShortlistedProperties = async () => {
+      if (authLoading) {
+        return;
+      }
+
       if (!user) {
         setLoadingProperties(false);
         return;
@@ -62,7 +66,7 @@ const Profile = () => {
     };
 
     fetchShortlistedProperties();
-  }, [user, shortlistedIds.length, shortlistLoading]);
+  }, [authLoading, user, shortlistedIds.length, shortlistLoading]);
 
   const handleLogout = async () => {
     try {
@@ -72,6 +76,14 @@ const Profile = () => {
       console.error('Logout error:', error);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center" role="status" aria-label="Checking your session">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   if (!user) {
     return null;
