@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -18,6 +19,9 @@ import {
   Loader2,
   Play,
   AlertCircle,
+  ZoomIn,
+  ZoomOut,
+  X,
 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -26,6 +30,7 @@ import { Badge } from '@/components/ui/badge';
 import { useProperty } from '@/hooks/useProperties';
 import { formatPropertyPrice } from '@/lib/formatPrice';
 import { buildPropertyUrl } from '@/lib/propertyCode';
+import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 const PropertyDetail = () => {
   const { propertyCode } = useParams();
@@ -33,12 +38,107 @@ const PropertyDetail = () => {
   const { property, loading, error } = useProperty(propertyCode);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const [zoomScale, setZoomScale] = useState(1);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    originX: number;
+    originY: number;
+  } | null>(null);
+  const activePointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const pinchStartRef = useRef<{ distance: number; scale: number } | null>(null);
 
   const shareCode = useMemo(() => property?.propertyCode || property?.id || propertyCode || '', [property?.propertyCode, property?.id, propertyCode]);
   const propertyUrl = useMemo(() => (shareCode ? buildPropertyUrl(shareCode) : ''), [shareCode]);
 
   // Combine images and videos into a single media array
   const allMedia = property ? [...(property.images || []), ...(property.videos || [])] : [];
+  const imageIndices = allMedia.flatMap((media, index) => media.type === 'image' ? [index] : []);
+
+  const resetZoom = () => {
+    setZoomScale(1);
+    setZoomPosition({ x: 0, y: 0 });
+    dragRef.current = null;
+    activePointersRef.current.clear();
+    pinchStartRef.current = null;
+  };
+
+  const updateZoom = (scale: number) => {
+    const nextScale = Math.min(4, Math.max(1, scale));
+    setZoomScale(nextScale);
+    if (nextScale === 1) setZoomPosition({ x: 0, y: 0 });
+  };
+
+  const changeZoomImage = (direction: -1 | 1) => {
+    const currentImagePosition = imageIndices.indexOf(currentMediaIndex);
+    const nextImagePosition =
+      (currentImagePosition + direction + imageIndices.length) % imageIndices.length;
+    setCurrentMediaIndex(imageIndices[nextImagePosition]);
+    resetZoom();
+  };
+
+  const handleZoomPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    event.currentTarget.setPointerCapture(event.pointerId);
+    activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    const pointers = Array.from(activePointersRef.current.values());
+    if (pointers.length >= 2) {
+      const [first, second] = pointers;
+      pinchStartRef.current = {
+        distance: Math.hypot(second.x - first.x, second.y - first.y),
+        scale: zoomScale,
+      };
+      dragRef.current = null;
+    } else if (zoomScale > 1) {
+      dragRef.current = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        originX: zoomPosition.x,
+        originY: zoomPosition.y,
+      };
+    }
+  };
+
+  const handleZoomPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!activePointersRef.current.has(event.pointerId)) return;
+    activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    const pointers = Array.from(activePointersRef.current.values());
+    if (pointers.length >= 2 && pinchStartRef.current) {
+      const [first, second] = pointers;
+      const distance = Math.hypot(second.x - first.x, second.y - first.y);
+      updateZoom(pinchStartRef.current.scale * (distance / pinchStartRef.current.distance));
+      return;
+    }
+
+    if (dragRef.current?.pointerId === event.pointerId) {
+      setZoomPosition({
+        x: dragRef.current.originX + event.clientX - dragRef.current.startX,
+        y: dragRef.current.originY + event.clientY - dragRef.current.startY,
+      });
+    }
+  };
+
+  const handleZoomPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    activePointersRef.current.delete(event.pointerId);
+    if (activePointersRef.current.size < 2) pinchStartRef.current = null;
+    if (dragRef.current?.pointerId === event.pointerId) dragRef.current = null;
+
+    if (activePointersRef.current.size === 1 && zoomScale > 1) {
+      const [pointerId, point] = Array.from(activePointersRef.current.entries())[0];
+      dragRef.current = {
+        pointerId,
+        startX: point.x,
+        startY: point.y,
+        originX: zoomPosition.x,
+        originY: zoomPosition.y,
+      };
+    }
+  };
 
   if (loading) {
     return (
@@ -172,16 +272,26 @@ const PropertyDetail = () => {
                         referrerPolicy="strict-origin-when-cross-origin"
                       />
                     ) : (
-                      <img
-                        src={allMedia[currentMediaIndex]?.url || '/placeholder.svg'}
-                        alt={property.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          console.warn(`Failed to load image: ${allMedia[currentMediaIndex]?.url}`);
-                          e.currentTarget.src = '/placeholder.svg';
+                      <button
+                        type="button"
+                        onClick={() => {
+                          resetZoom();
+                          setIsZoomOpen(true);
                         }}
-                        loading="eager"
-                      />
+                        aria-label="Zoom property photo"
+                        className="block h-full w-full cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+                      >
+                        <img
+                          src={allMedia[currentMediaIndex]?.url || '/placeholder.svg'}
+                          alt={property.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.warn(`Failed to load image: ${allMedia[currentMediaIndex]?.url}`);
+                            e.currentTarget.src = '/placeholder.svg';
+                          }}
+                          loading="eager"
+                        />
+                      </button>
                     )}
                   </>
                 ) : (
@@ -244,6 +354,12 @@ const PropertyDetail = () => {
                 <div className="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-black/50 text-white text-sm">
                   {currentMediaIndex + 1} / {allMedia.length}
                 </div>
+                {allMedia[currentMediaIndex]?.type === 'image' && (
+                  <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-full bg-black/50 px-3 py-1.5 text-sm text-white">
+                    <ZoomIn className="h-4 w-4" />
+                    <span>Tap to zoom</span>
+                  </div>
+                )}
               </motion.div>
 
               {/* Thumbnails */}
@@ -558,6 +674,129 @@ const PropertyDetail = () => {
       </main>
 
       <Footer />
+
+      <Dialog
+        open={isZoomOpen}
+        onOpenChange={(open) => {
+          setIsZoomOpen(open);
+          if (!open) resetZoom();
+        }}
+      >
+        <DialogContent
+          showCloseButton={false}
+          aria-describedby={undefined}
+          className="!left-0 !top-0 !h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 overflow-hidden rounded-none border-0 bg-black p-0 text-white shadow-none"
+          onPointerDown={(event) => {
+            if ((event.target as HTMLElement).closest('button')) return;
+            handleZoomPointerDown(event);
+          }}
+          onPointerMove={handleZoomPointerMove}
+          onPointerUp={handleZoomPointerUp}
+          onPointerCancel={handleZoomPointerUp}
+          onClick={(event) => {
+            const target = event.target as HTMLElement;
+            if (target.closest('button') || target instanceof HTMLImageElement) return;
+            setIsZoomOpen(false);
+          }}
+          onWheel={(event) => {
+            updateZoom(zoomScale + (event.deltaY < 0 ? 0.25 : -0.25));
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'ArrowLeft' && imageIndices.length > 1) {
+              changeZoomImage(-1);
+            } else if (event.key === 'ArrowRight' && imageIndices.length > 1) {
+              changeZoomImage(1);
+            } else if (event.key === '+' || event.key === '=') {
+              updateZoom(zoomScale + 0.5);
+            } else if (event.key === '-') {
+              updateZoom(zoomScale - 0.5);
+            } else if (event.key === '0') {
+              resetZoom();
+            }
+          }}
+        >
+          <DialogTitle className="sr-only">Property photo viewer</DialogTitle>
+
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent px-4 py-4 pr-16 sm:px-6 sm:py-5 sm:pr-20">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium sm:text-base">{property.title}</p>
+              <p className="text-xs text-white/70">
+                {imageIndices.indexOf(currentMediaIndex) + 1} / {imageIndices.length}
+              </p>
+            </div>
+            <div className="pointer-events-auto flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => updateZoom(zoomScale - 0.5)}
+                disabled={zoomScale <= 1}
+                aria-label="Zoom out"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-black/80 text-white shadow-lg transition hover:bg-black disabled:opacity-70"
+              >
+                <ZoomOut className="h-5 w-5" />
+              </button>
+              <span className="min-w-12 rounded-full border border-white/70 bg-black/80 px-2 py-2 text-center text-sm tabular-nums text-white shadow-lg">
+                {Math.round(zoomScale * 100)}%
+              </span>
+              <button
+                type="button"
+                onClick={() => updateZoom(zoomScale + 0.5)}
+                disabled={zoomScale >= 4}
+                aria-label="Zoom in"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-black/80 text-white shadow-lg transition hover:bg-black disabled:opacity-70"
+              >
+                <ZoomIn className="h-5 w-5" />
+              </button>
+              <DialogClose
+                type="button"
+                aria-label="Close photo viewer"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-black/80 text-white shadow-lg transition hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              >
+                <X className="h-5 w-5" />
+              </DialogClose>
+            </div>
+          </div>
+
+          <div className="absolute inset-0 flex touch-none items-center justify-center overflow-hidden">
+            <img
+              src={allMedia[currentMediaIndex]?.url || '/placeholder.svg'}
+              alt={`${property.title} - photo ${imageIndices.indexOf(currentMediaIndex) + 1}`}
+              draggable={false}
+              onDoubleClick={() => updateZoom(zoomScale === 1 ? 2 : 1)}
+              className={`max-h-[85dvh] max-w-[92vw] select-none object-contain transition-transform duration-150 ease-out ${
+                zoomScale > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'
+              }`}
+              style={{
+                transform: `translate(${zoomPosition.x}px, ${zoomPosition.y}px) scale(${zoomScale})`,
+              }}
+            />
+          </div>
+
+          {imageIndices.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() => changeZoomImage(-1)}
+                aria-label="Previous photo"
+                className="absolute left-4 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-black/80 text-white shadow-lg transition hover:bg-black sm:left-6"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                type="button"
+                onClick={() => changeZoomImage(1)}
+                aria-label="Next photo"
+                className="absolute right-4 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-black/80 text-white shadow-lg transition hover:bg-black sm:right-6"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </>
+          )}
+
+          <p className="absolute inset-x-0 bottom-4 z-10 text-center text-xs text-white/70">
+            Scroll or pinch to zoom · Drag to move · Double-click to toggle zoom
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

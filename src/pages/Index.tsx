@@ -28,16 +28,16 @@ const Index = () => {
         <CategoryCards />
 
         {/* Featured Properties */}
-        <section className="pb-8 pt-4 md:pb-16 md:pt-6">
+        <section className="pb-8 pt-4 md:pb-10 md:pt-6">
           <div className="container mx-auto px-4">
             {/* Header with See All */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3 mb-6">
               <h2 className="text-2xl md:text-3xl font-semibold text-gray-900">
                 Properties
               </h2>
               <Link 
                 to="/properties"
-                className="text-red-500 hover:text-red-600 font-medium flex items-center gap-1 text-sm md:text-base"
+                className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/15 bg-white/70 px-4 py-2 text-sm font-medium text-primary shadow-sm backdrop-blur-md transition-all hover:bg-white/90 hover:text-primary/80 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 md:text-base"
               >
                 See All
                 <ArrowRight className="w-4 h-4" />
@@ -98,7 +98,7 @@ const Index = () => {
         </section>
 
         {/* Property Categories */}
-        <section className="py-16 md:py-24">
+        <section className="pb-16 pt-12 md:pb-24 md:pt-12">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
