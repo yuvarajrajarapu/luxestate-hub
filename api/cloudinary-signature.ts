@@ -1,6 +1,4 @@
-export const config = {
-  runtime: 'edge',
-};
+import { createHash } from 'node:crypto';
 
 const DEFAULT_FIREBASE_PROJECT_ID = 'yuvainfraedge';
 const CLOUDINARY_FOLDER = 'umy-infra';
@@ -29,12 +27,7 @@ async function createCloudinarySignature(parameters: Record<string, string>, api
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([key, value]) => `${key}=${value}`)
     .join('&');
-  const digest = await crypto.subtle.digest(
-    'SHA-1',
-    new TextEncoder().encode(`${stringToSign}${apiSecret}`)
-  );
-
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+  return createHash('sha1').update(`${stringToSign}${apiSecret}`).digest('hex');
 }
 
 export default async function handler(request: Request): Promise<Response> {
