@@ -3,17 +3,36 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Search, Building2, Home, LandPlot, Key, Briefcase, Store, Users, Trees, Fence } from 'lucide-react';
 import { usePropertyCounts } from '@/hooks/usePropertyCounts';
-import { getOptimizedImageUrl } from '@/lib/image-optimization';
 import property1 from '@/assets/properties/property-1.jpg';
+import property1_320 from '@/assets/properties/property-1-320.avif';
+import property1_640 from '@/assets/properties/property-1-640.avif';
 import property2 from '@/assets/properties/property-2.jpg';
+import property2_320 from '@/assets/properties/property-2-320.avif';
+import property2_640 from '@/assets/properties/property-2-640.avif';
 import property3 from '@/assets/properties/property-3.jpg';
+import property3_320 from '@/assets/properties/property-3-320.avif';
+import property3_640 from '@/assets/properties/property-3-640.avif';
 import property5 from '@/assets/properties/property-5.jpg';
+import property5_320 from '@/assets/properties/property-5-320.avif';
+import property5_640 from '@/assets/properties/property-5-640.avif';
 import flatRent from '@/assets/properties/flat-rent.jpg';
+import flatRent_320 from '@/assets/properties/flat-rent-320.avif';
+import flatRent_640 from '@/assets/properties/flat-rent-640.avif';
 import houseRent from '@/assets/properties/house-rent.jpg';
+import houseRent_320 from '@/assets/properties/house-rent-320.avif';
+import houseRent_640 from '@/assets/properties/house-rent-640.avif';
 import plotSale from '@/assets/properties/plot-sale.jpg';
+import plotSale_320 from '@/assets/properties/plot-sale-320.avif';
+import plotSale_640 from '@/assets/properties/plot-sale-640.avif';
 import agricultureLand from '@/assets/properties/agriculture-land.jpg';
+import agricultureLand_320 from '@/assets/properties/agriculture-land-320.avif';
+import agricultureLand_640 from '@/assets/properties/agriculture-land-640.avif';
 import farmhouseSale from '@/assets/properties/farmhouse-sale.jpg';
+import farmhouseSale_320 from '@/assets/properties/farmhouse-sale-320.avif';
+import farmhouseSale_640 from '@/assets/properties/farmhouse-sale-640.avif';
 import farmhouseRent from '@/assets/properties/farmhouse-rent.jpg';
+import farmhouseRent_320 from '@/assets/properties/farmhouse-rent-320.avif';
+import farmhouseRent_640 from '@/assets/properties/farmhouse-rent-640.avif';
 
 const categories = [
   {
@@ -22,6 +41,7 @@ const categories = [
     subtitle: 'Apartments & Flats',
     href: '/properties?categorySlug=flat-for-sale',
     image: property1,
+    imageSrcSet: `${property1_320} 320w, ${property1_640} 640w`,
     bgColor: 'bg-amber-50 dark:bg-amber-950/30',
     icon: Building2,
   },
@@ -31,6 +51,7 @@ const categories = [
     subtitle: 'Villas & Independent Houses',
     href: '/properties?categorySlug=house-for-sale',
     image: property3,
+    imageSrcSet: `${property3_320} 320w, ${property3_640} 640w`,
     bgColor: 'bg-emerald-50 dark:bg-emerald-950/30',
     icon: Home,
   },
@@ -40,6 +61,7 @@ const categories = [
     subtitle: 'Residential & Commercial Plots',
     href: '/land/plot',
     image: plotSale,
+    imageSrcSet: `${plotSale_320} 320w, ${plotSale_640} 640w`,
     bgColor: 'bg-blue-50 dark:bg-blue-950/30',
     icon: Fence,
   },
@@ -49,6 +71,7 @@ const categories = [
     subtitle: 'Farm & Agricultural Land',
     href: '/land/agricultural',
     image: agricultureLand,
+    imageSrcSet: `${agricultureLand_320} 320w, ${agricultureLand_640} 640w`,
     bgColor: 'bg-lime-50 dark:bg-lime-950/30',
     icon: Trees,
   },
@@ -58,6 +81,7 @@ const categories = [
     subtitle: 'Luxury Farmhouses',
     href: '/land/farm-houses?type=sale',
     image: farmhouseSale,
+    imageSrcSet: `${farmhouseSale_320} 320w, ${farmhouseSale_640} 640w`,
     bgColor: 'bg-teal-50 dark:bg-teal-950/30',
     icon: Home,
   },
@@ -67,6 +91,7 @@ const categories = [
     subtitle: 'Rental Farmhouses',
     href: '/land/farm-houses?type=rent',
     image: farmhouseRent,
+    imageSrcSet: `${farmhouseRent_320} 320w, ${farmhouseRent_640} 640w`,
     bgColor: 'bg-green-50 dark:bg-green-950/30',
     icon: Key,
   },
@@ -76,6 +101,7 @@ const categories = [
     subtitle: 'Rental Apartments',
     href: '/properties?categorySlug=flat-for-rent',
     image: flatRent,
+    imageSrcSet: `${flatRent_320} 320w, ${flatRent_640} 640w`,
     bgColor: 'bg-cyan-50 dark:bg-cyan-950/30',
     icon: Key,
   },
@@ -85,6 +111,7 @@ const categories = [
     subtitle: 'Rental Villas & Houses',
     href: '/properties?categorySlug=house-for-rent',
     image: houseRent,
+    imageSrcSet: `${houseRent_320} 320w, ${houseRent_640} 640w`,
     bgColor: 'bg-violet-50 dark:bg-violet-950/30',
     icon: Home,
   },
@@ -94,6 +121,7 @@ const categories = [
     subtitle: 'For Rent & Lease',
     href: '/properties?categorySlug=office-for-rent-lease',
     image: property5,
+    imageSrcSet: `${property5_320} 320w, ${property5_640} 640w`,
     bgColor: 'bg-purple-50 dark:bg-purple-950/30',
     icon: Briefcase,
   },
@@ -103,6 +131,7 @@ const categories = [
     subtitle: 'Shops & Showrooms',
     href: '/properties?categorySlug=commercial-space-for-rent-lease',
     image: property1,
+    imageSrcSet: `${property1_320} 320w, ${property1_640} 640w`,
     bgColor: 'bg-rose-50 dark:bg-rose-950/30',
     icon: Store,
   },
@@ -112,6 +141,7 @@ const categories = [
     subtitle: 'Hostels & PG',
     href: '/properties?categorySlug=pg-hostel-boys',
     image: property2,
+    imageSrcSet: `${property2_320} 320w, ${property2_640} 640w`,
     bgColor: 'bg-sky-50 dark:bg-sky-950/30',
     icon: Users,
   },
@@ -121,6 +151,7 @@ const categories = [
     subtitle: 'Hostels & PG',
     href: '/properties?categorySlug=pg-hostel-girls',
     image: property3,
+    imageSrcSet: `${property3_320} 320w, ${property3_640} 640w`,
     bgColor: 'bg-pink-50 dark:bg-pink-950/30',
     icon: Users,
   },
@@ -240,10 +271,16 @@ const CategoryCards = () => {
                     {/* Image */}
                     <div className="absolute bottom-0 right-0 w-[80%] h-[55%]">
                       <picture>
-                        <source srcSet={getOptimizedImageUrl(category.image, 'webp', 75)} type="image/webp" />
+                        <source
+                          srcSet={category.imageSrcSet}
+                          sizes="(min-width: 768px) 240px, 208px"
+                          type="image/avif"
+                        />
                         <img
                           src={category.image}
                           alt={category.title}
+                          width={640}
+                          height={512}
                           className="w-full h-full object-cover rounded-tl-xl group-hover:scale-105 transition-transform duration-500"
                           loading="lazy"
                           decoding="async"

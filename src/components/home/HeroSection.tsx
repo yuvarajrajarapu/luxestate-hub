@@ -1,21 +1,19 @@
 import { motion } from 'framer-motion';
 import heroBg from '@/assets/hero-bg.jpg';
-import { getOptimizedImageUrl } from '@/lib/image-optimization';
 
 const HeroSection = () => {
-  const optimizedHeroBg = getOptimizedImageUrl(heroBg, 'webp', 85);
-
   return (
     <section className="relative min-h-[50vh] md:min-h-[60vh] flex items-center justify-center overflow-hidden pt-16">
       {/* Background Image */}
       <div className="absolute inset-0">
         <picture>
-          <source srcSet={optimizedHeroBg} type="image/webp" />
+          <source srcSet="/hero-bg.avif" type="image/avif" />
           <img
             src={heroBg}
             alt="Luxury real estate"
+            width={1600}
+            height={900}
             className="w-full h-full object-cover"
-            fetchPriority="high"
             loading="eager"
             decoding="async"
           />
