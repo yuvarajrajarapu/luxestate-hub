@@ -7,6 +7,7 @@ import { useProperties } from '@/hooks/useProperties';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Loader2 } from 'lucide-react';
+import GoogleOneTap from '@/components/auth/GoogleOneTap';
 
 const PropertyCard = lazy(() => import('@/components/property/PropertyCard'));
 
@@ -16,6 +17,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <GoogleOneTap />
       <Header />
 
       <main>

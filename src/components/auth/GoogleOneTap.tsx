@@ -80,11 +80,13 @@ function loadGoogleIdentityServices(): Promise<GoogleIdentityServices> {
 }
 
 const GoogleOneTap = () => {
-  const { signInWithGoogleCredential } = useAuth();
+  const { loading, user, signInWithGoogleCredential } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (loading || user) return;
+
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
     if (!clientId?.endsWith('.apps.googleusercontent.com')) {
       console.warn(
@@ -161,7 +163,7 @@ const GoogleOneTap = () => {
       }
       window.google?.accounts?.id?.cancel();
     };
-  }, [navigate, signInWithGoogleCredential, toast]);
+  }, [loading, navigate, signInWithGoogleCredential, toast, user]);
 
   return null;
 };
