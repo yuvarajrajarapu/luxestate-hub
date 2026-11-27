@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PropertyCard from '@/components/property/PropertyCard';
 import { useProperties } from '@/hooks/useProperties';
+import PageSeo from '@/components/seo/PageSeo';
 import { Loader2 } from 'lucide-react';
 
 const LandFarmHouses = () => {
@@ -21,6 +22,11 @@ const LandFarmHouses = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSeo
+        title="Farmhouses for Sale and Rent in India | UMY Infra"
+        description="Discover farmhouses for sale and rent across India with UMY Infra."
+        path="/land/farm-houses"
+      />
       <Header />
       
       <main className="pt-24 pb-16">

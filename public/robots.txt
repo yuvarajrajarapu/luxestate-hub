@@ -16,4 +16,4 @@ Allow: /
 Disallow: /admin
 
 # Sitemap
-Sitemap: https://umyinfra.in/sitemap.xml
+Sitemap: https://www.umyinfra.in/sitemap.xml

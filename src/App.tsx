@@ -85,9 +85,11 @@ export const AppContent = () => {
 };
 
 const App = () => (
-  <BrowserRouter>
-    <AppContent />
-  </BrowserRouter>
+  <HelmetProvider>
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  </HelmetProvider>
 );
 
 export default App;

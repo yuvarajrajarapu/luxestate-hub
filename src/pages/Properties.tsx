@@ -22,6 +22,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { useProperties } from '@/hooks/useProperties';
+import PageSeo from '@/components/seo/PageSeo';
 // import { MetadataHead } from '@/hooks/useMetadata';
 // import { generateListingPageMetadata, generatePageMetadata } from '@/lib/metadata';
 
@@ -120,6 +121,11 @@ const Properties = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSeo
+        title="Properties for Sale, Rent & Lease in India | UMY Infra"
+        description="Browse homes, apartments, plots and commercial properties for sale, rent or lease across India with UMY Infra."
+        path="/properties"
+      />
       <Header />
 
       {/* Main Content */}

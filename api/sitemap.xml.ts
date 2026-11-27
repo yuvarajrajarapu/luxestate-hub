@@ -2,21 +2,36 @@ export const config = {
   runtime: 'edge',
 };
 
-interface SitemapEntry {
-  loc: string;
-  lastmod: string;
-  changefreq: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
-  priority: number;
+const SITE_URL = 'https://www.umyinfra.in';
+const PAGE_SIZE = 1000;
+const MAX_SITEMAP_URLS = 50_000;
+const STATIC_PATHS = [
+  '/',
+  '/properties',
+  '/land/plot',
+  '/land/agricultural',
+  '/land/farm-houses',
+];
+
+interface FirestoreValue {
+  stringValue?: string;
+  booleanValue?: boolean;
+  timestampValue?: string;
 }
 
-const SITE_URL = 'https://umyinfra.in';
-const FIREBASE_PROJECT_ID = 'umy-infra';
+interface FirestoreDocument {
+  name?: string;
+  updateTime?: string;
+  fields?: Record<string, FirestoreValue>;
+}
 
-/**
- * Escape XML special characters
- */
-function escapeXml(unsafe: string): string {
-  return unsafe
+interface SitemapEntry {
+  loc: string;
+  lastmod?: string;
+}
+
+function escapeXml(value: string): string {
+  return value
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -24,71 +39,64 @@ function escapeXml(unsafe: string): string {
     .replace(/'/g, '&apos;');
 }
 
-/**
- * Fetch properties from Firestore
- */
-async function fetchProperties(): Promise<any[]> {
-  try {
-    const apiKey = process.env.FIREBASE_API_KEY;
-    if (!apiKey) {
-      console.warn('FIREBASE_API_KEY not set, returning empty properties');
-      return [];
-    }
+async function fetchProperties(): Promise<FirestoreDocument[]> {
+  const projectId =
+    process.env.FIREBASE_PROJECT_ID ??
+    process.env.VITE_FIREBASE_PROJECT_ID ??
+    'yuvainfraedge';
+  const endpoint = `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(projectId)}/databases/(default)/documents/properties`;
+  const documents: FirestoreDocument[] = [];
+  let pageToken: string | undefined;
 
-    const response = await fetch(
-      `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/properties?pageSize=1000`,
-      {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-        },
-      }
-    );
+  do {
+    const url = new URL(endpoint);
+    url.searchParams.set('pageSize', String(PAGE_SIZE));
+    if (pageToken) url.searchParams.set('pageToken', pageToken);
 
+    const response = await fetch(url);
     if (!response.ok) {
-      console.warn('Failed to fetch properties from Firestore');
-      return [];
+      throw new Error(`Firestore sitemap query failed with status ${response.status}`);
     }
 
-    const data = await response.json() as any;
-    return data.documents || [];
-  } catch (error) {
-    console.error('Error fetching properties:', error);
-    return [];
-  }
-}
-
-/**
- * Extract property data from Firestore document
- */
-function extractPropertyData(doc: any): any | null {
-  try {
-    if (!doc.name || !doc.fields) return null;
-
-    const id = doc.name.split('/').pop();
-    const fields = doc.fields;
-
-    return {
-      id,
-      title: fields.title?.stringValue || '',
-      active: fields.active?.booleanValue !== false,
-      updatedAt: doc.updateTime || new Date().toISOString(),
+    const page = (await response.json()) as {
+      documents?: FirestoreDocument[];
+      nextPageToken?: string;
     };
-  } catch (error) {
-    return null;
-  }
+
+    documents.push(...(page.documents ?? []));
+    if (documents.length > MAX_SITEMAP_URLS) {
+      throw new Error(`Property collection exceeds the ${MAX_SITEMAP_URLS}-URL sitemap limit`);
+    }
+
+    pageToken = page.nextPageToken;
+  } while (pageToken);
+
+  return documents;
 }
 
-/**
- * Generate sitemap XML
- */
+function getPropertyEntry(document: FirestoreDocument): SitemapEntry | null {
+  const fields = document.fields;
+  const documentId = document.name?.split('/').pop();
+  const propertyCode = fields?.propertyCode?.stringValue?.trim() || documentId;
+
+  if (!propertyCode || fields?.isSoldOut?.booleanValue === true) return null;
+
+  const updatedAt = fields?.updatedAt?.timestampValue || document.updateTime;
+  const updatedAtMs = updatedAt ? Date.parse(updatedAt) : Number.NaN;
+
+  return {
+    loc: `${SITE_URL}/property/${encodeURIComponent(propertyCode)}`,
+    ...(Number.isNaN(updatedAtMs)
+      ? {}
+      : { lastmod: new Date(updatedAtMs).toISOString().slice(0, 10) }),
+  };
+}
+
 function generateSitemapXml(entries: SitemapEntry[]): string {
   const urls = entries
     .map(
-      entry => `  <url>
-    <loc>${escapeXml(entry.loc)}</loc>
-    <lastmod>${entry.lastmod}</lastmod>
-    <changefreq>${entry.changefreq}</changefreq>
-    <priority>${entry.priority}</priority>
+      ({ loc, lastmod }) => `  <url>
+    <loc>${escapeXml(loc)}</loc>${lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : ''}
   </url>`
     )
     .join('\n');
@@ -99,115 +107,39 @@ ${urls}
 </urlset>`;
 }
 
-/**
- * Get today's date in YYYY-MM-DD format
- */
-function getTodayDate(): string {
-  const today = new Date();
-  return today.toISOString().split('T')[0];
-}
-
-/**
- * Main handler
- */
-export default async function handler(request: Request) {
+export default async function handler(_request: Request) {
   try {
-    const entries: SitemapEntry[] = [];
-    const today = getTodayDate();
+    const entries: SitemapEntry[] = STATIC_PATHS.map((path) => ({
+      loc: `${SITE_URL}${path}`,
+    }));
+    const existingUrls = new Set(entries.map((entry) => entry.loc));
 
-    // Static pages (highest priority)
-    entries.push({
-      loc: `${SITE_URL}/`,
-      lastmod: today,
-      changefreq: 'daily',
-      priority: 1.0,
-    });
-
-    // Category pages
-    const categories = ['sale', 'rent', 'lease'];
-    for (const category of categories) {
-      entries.push({
-        loc: `${SITE_URL}/properties?type=${category}`,
-        lastmod: today,
-        changefreq: 'daily',
-        priority: 0.9,
-      });
+    for (const document of await fetchProperties()) {
+      const entry = getPropertyEntry(document);
+      if (entry && !existingUrls.has(entry.loc)) {
+        entries.push(entry);
+        existingUrls.add(entry.loc);
+      }
     }
 
-    // Other static pages
-    entries.push({
-      loc: `${SITE_URL}/profile`,
-      lastmod: today,
-      changefreq: 'monthly',
-      priority: 0.8,
-    });
-
-    // Dynamic property pages
-    const properties = await fetchProperties();
-    const activeProperties = properties
-      .map(extractPropertyData)
-      .filter((p): p is any => p !== null && p.active);
-
-    console.log(`Found ${activeProperties.length} active properties for sitemap`);
-
-    for (const property of activeProperties) {
-      entries.push({
-        loc: `${SITE_URL}/properties/${property.id}`,
-        lastmod: property.updatedAt.split('T')[0],
-        changefreq: 'weekly',
-        priority: 0.8,
-      });
+    if (entries.length > MAX_SITEMAP_URLS) {
+      throw new Error(`Sitemap exceeds the ${MAX_SITEMAP_URLS}-URL limit`);
     }
 
-    // Common cities (location hierarchy)
-    const cities = [
-      'hyderabad',
-      'kakinada',
-      'vijayawada',
-      'visakhapatnam',
-      'bangalore',
-      'pune',
-      'mumbai',
-      'delhi',
-      'kolkata',
-      'chennai',
-    ];
-
-    for (const city of cities) {
-      entries.push({
-        loc: `${SITE_URL}/properties?city=${encodeURIComponent(city)}`,
-        lastmod: today,
-        changefreq: 'weekly',
-        priority: 0.7,
-      });
-    }
-
-    const xml = generateSitemapXml(entries);
-
-    return new Response(xml, {
+    return new Response(generateSitemapXml(entries), {
       headers: {
         'Content-Type': 'application/xml; charset=utf-8',
-        'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
+        'Cache-Control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400',
         'X-Content-Type-Options': 'nosniff',
       },
     });
   } catch (error) {
-    console.error('Sitemap generation error:', error);
-
-    // Return minimal valid sitemap on error
-    const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${SITE_URL}/</loc>
-    <lastmod>${getTodayDate()}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-</urlset>`;
-
-    return new Response(fallbackXml, {
+    console.error('Sitemap generation failed:', error);
+    return new Response('Sitemap temporarily unavailable', {
+      status: 503,
       headers: {
-        'Content-Type': 'application/xml; charset=utf-8',
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store',
       },
     });
   }

@@ -3,6 +3,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PropertyCard from '@/components/property/PropertyCard';
 import { useProperties } from '@/hooks/useProperties';
+import PageSeo from '@/components/seo/PageSeo';
 import { Loader2 } from 'lucide-react';
 
 const LandPlot = () => {
@@ -14,6 +15,11 @@ const LandPlot = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSeo
+        title="Plots for Sale in India | UMY Infra"
+        description="Browse land and plot listings for sale across India with UMY Infra."
+        path="/land/plot"
+      />
       <Header />
       
       <main className="pt-24 pb-16">

@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PropertyCard from '@/components/property/PropertyCard';
 import { useProperties } from '@/hooks/useProperties';
+import PageSeo from '@/components/seo/PageSeo';
 import { Loader2 } from 'lucide-react';
 
 const LandAgricultural = () => {
@@ -21,6 +22,11 @@ const LandAgricultural = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSeo
+        title="Agricultural Land for Sale in India | UMY Infra"
+        description="Explore agricultural land listings for farming and investment across India with UMY Infra."
+        path="/land/agricultural"
+      />
       <Header />
       
       <main className="pt-24 pb-16">
