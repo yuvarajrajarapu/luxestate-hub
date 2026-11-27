@@ -22,9 +22,7 @@
 // }
 
 // 2. Verify Cloudinary Configuration
-// Check that CLOUD_NAME and UPLOAD_PRESET are correct in src/lib/cloudinary.ts
-const CLOUD_NAME = 'dswoyink7';
-const UPLOAD_PRESET = 'yuvainfraedge';
+// Signed uploads require CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET on the server.
 
 // 3. Check URLs Format
 // Images should be stored as Cloudinary URLs:
@@ -80,8 +78,9 @@ export const imageDebugTips = {
   checkCloudinary: () => {
     // In Cloudinary Dashboard:
     // 1. Verify cloud name: dswoyink7
-    // 2. Verify upload preset: yuvainfraedge
-    // 3. Check CORS settings in account
+    // 2. Verify the signed-upload API credentials are configured server-side
+    // 3. Disable the old unsigned upload preset
+    // 4. Check CORS settings in account
     console.log('Check Cloudinary settings');
   },
 

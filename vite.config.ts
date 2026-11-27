@@ -1,7 +1,36 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { fileURLToPath } from "node:url";
 import compression from 'vite-plugin-compression';
+
+const projectRoot = fileURLToPath(new URL(".", import.meta.url));
+const manualChunkGroups = {
+  "react-vendor": ["react", "react-dom", "react-router-dom", "react-helmet-async"],
+  "firebase-vendor": ["firebase/app", "firebase/firestore", "firebase/auth"],
+  "forms-vendor": ["react-hook-form", "@hookform/resolvers"],
+  animation: ["framer-motion"],
+  "radix-ui": [
+    "@radix-ui/react-dialog",
+    "@radix-ui/react-dropdown-menu",
+    "@radix-ui/react-navigation-menu",
+    "@radix-ui/react-select",
+    "@radix-ui/react-label",
+    "@radix-ui/react-checkbox",
+    "@radix-ui/react-slider",
+    "@radix-ui/react-progress",
+    "@radix-ui/react-tabs",
+  ],
+  query: ["@tanstack/react-query"],
+};
+
+function getManualChunk(id: string): string | undefined {
+  const normalizedId = id.replace(/\\/g, "/");
+
+  return Object.entries(manualChunkGroups).find(([, packages]) =>
+    packages.some((packageName) => normalizedId.includes(`/node_modules/${packageName}/`))
+  )?.[0];
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -10,7 +39,7 @@ export default defineConfig(({ mode }) => {
   
   return {
     server: {
-      host: "::",
+      host: "127.0.0.1",
       port: 8080,
     },
     plugins: [
@@ -34,7 +63,7 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src"),
+        "@": path.resolve(projectRoot, "./src"),
       },
     },
     build: {
@@ -61,23 +90,14 @@ export default defineConfig(({ mode }) => {
           entryFileNames: 'assets/[name]-[hash].js',
           chunkFileNames: 'assets/[name]-[hash].js',
           assetFileNames: 'assets/[name]-[hash].[ext]',
-          compact: true,
         },
       } : {
         // Client build: full manual chunking for optimal code splitting
         output: {
-          manualChunks: {
-            'react-vendor': ['react', 'react-dom', 'react-router-dom', 'react-helmet-async'],
-            'firebase-vendor': ['firebase/app', 'firebase/firestore', 'firebase/auth'],
-            'forms-vendor': ['react-hook-form', '@hookform/resolvers'],
-            'animation': ['framer-motion'],
-            'radix-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-navigation-menu', '@radix-ui/react-select', '@radix-ui/react-label', '@radix-ui/react-checkbox', '@radix-ui/react-slider', '@radix-ui/react-progress', '@radix-ui/react-tabs'],
-            'query': ['@tanstack/react-query'],
-          },
+          manualChunks: getManualChunk,
           entryFileNames: 'assets/[name]-[hash].js',
           chunkFileNames: 'assets/[name]-[hash].js',
           assetFileNames: 'assets/[name]-[hash].[ext]',
-          compact: true,
         },
       },
       
@@ -92,6 +112,7 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: {
       include: [
         'react',
+        'react/jsx-runtime',
         'react-dom',
         'react-router-dom',
         'react-hook-form',

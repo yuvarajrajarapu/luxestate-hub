@@ -11,7 +11,7 @@ import {
   Plus,
   Link as LinkIcon,
 } from 'lucide-react';
-import { uploadToCloudinary, CloudinaryUploadResult } from '@/lib/cloudinary';
+import { uploadToCloudinary, MAX_UPLOAD_BYTES } from '@/lib/cloudinary';
 import { MediaItem } from '@/types/property';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -109,6 +109,21 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       if (!files) return;
 
       const fileArray = Array.from(files);
+      if (fileArray.some((file) => !file.type.startsWith('image/') && !file.type.startsWith('video/'))) {
+        toast.error('Only image and video files can be uploaded');
+        return;
+      }
+
+      const oversizedFile = fileArray.find((file) => {
+        const type = file.type.startsWith('video/') ? 'video' : 'image';
+        return file.size > MAX_UPLOAD_BYTES[type];
+      });
+      if (oversizedFile) {
+        const type = oversizedFile.type.startsWith('video/') ? 'video' : 'image';
+        toast.error(`${oversizedFile.name} exceeds the ${type} upload size limit`);
+        return;
+      }
+
       const imageFiles = fileArray.filter((f) => f.type.startsWith('image/'));
       const videoFiles = fileArray.filter((f) => f.type.startsWith('video/'));
 

@@ -47,7 +47,7 @@ const LoadingFallback = () => (
   </div>
 );
 
-const App = () => {
+export const AppContent = () => {
   return (
     <div className="min-h-screen">
       <QueryClientProvider client={queryClient}>
@@ -55,29 +55,27 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
-              <Suspense fallback={<LoadingFallback />}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/properties" element={<Properties />} />
-                  <Route path="/property/:propertyCode" element={<PropertyDetail />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/profile" element={<Profile />} />
-                  {/* Land Routes */}
-                  <Route path="/land/plot" element={<LandPlot />} />
-                  <Route path="/land/agricultural" element={<LandAgricultural />} />
-                  <Route path="/land/farm-houses" element={<LandFarmHouses />} />
-                  {/* Admin Routes */}
-                  <Route path="/admin" element={<AdminLogin />} />
-                  <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-                  <Route path="/admin/property/new" element={<AdminRoute><AdminPropertyNew /></AdminRoute>} />
-                  <Route path="/admin/property/:id/edit" element={<AdminRoute><AdminPropertyEdit /></AdminRoute>} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </BrowserRouter>
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/properties" element={<Properties />} />
+                <Route path="/property/:propertyCode" element={<PropertyDetail />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/profile" element={<Profile />} />
+                {/* Land Routes */}
+                <Route path="/land/plot" element={<LandPlot />} />
+                <Route path="/land/agricultural" element={<LandAgricultural />} />
+                <Route path="/land/farm-houses" element={<LandFarmHouses />} />
+                {/* Admin Routes */}
+                <Route path="/admin" element={<AdminLogin />} />
+                <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                <Route path="/admin/property/new" element={<AdminRoute><AdminPropertyNew /></AdminRoute>} />
+                <Route path="/admin/property/:id/edit" element={<AdminRoute><AdminPropertyEdit /></AdminRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </TooltipProvider>
         </AuthProvider>
       </QueryClientProvider>
@@ -85,5 +83,11 @@ const App = () => {
     </div>
   );
 };
+
+const App = () => (
+  <BrowserRouter>
+    <AppContent />
+  </BrowserRouter>
+);
 
 export default App;

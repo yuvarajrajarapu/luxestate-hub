@@ -9,7 +9,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noImplicitAny": false,
     "noUnusedParameters": false,
     "skipLibCheck": true,
