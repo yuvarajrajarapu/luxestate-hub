@@ -9,6 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import GoogleSignIn from '@/components/auth/GoogleSignIn';
 import AuthLayout from '@/components/auth/AuthLayout';
 
+const EMAIL_FORMAT = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const Signup = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -22,6 +24,16 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const normalizedEmail = email.trim();
+    if (!EMAIL_FORMAT.test(normalizedEmail)) {
+      toast({
+        title: 'Invalid email address',
+        description: 'Enter an email address in the format name@example.com.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     if (password !== confirmPassword) {
       toast({
@@ -44,7 +56,7 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      await signUp(email, password, username);
+      await signUp(normalizedEmail, password, username);
       toast({
         title: 'Account created!',
         description: 'Welcome to UMY Infra.',
@@ -98,6 +110,8 @@ const Signup = () => {
                   id="email"
                   type="email"
                   placeholder="you@example.com"
+                  pattern={EMAIL_FORMAT.source}
+                  title="Enter an email address in the format name@example.com."
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 h-12"
