@@ -230,8 +230,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { auth, GoogleAuthProvider, signInWithCredential } = await loadFirebaseAuth();
       const { doc, getDoc, setDoc, serverTimestamp, db } = await loadFirebaseFirestore();
-      // Authenticate with Google credential token from One Tap
-      const googleCredential = GoogleAuthProvider.credential(null, credential);
+      // Google One Tap returns an ID token, which Firebase expects as the first argument.
+      const googleCredential = GoogleAuthProvider.credential(credential);
       
       const result = await signInWithCredential(auth, googleCredential);
       const currentUser = result.user;
