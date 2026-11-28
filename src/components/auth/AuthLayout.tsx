@@ -9,17 +9,36 @@ interface AuthLayoutProps {
 }
 
 const featuredCities = [
+  { name: 'Adoni', state: 'Andhra Pradesh' },
+  { name: 'Amalapuram', state: 'Andhra Pradesh' },
+  { name: 'Amaravati', state: 'Andhra Pradesh — Capital' },
   { name: 'Anantapur', state: 'Andhra Pradesh' },
+  { name: 'Bhimavaram', state: 'Andhra Pradesh' },
+  { name: 'Chirala', state: 'Andhra Pradesh' },
+  { name: 'Chittoor', state: 'Andhra Pradesh' },
+  { name: 'Dharmavaram', state: 'Andhra Pradesh' },
+  { name: 'Eluru', state: 'Andhra Pradesh' },
+  { name: 'Gudivada', state: 'Andhra Pradesh' },
   { name: 'Guntur', state: 'Andhra Pradesh' },
+  { name: 'Hindupur', state: 'Andhra Pradesh' },
   { name: 'Hyderabad', state: 'Telangana' },
   { name: 'Kadapa', state: 'Andhra Pradesh' },
   { name: 'Kakinada', state: 'Andhra Pradesh' },
   { name: 'Kurnool', state: 'Andhra Pradesh' },
+  { name: 'Machilipatnam', state: 'Andhra Pradesh' },
+  { name: 'Madanapalle', state: 'Andhra Pradesh' },
+  { name: 'Nandyal', state: 'Andhra Pradesh' },
   { name: 'Nellore', state: 'Andhra Pradesh' },
+  { name: 'Ongole', state: 'Andhra Pradesh' },
+  { name: 'Proddatur', state: 'Andhra Pradesh' },
   { name: 'Rajamahendravaram', state: 'Andhra Pradesh' },
+  { name: 'Srikakulam', state: 'Andhra Pradesh' },
+  { name: 'Tadepalligudem', state: 'Andhra Pradesh' },
+  { name: 'Tenali', state: 'Andhra Pradesh' },
   { name: 'Tirupati', state: 'Andhra Pradesh' },
   { name: 'Vijayawada', state: 'Andhra Pradesh' },
   { name: 'Visakhapatnam', state: 'Andhra Pradesh' },
+  { name: 'Vizianagaram', state: 'Andhra Pradesh' },
 ];
 
 const categorySlides = [
