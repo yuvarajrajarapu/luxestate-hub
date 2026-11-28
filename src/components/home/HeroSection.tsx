@@ -17,7 +17,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative min-h-[50vh] md:min-h-[60vh] flex items-center justify-center overflow-hidden pt-8">
+    <section className="relative min-h-[50vh] md:min-h-[60vh] flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <picture>
@@ -37,9 +37,11 @@ const HeroSection = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-16 md:py-24 text-center">
+      <div className="relative z-10 container mx-auto px-4 pt-20 pb-16 text-center md:pt-12 md:pb-24">
         <div className="max-w-4xl mx-auto">
-          <FeaturedCityBadge city={city} variant="hero" className="mb-5" />
+          <div className="flex w-full justify-center">
+            <FeaturedCityBadge city={city} variant="hero" className="mb-5" />
+          </div>
           <h1 className="text-display text-primary-foreground mb-4">
             Find Your Perfect Property
           </h1>
