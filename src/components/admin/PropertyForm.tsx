@@ -26,6 +26,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -100,6 +101,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
     isVerified: false,
     isFeatured: false,
     isSoldOut: false,
+    showPropertyDetails: true,
   });
 
   const [propertyCode, setPropertyCode] = useState('');
@@ -180,6 +182,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
           isVerified: data.isVerified,
           isFeatured: data.isFeatured,
           isSoldOut: data.isSoldOut,
+          showPropertyDetails: data.showPropertyDetails !== false,
         });
         setSelectedAmenities(data.amenities);
         setImages(data.images || []);
@@ -306,6 +309,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
         isVerified: formData.isVerified,
         isFeatured: formData.isFeatured,
         isSoldOut: formData.isSoldOut,
+        showPropertyDetails: formData.showPropertyDetails,
         updatedAt: Timestamp.now(),
         userId: user?.uid || null,
       };
@@ -637,10 +641,25 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
             transition={{ delay: 0.3 }}
             className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100"
           >
-            <h2 className="text-lg font-semibold text-slate-900 mb-6">
-              Property Details
-            </h2>
+            <div className="flex items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Property Details
+                </h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  Show this section on the public property page
+                </p>
+              </div>
+              <Switch
+                checked={formData.showPropertyDetails}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({ ...prev, showPropertyDetails: checked }))
+                }
+                aria-label="Show Property Details section"
+              />
+            </div>
 
+            {formData.showPropertyDetails && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Land-Specific Details */}
               {formData.category === 'land-for-sale' && (
@@ -1256,6 +1275,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ propertyId, mode }) => {
                 </div>
               )}
             </div>
+            )}
           </motion.div>
 
           {/* Amenities - Dynamic based on category */}

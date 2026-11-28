@@ -617,43 +617,45 @@ const PropertyDetail = () => {
                 </div>
 
                 {/* Details */}
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Property Details</h2>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="flex justify-between py-3 border-b border-border">
-                      <span className="text-muted-foreground">Property Type</span>
-                      <span className="font-medium capitalize">
-                        {property.category.replace(/-/g, ' ')}
-                      </span>
-                    </div>
-                    {property.furnishingStatus && (
+                {property.showPropertyDetails !== false && (
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4">Property Details</h2>
+                    <div className="grid sm:grid-cols-2 gap-4">
                       <div className="flex justify-between py-3 border-b border-border">
-                        <span className="text-muted-foreground">Furnishing</span>
+                        <span className="text-muted-foreground">Property Type</span>
                         <span className="font-medium capitalize">
-                          {property.furnishingStatus.replace(/-/g, ' ')}
+                          {property.category.replace(/-/g, ' ')}
                         </span>
                       </div>
-                    )}
-                    {property.possessionStatus && (
+                      {property.furnishingStatus && (
+                        <div className="flex justify-between py-3 border-b border-border">
+                          <span className="text-muted-foreground">Furnishing</span>
+                          <span className="font-medium capitalize">
+                            {property.furnishingStatus.replace(/-/g, ' ')}
+                          </span>
+                        </div>
+                      )}
+                      {property.possessionStatus && (
+                        <div className="flex justify-between py-3 border-b border-border">
+                          <span className="text-muted-foreground">Possession</span>
+                          <span className="font-medium capitalize">
+                            {property.possessionStatus.replace(/-/g, ' ')}
+                          </span>
+                        </div>
+                      )}
+                      {property.facing && (
+                        <div className="flex justify-between py-3 border-b border-border">
+                          <span className="text-muted-foreground">Facing</span>
+                          <span className="font-medium">{property.facing}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between py-3 border-b border-border">
-                        <span className="text-muted-foreground">Possession</span>
-                        <span className="font-medium capitalize">
-                          {property.possessionStatus.replace(/-/g, ' ')}
-                        </span>
+                        <span className="text-muted-foreground">Posted By</span>
+                        <span className="font-medium capitalize">{property.postedBy}</span>
                       </div>
-                    )}
-                    {property.facing && (
-                      <div className="flex justify-between py-3 border-b border-border">
-                        <span className="text-muted-foreground">Facing</span>
-                        <span className="font-medium">{property.facing}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between py-3 border-b border-border">
-                      <span className="text-muted-foreground">Posted By</span>
-                      <span className="font-medium capitalize">{property.postedBy}</span>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* Amenities */}
                 {property.amenities.length > 0 && (
