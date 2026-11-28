@@ -1,10 +1,23 @@
+import { useEffect, useState } from 'react';
+import FeaturedCityBadge from '@/components/FeaturedCityBadge';
+import { featuredCities } from '@/data/featuredCities';
 import heroBg from '@/assets/hero-bg.jpg';
 
 const HeroSection = () => {
+  const [cityIndex, setCityIndex] = useState(0);
+  const city = featuredCities[cityIndex];
   const imagePriorityAttribute = { fetchpriority: 'high' };
 
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setCityIndex((index) => (index + 1) % featuredCities.length);
+    }, 3500);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
   return (
-    <section className="relative min-h-[50vh] md:min-h-[60vh] flex items-center justify-center overflow-hidden pt-16">
+    <section className="relative min-h-[50vh] md:min-h-[60vh] flex items-center justify-center overflow-hidden pt-8">
       {/* Background Image */}
       <div className="absolute inset-0">
         <picture>
@@ -26,6 +39,7 @@ const HeroSection = () => {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-16 md:py-24 text-center">
         <div className="max-w-4xl mx-auto">
+          <FeaturedCityBadge city={city} variant="hero" className="mb-5" />
           <h1 className="text-display text-primary-foreground mb-4">
             Find Your Perfect Property
           </h1>

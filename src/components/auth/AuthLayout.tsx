@@ -1,45 +1,14 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Building2, ChevronLeft, ChevronRight, MapPin, Store, Trees } from 'lucide-react';
+import { Building2, ChevronLeft, ChevronRight, Store, Trees } from 'lucide-react';
 import GoogleOneTap from '@/components/auth/GoogleOneTap';
+import FeaturedCityBadge from '@/components/FeaturedCityBadge';
+import { featuredCities, type FeaturedCity } from '@/data/featuredCities';
 
 interface AuthLayoutProps {
   children: ReactNode;
 }
-
-const featuredCities = [
-  { name: 'Adoni', state: 'Andhra Pradesh' },
-  { name: 'Amalapuram', state: 'Andhra Pradesh' },
-  { name: 'Amaravati', state: 'Andhra Pradesh — Capital' },
-  { name: 'Anantapur', state: 'Andhra Pradesh' },
-  { name: 'Bhimavaram', state: 'Andhra Pradesh' },
-  { name: 'Chirala', state: 'Andhra Pradesh' },
-  { name: 'Chittoor', state: 'Andhra Pradesh' },
-  { name: 'Dharmavaram', state: 'Andhra Pradesh' },
-  { name: 'Eluru', state: 'Andhra Pradesh' },
-  { name: 'Gudivada', state: 'Andhra Pradesh' },
-  { name: 'Guntur', state: 'Andhra Pradesh' },
-  { name: 'Hindupur', state: 'Andhra Pradesh' },
-  { name: 'Hyderabad', state: 'Telangana' },
-  { name: 'Kadapa', state: 'Andhra Pradesh' },
-  { name: 'Kakinada', state: 'Andhra Pradesh' },
-  { name: 'Kurnool', state: 'Andhra Pradesh' },
-  { name: 'Machilipatnam', state: 'Andhra Pradesh' },
-  { name: 'Madanapalle', state: 'Andhra Pradesh' },
-  { name: 'Nandyal', state: 'Andhra Pradesh' },
-  { name: 'Nellore', state: 'Andhra Pradesh' },
-  { name: 'Ongole', state: 'Andhra Pradesh' },
-  { name: 'Proddatur', state: 'Andhra Pradesh' },
-  { name: 'Rajamahendravaram', state: 'Andhra Pradesh' },
-  { name: 'Srikakulam', state: 'Andhra Pradesh' },
-  { name: 'Tadepalligudem', state: 'Andhra Pradesh' },
-  { name: 'Tenali', state: 'Andhra Pradesh' },
-  { name: 'Tirupati', state: 'Andhra Pradesh' },
-  { name: 'Vijayawada', state: 'Andhra Pradesh' },
-  { name: 'Visakhapatnam', state: 'Andhra Pradesh' },
-  { name: 'Vizianagaram', state: 'Andhra Pradesh' },
-];
 
 const categorySlides = [
   { title: 'Homes', types: ['Apartments', 'Houses & Villas', 'PG / Hostels'], icon: Building2 },
@@ -52,36 +21,6 @@ const categorySlideVariants = {
   center: { opacity: 1, x: 0 },
   exit: (direction: number) => ({ opacity: 0, x: direction * -28 }),
 };
-
-type FeaturedCity = (typeof featuredCities)[number];
-
-const AnimatedText = ({ value, className }: { value: string; className: string }) => (
-  <span className="grid">
-    <AnimatePresence initial={false}>
-      <motion.span
-        key={value}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className={`col-start-1 row-start-1 ${className}`}
-      >
-        {value}
-      </motion.span>
-    </AnimatePresence>
-  </span>
-);
-
-const CityBadge = ({ city }: { city: FeaturedCity }) => (
-  <motion.div
-    layout="size"
-    transition={{ layout: { type: 'spring', stiffness: 120, damping: 26, mass: 1 } }}
-    className="inline-flex w-fit max-w-full items-center gap-2 overflow-hidden rounded-full border border-white/20 bg-white/[0.08] px-4 py-2 text-sm text-slate-100 shadow-[0_8px_32px_rgba(15,23,42,0.28)] backdrop-blur-xl"
-  >
-    <MapPin className="h-4 w-4 shrink-0 text-amber-300" />
-    <AnimatedText value={`${city.name}, ${city.state}`} className="whitespace-nowrap" />
-  </motion.div>
-);
 
 const AuthLayout = ({ children }: AuthLayoutProps) => {
   const [cityIndex, setCityIndex] = useState(0);
@@ -136,7 +75,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
           className="hidden max-w-xl text-white lg:block"
         >
           <div className="mb-8">
-            <CityBadge city={city} />
+            <FeaturedCityBadge city={city} />
           </div>
 
           <h2 className="font-display text-5xl font-bold leading-[1.08] tracking-tight xl:text-6xl">
@@ -227,7 +166,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
 
         <div className="w-full max-w-md justify-self-center">
           <div className="mb-4 flex justify-center lg:hidden">
-            <CityBadge city={city} />
+            <FeaturedCityBadge city={city} />
           </div>
           <Link
             to="/"

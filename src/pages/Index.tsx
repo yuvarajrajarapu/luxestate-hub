@@ -63,7 +63,7 @@ const Index = () => {
                 <div className="flex gap-3" style={{ width: 'max-content' }}>
                   <Suspense fallback={<div className="flex w-full items-center justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
                     {properties.map((property, index) => (
-                      <div key={property.id} className="w-48">
+                      <div key={property.id} className="w-64">
                         <PropertyCard property={property} index={index} />
                       </div>
                     ))}

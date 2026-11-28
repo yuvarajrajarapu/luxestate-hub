@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MapPin, Square, Heart, Share2 } from 'lucide-react';
+import { MapPin, Square, Heart, Share2, ArrowUpRight, Phone } from 'lucide-react';
 import type { Property } from '@/types/property';
 import { useShortlist } from '@/hooks/useShortlist';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +20,9 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
 
   const shareCode = property.propertyCode || property.id;
   const shortlisted = isShortlisted(property.id);
+  const statusLabel = property.isSoldOut
+    ? 'Sold Out'
+    : `For ${property.listingType === 'sale' ? 'Sale' : property.listingType === 'rent' ? 'Rent' : 'Lease'}`;
 
   const handleShortlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -100,6 +103,14 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
             title={property.title}
             className="w-full h-full"
           />
+
+          <span
+            className={`absolute left-2 top-2 rounded-full px-2.5 py-1 text-[10px] font-semibold text-white shadow-md ${
+              property.isSoldOut ? 'bg-red-600' : 'bg-slate-900/90'
+            }`}
+          >
+            {statusLabel}
+          </span>
           
           {/* Top Right Icons */}
           <div className="absolute top-2 right-2 flex gap-2">
@@ -125,9 +136,9 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         </div>
 
         {/* Content Section */}
-        <div className="p-3 space-y-2">
+        <div className="p-3 pb-2 space-y-2">
           {/* Title */}
-          <h4 className="text-sm font-medium text-gray-900 line-clamp-1">
+          <h4 className="min-h-10 text-sm font-medium text-gray-900 line-clamp-2">
             {property.title}
           </h4>
 
@@ -151,6 +162,27 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
           </div>
         </div>
       </Link>
+
+      <div className="flex gap-2 px-3 pb-3">
+        <Link
+          to={`/property/${shareCode}`}
+          aria-label={`View details for ${property.title}`}
+          className="flex min-w-0 flex-1 items-center justify-center gap-1 rounded-md bg-slate-900 px-2 py-2 text-xs font-medium text-white transition-colors hover:bg-slate-800"
+        >
+          <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
+          <span>View</span>
+        </Link>
+        {!property.isSoldOut && (
+          <a
+            href={`tel:${property.contactPhone}`}
+            aria-label={`Contact ${property.contactName} about ${property.title}`}
+            className="flex min-w-0 flex-1 items-center justify-center gap-1 rounded-md border border-gray-200 px-2 py-2 text-xs font-medium text-gray-800 transition-colors hover:bg-gray-50"
+          >
+            <Phone className="h-3.5 w-3.5 shrink-0" />
+            <span>Contact</span>
+          </a>
+        )}
+      </div>
     </div>
   );
 };

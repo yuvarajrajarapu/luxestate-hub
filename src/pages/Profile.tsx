@@ -224,7 +224,7 @@ const Profile = () => {
                       description="Save your favorite properties here by clicking the heart icon"
                     />
                   ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
+                    <div className="grid grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-4 mt-8">
                       {shortlistedProperties.map((property, index) => (
                         <PropertyCard key={property.id} property={property} index={index} />
                       ))}
